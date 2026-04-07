@@ -21,8 +21,8 @@ interface RoutingSectionProps {
 }
 
 export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
-  const [origin, setOrigin] = useState("Calle Bravo Murillo 1, Madrid");
-  const [destination, setDestination] = useState("Calle Bravo Murillo 100, Madrid");
+  const [origin, setOrigin] = useState("Calle Marqués de Viana 1, Madrid");
+  const [destination, setDestination] = useState("Plaza de Castilla, Madrid");
   const [hour, setHour] = useState(14);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +91,7 @@ ${gpxPoints}
         <p className="text-[var(--ds-gray-600)] mt-2">Planifica tu trayecto priorizando la sombra y la proximidad a fuentes y refugios.</p>
         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#fffbeb] border border-[#fde68a] text-xs text-[#92400e]">
           <span>⚡</span>
-          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Bravo Murillo / Tetuán</strong>. Origen y destino deben estar en esa zona.</span>
+          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Estrecho / Valdeacederas / Plaza de Castilla</strong>. Origen y destino deben estar en esa zona.</span>
         </div>
       </div>
 

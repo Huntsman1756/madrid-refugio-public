@@ -37,10 +37,16 @@ check_data_files()
 
 GEOCODE_TIMEOUT_SECONDS = 8
 _LOCAL_GEOCACHE = {
-    "calle bravo murillo 1, madrid": (40.44795, -3.70312),
-    "calle bravo murillo 1, madrid, spain": (40.44795, -3.70312),
-    "calle bravo murillo 100, madrid": (40.45685, -3.70355),
-    "calle bravo murillo 100, madrid, spain": (40.45685, -3.70355),
+    "calle marqués de viana 1, madrid": (40.46175, -3.70063),
+    "calle marqués de viana 1, madrid, spain": (40.46175, -3.70063),
+    "calle marques de viana 1, madrid": (40.46175, -3.70063),
+    "calle marques de viana 1, madrid, spain": (40.46175, -3.70063),
+    "plaza de castilla, madrid": (40.46597, -3.69038),
+    "plaza de castilla, madrid, spain": (40.46597, -3.69038),
+    "calle de bravo murillo 243, madrid": (40.46250, -3.69800),
+    "calle de bravo murillo 243, madrid, spain": (40.46250, -3.69800),
+    "calle de bravo murillo 303, madrid": (40.46500, -3.69300),
+    "calle de bravo murillo 303, madrid, spain": (40.46500, -3.69300),
 }
 MADRID_BBOX = {
     "lat_min": 40.31,
