@@ -210,7 +210,11 @@ app = FastAPI(title="Madrid Refugio API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://madrid-refugio.vercel.app",
+        "https://madrid-refugio-git-main-huntsman1756s-projects.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
