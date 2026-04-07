@@ -196,7 +196,7 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
             f"La dirección está a {snap_distance:.0f} m del área de routing activa "
             f"(máximo permitido: {MAX_SNAP_METRES} m). "
             f"El punto más cercano del grafo está en ({ref_lat:.5f}, {ref_lon:.5f}). "
-            "Usa una dirección en el corredor Bravo Murillo / Tetuán."
+            "Usa una dirección en el corredor Estrecho / Valdeacederas / Plaza de Castilla."
         )
 
     return node_id
