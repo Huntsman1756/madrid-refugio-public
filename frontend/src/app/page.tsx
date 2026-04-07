@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity } from "lucide-react";
@@ -121,8 +122,7 @@ export default function Home() {
             <div className="w-px h-3 bg-[var(--ds-gray-100)]"></div>
             <button onClick={() => changeScale(0.1)} className="px-2 py-0.5 text-sm font-bold text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-100)] rounded transition-colors" title="Aumentar letra">A+</button>
           </div>
-          <Button variant="secondary" className="hidden sm:inline-flex" onClick={() => window.open("https://github.com/Huntsman1756/madrid-refugio/blob/main/anexo_III_memoria.md", "_blank")}>Metodología</Button>
-          <Button variant="primary" onClick={() => window.open("https://github.com/Huntsman1756/madrid-refugio", "_blank")}>GitHub</Button>
+          <Link href="/metodologia"><Button variant="primary" className="hidden sm:inline-flex">Metodología</Button></Link>
         </div>
       </nav>
 
@@ -141,7 +141,7 @@ export default function Home() {
           </p>
           <div className="flex items-center gap-4 pt-4">
             <Button variant="primary" className="h-12 px-6 text-base" onClick={() => document.getElementById("routing")?.scrollIntoView({behavior: "smooth"})}>Explorar Mapa <ArrowRight className="w-4 h-4 ml-2" /></Button>
-            <Button variant="secondary" className="h-12 px-6 text-base" onClick={() => window.open("https://github.com/Huntsman1756/madrid-refugio/blob/main/anexo_III_memoria.md", "_blank")}>Leer Metodología</Button>
+            <Link href="/metodologia"><Button variant="secondary" className="h-12 px-6 text-base">Leer Metodología</Button></Link>
           </div>
         </div>
 
@@ -388,8 +388,7 @@ export default function Home() {
         <footer className="border-t border-[var(--ds-gray-100)] pt-12 mt-24 pb-12 flex flex-col md:flex-row justify-between items-center text-sm text-[var(--ds-gray-500)]">
           <div>&copy; 2026 Madrid Refugio. Datos Abiertos del Ayuntamiento de Madrid.</div>
           <div className="flex gap-4 mt-4 md:mt-0">
-            <a href="https://github.com/Huntsman1756/madrid-refugio" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--ds-black)] transition-colors">GitHub</a>
-            <a href="https://github.com/Huntsman1756/madrid-refugio/blob/main/anexo_III_memoria.md" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--ds-black)] transition-colors">Metodología</a>
+            <Link href="/metodologia" className="hover:text-[var(--ds-black)] transition-colors">Metodología</Link>
             <a href="https://datos.madrid.es/pages/premios-de-reutilizacion-2026" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--ds-black)] transition-colors">Premios de Reutilización</a>
           </div>
         </footer>
