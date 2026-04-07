@@ -39,8 +39,8 @@ Los archivos grandes no están en el repositorio. Descárgalos antes de ejecutar
 
 | Archivo | Descripción | Enlace |
 |---|---|---|
-| `madrid_shadow_graph.graphml` | Grafo de calles con pesos de sombra (Tetuán) | [Release v1.0](https://github.com/TU-USUARIO/madrid-refugio/releases/tag/v1.0) |
-| `shadow_matrix.parquet` | Matriz de sombra precomputada por hora | [Release v1.0](https://github.com/TU-USUARIO/madrid-refugio/releases/tag/v1.0) |
+| `madrid_shadow_graph.graphml` | Grafo de calles con pesos de sombra (Tetuán) | [Release v1.0](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.0) |
+| `shadow_matrix.parquet` | Matriz de sombra precomputada por hora | [Release v1.0](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.0) |
 
 Colócalos en `data/processed/` antes de lanzar `uvicorn`.
 

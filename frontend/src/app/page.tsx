@@ -10,6 +10,35 @@ import { RoutingSection } from "@/components/RoutingSection";
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false, loading: () => <div className="w-full h-full bg-[var(--ds-gray-50)] rounded-xl animate-pulse flex items-center justify-center text-[var(--ds-gray-500)]">Loading Map...</div> });
 
+function CountUp({ end, decimals = 0, suffix = "" }: { end: number, decimals?: number, suffix?: string }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    // Accesibilidad: reducir movimiento si el usuario lo tiene configurado en OS
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVal(end);
+      return;
+    }
+
+    let start: number | null = null;
+    const duration = 2000;
+    let frameId: number;
+
+    const step = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setVal(end * ease);
+      if (progress < 1) {
+        frameId = window.requestAnimationFrame(step);
+      }
+    };
+    frameId = window.requestAnimationFrame(step);
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [end]);
+  return <>{val.toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}</>;
+}
+
 export default function Home() {
   const [mergedData, setMergedData] = useState<any>(null);
   const [refugios, setRefugios] = useState<any>(null);
@@ -17,6 +46,8 @@ export default function Home() {
   const [selectedBarrio, setSelectedBarrio] = useState<string | null>(null);
   const [barrioStats, setBarrioStats] = useState<any>(null);
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lon: number } | null>(null);
+  const [fontScale, setFontScale] = useState(1);
+  const [clickStamp, setClickStamp] = useState(Date.now());
 
   useEffect(() => {
     fetch('/data/barrios_merged.geojson').then(res => res.json()).then(setMergedData);
@@ -24,8 +55,15 @@ export default function Home() {
     fetch('/data/fuentes.geojson').then(res => res.json()).then(setFuentes);
   }, []);
 
+  const changeScale = (delta: number) => {
+    const newScale = Math.max(0.8, Math.min(1.5, fontScale + delta));
+    setFontScale(newScale);
+    document.documentElement.style.setProperty('--scale', newScale.toString());
+  };
+
   const handleBarrioSelect = (name: string) => {
     setSelectedBarrio(name);
+    setClickStamp(Date.now());
     if (mergedData) {
       const feature = mergedData.features.find((f: any) => f.properties.NOMBRE === name);
       if (feature) setBarrioStats(feature.properties);
@@ -76,6 +114,13 @@ export default function Home() {
           <span className="font-sans font-semibold text-[var(--ds-black)] tracking-tight">Madrid Refugio</span>
         </div>
         <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-1 bg-[var(--ds-gray-50)] rounded-md border border-[var(--ds-gray-100)] px-1 py-1 mr-2 shadow-sm">
+            <button onClick={() => changeScale(-0.1)} className="px-2 py-0.5 text-xs font-bold text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-100)] rounded transition-colors" title="Reducir letra">A-</button>
+            <div className="w-px h-3 bg-[var(--ds-gray-100)]"></div>
+            <button onClick={() => { setFontScale(1); document.documentElement.style.setProperty('--scale', '1'); }} className="px-2 py-0.5 text-xs font-bold text-[var(--ds-gray-600)] hover:text-[var(--ds-black)] transition-colors" title="Restaurar">{(fontScale*100).toFixed(0)}%</button>
+            <div className="w-px h-3 bg-[var(--ds-gray-100)]"></div>
+            <button onClick={() => changeScale(0.1)} className="px-2 py-0.5 text-sm font-bold text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-100)] rounded transition-colors" title="Aumentar letra">A+</button>
+          </div>
           <Button variant="secondary" className="hidden sm:inline-flex" onClick={() => window.open("https://github.com/Huntsman1756/madrid-refugio/blob/main/anexo_III_memoria.md", "_blank")}>Metodología</Button>
           <Button variant="primary" onClick={() => window.open("https://github.com/Huntsman1756/madrid-refugio", "_blank")}>GitHub</Button>
         </div>
@@ -108,7 +153,7 @@ export default function Home() {
             </div>
             <h3 className="card-title text-[var(--ds-black)]">Salud</h3>
             <p className="text-[var(--ds-gray-600)] mb-1">Reducción del estrés térmico en el grupo de mayor mortalidad (Mayores 65+). Protección Activa.</p>
-            <span className="text-sm font-semibold text-[#0a72ef] mt-auto">+432 m de sombra acumulada en ruta óptima</span>
+            <span className="text-sm font-semibold text-[#0a72ef] mt-auto">+<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra acumulada en ruta óptima</span>
           </Card>
           <Card level={2} className="p-6 flex flex-col gap-4">
             <div className="w-10 h-10 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] mb-2 shadow-[var(--shadow-border)]">
@@ -135,7 +180,7 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-6 mb-24">
           <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30">
             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo Sur</span>
-            <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de 1,00</span>, cruzando población mayor y déficit de sombras.</p>
+            <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30">
              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de Proximidad</span>

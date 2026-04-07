@@ -27,12 +27,10 @@ import sys
 def check_data_files():
     missing = [p for p in [GRAPH_PATH, SHADOW_MATRIX_PATH] if not p.exists()]
     if missing:
-        print("\n❌ Archivos de datos no encontrados:")
+        print("\n❌ Error Crítico: Faltan archivos de datos básicos para arrancar el backend.")
         for f in missing:
             print(f"   - {f}")
-        print("\n📥 Descárgalos desde:")
-        print("   https://github.com/TU-USUARIO/madrid-refugio/releases/tag/v1.0")
-        print("   y colócalos en data/processed/\n")
+        print("Asegúrate de que los archivos están en 'data/processed/'.\n")
         sys.exit(1)
 
 check_data_files()

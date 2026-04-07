@@ -10,8 +10,6 @@ cache/
 # Data (large files)
 data/raw/
 data/processed/edificios_alturas.geojson
-data/processed/madrid_walk_graph.graphml
-data/processed/shadow_matrix.parquet
 data/processed/*.csv
 data/processed/*.json
 data/processed/*.graphml
@@ -21,6 +19,8 @@ data/processed/*.geojson
 !data/processed/fuentes.geojson
 !data/processed/routing_summary.json
 !data/processed/shadow_summary.json
+!data/processed/shadow_matrix.parquet
+!data/processed/madrid_shadow_graph.graphml
 
 
 # Logs

@@ -126,7 +126,23 @@ ${gpxPoints}
           <Card level={2} className="p-6 border border-[var(--ds-gray-100)]">
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--ds-gray-600)] mb-1">Origen</label>
+                <label className="flex justify-between text-sm font-medium text-[var(--ds-gray-600)] mb-1">
+                  Origen
+                  <button
+                    onClick={() => {
+                      if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(pos => {
+                          setOrigin(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
+                        });
+                      }
+                    }}
+                    className="text-xs text-[#0a72ef] hover:underline flex items-center gap-1"
+                    title="Usar mi ubicación actual"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                    Ubícame
+                  </button>
+                </label>
                 <input
                   type="text"
                   value={origin}
