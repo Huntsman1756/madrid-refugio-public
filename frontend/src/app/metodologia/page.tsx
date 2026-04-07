@@ -62,7 +62,7 @@ export default function MetodologiaPage() {
         {/* 3. Reutilización de Datos Abiertos */}
         <section className="mb-12">
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Reutilización de Datos Abiertos</h2>
-          <p className="text-[var(--ds-gray-600)] mb-6">Hemos integrado 11 datasets críticos del ecosistema de datos de Madrid:</p>
+          <p className="text-[var(--ds-gray-600)] mb-6">Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:</p>
           <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden">
             <table className="w-full text-sm text-left">
               <thead className="bg-[var(--ds-gray-50)] text-[var(--ds-gray-500)] border-b border-[var(--ds-gray-100)]">

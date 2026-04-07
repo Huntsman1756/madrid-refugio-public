@@ -16,7 +16,7 @@ La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cá
 
 ## 3. Reutilización de Datos Abiertos
 
-Hemos integrado 11 datasets críticos del ecosistema de datos de Madrid:
+Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:
 1. **Modelo de Alturas de Edificación (2024):** Geoportal del Ayuntamiento de Madrid. 490.077 polígonos con atributo Z (altura real). Base para la simulación de sombras.
 2. **Inventario de Arbolado Viario:** 661.192 ejemplares geolocalizados para sombra biológica.
 3. **Padrón Municipal (Enero 2026):** Población por barrio segregada por edad (>65 años).
