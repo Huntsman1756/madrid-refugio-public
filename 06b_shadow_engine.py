@@ -1,5 +1,6 @@
 import pybdshadow
 import geopandas as gpd
+import pandas as pd
 from datetime import datetime
 
 def generate_shadows(edificios, dt, precision=1.0):
@@ -11,39 +12,80 @@ def generate_shadows(edificios, dt, precision=1.0):
     edificios_4326 = edificios.to_crs(4326)
     edificios_4326['building_id'] = range(len(edificios_4326))
     
-    # Generate shadows
-    shadows = pybdshadow.bdshadow_sunlight(
-        edificios_4326, 
-        date=dt
-    )
+    # Process in chunks to handle pybdshadow internal geometry errors
+    CHUNK_SIZE = 5000
+    all_shadows = []
+    total = len(edificios_4326)
+    
+    for start in range(0, total, CHUNK_SIZE):
+        chunk = edificios_4326.iloc[start:start+CHUNK_SIZE].copy()
+        try:
+            shadows_chunk = pybdshadow.bdshadow_sunlight(chunk, date=dt)
+            if not shadows_chunk.empty:
+                all_shadows.append(shadows_chunk)
+        except Exception as e:
+            print(f"    [WARN] Chunk {start}-{start+len(chunk)} failed: {e}")
+            # Try individual buildings in the failed chunk
+            for idx in range(len(chunk)):
+                try:
+                    single = chunk.iloc[[idx]].copy()
+                    s = pybdshadow.bdshadow_sunlight(single, date=dt)
+                    if not s.empty:
+                        all_shadows.append(s)
+                except Exception:
+                    pass  # Skip this building
+    
+    if not all_shadows:
+        return gpd.GeoDataFrame(geometry=[], crs=25830)
+    
+    concatenated = pd.concat(all_shadows, ignore_index=True)
+    if isinstance(concatenated, gpd.GeoDataFrame):
+        shadows = concatenated
+        if shadows.crs is None:
+            shadows.set_crs(4326, inplace=True)
+    else:
+        shadows = gpd.GeoDataFrame(concatenated, geometry='geometry', crs=4326)
+        
+    # Optional: explicitly set to 4326 if they mismatch slightly in string representation
+    shadows.set_crs(4326, allow_override=True, inplace=True)
     
     # Reproject back to EPSG:25830
     if not shadows.empty:
         if shadows.crs is None:
             shadows.set_crs(4326, inplace=True)
             
-        from shapely.geometry import Polygon, MultiPolygon
-        def close_rings(geom):
-            if geom is None:
+        def safe_buffer(geom):
+            try:
+                if geom is None or geom.is_empty:
+                    return None
+                g2 = geom.buffer(0)
+                if g2.is_empty: return None
+                return g2
+            except:
                 return None
-            if isinstance(geom, Polygon):
-                coords = list(geom.exterior.coords)
-                if coords and coords[0] != coords[-1]:
-                    coords.append(coords[0])
-                # We ignore interiors for shadow polygons as they usually don't matter or don't exist
-                return Polygon(coords)
-            elif isinstance(geom, MultiPolygon):
-                return MultiPolygon([close_rings(p) for p in geom.geoms if p is not None])
-            return geom
-            
-        shadows.geometry = shadows.geometry.apply(close_rings)
+                
+        shadows['geometry'] = shadows.geometry.apply(safe_buffer)
+        shadows = shadows.dropna(subset=['geometry'])
+        shadows = shadows[shadows.geometry.is_valid & ~shadows.geometry.is_empty].copy()
         
-        # Try make_valid to fix any remaining self-intersections
-        from shapely.validation import make_valid
-        shadows.geometry = shadows.geometry.apply(make_valid)
-        
-        shadows_utm = shadows.to_crs(25830)
-        return shadows_utm
+        try:
+            shadows_utm = shadows.to_crs(25830)
+            shadows_utm['geometry'] = shadows_utm.geometry.apply(safe_buffer)
+            shadows_utm = shadows_utm.dropna(subset=['geometry'])
+            return shadows_utm
+        except Exception as e:
+            print(f"    [WARN] to_crs failed: {e}. Recovering valid geometries row-by-row.")
+            valid_rows = []
+            for _, row in shadows.iterrows():
+                try:
+                    gdf = gpd.GeoDataFrame([row], crs=4326)
+                    gdf_utm = gdf.to_crs(25830)
+                    valid_rows.append(gdf_utm)
+                except:
+                    pass
+            if valid_rows:
+                return pd.concat(valid_rows, ignore_index=True)
+            return gpd.GeoDataFrame(geometry=[], crs=25830)
     return gpd.GeoDataFrame(geometry=[], crs=25830)
 
 if __name__ == "__main__":

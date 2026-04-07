@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
 import { RoutingSection } from "@/components/RoutingSection";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false, loading: () => <div className="w-full h-full bg-[var(--ds-gray-50)] rounded-xl animate-pulse flex items-center justify-center text-[var(--ds-gray-500)]">Loading Map...</div> });
@@ -352,6 +353,29 @@ export default function Home() {
                           </span>
                           <span className="block text-xs text-[var(--ds-gray-500)] mt-0.5">Media Madrid: 1,4</span>
                         </div>
+                      </div>
+
+                      {/* Radar Chart for Vulnerability Profile */}
+                      <div className="mt-4 p-3 rounded-xl bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)]">
+                        <span className="block text-xs font-semibold text-[var(--ds-black)] mb-2 text-center">Perfil de Vulnerabilidad Climática</span>
+                        <div className="h-[220px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
+                              { subject: 'Mayores >65', value: Math.min(100, ((barrioStats.pop_65plus || 0) / 12000) * 100) },
+                              { subject: 'Calor (LST)', value: Math.max(0, Math.min(100, (((barrioStats.LST_mean || 38) - 35) / 10) * 100)) },
+                              { subject: 'Contaminación', value: Math.min(100, ((no2 || 0) / 40) * 100) },
+                              { subject: 'Falta Refugios', value: Math.max(0, 100 - ((refugiosCount || 0) / 4) * 100) },
+                              { subject: 'Falta Fuentes', value: Math.max(0, 100 - ((barrioStats.fuentes_400m || 0) / 15) * 100) },
+                            ]}>
+                              <PolarGrid stroke="#e5e5e5" />
+                              <PolarAngleAxis dataKey="subject" tick={{ fill: '#737373', fontSize: 10 }} />
+                              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                              <Tooltip contentStyle={{ fontSize: '12px', borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                              <Radar name="Vulnerabilidad" dataKey="value" stroke="#ef4444" fill="#ef4444" fillOpacity={0.4} />
+                            </RadarChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <p className="text-[10px] text-center text-[var(--ds-gray-400)] mt-1">Mayor área = Mayor necesidad de intervención</p>
                       </div>
 
                       {/* Ranking */}

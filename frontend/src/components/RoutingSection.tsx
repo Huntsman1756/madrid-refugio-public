@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { AlertTriangle, Share2, Download } from "lucide-react";
+import { AlertTriangle, Share2, Download, Play, Pause, FastForward } from "lucide-react";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -28,6 +28,25 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<any>(null);
   const [routeResult, setRouteResult] = useState<any>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Time slider automation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setHour(prev => prev >= 20 ? 8 : prev + 1);
+      }, 2000); // Wait 2s for backend to calculate
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  // Auto-calculate route when hour changes during playback
+  useEffect(() => {
+    if (isPlaying) {
+      handleCalculate();
+    }
+  }, [hour, isPlaying]);
 
   const isHeatHour = hour >= 12 && hour <= 19;
 
@@ -185,9 +204,18 @@ ${gpxPoints}
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-[var(--ds-gray-600)] mb-1">
-                Contexto térmico (Hora: {hour}:00)
-              </label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-[var(--ds-gray-600)]">
+                  Contexto térmico (Hora: {hour}:00)
+                </label>
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className={`flex items-center gap-1 text-xs px-2 py-1 rounded-md transition-colors ${isPlaying ? 'bg-[#fef2f2] text-red-600' : 'bg-[var(--ds-gray-100)] text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-200)]'}`}
+                >
+                  {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                  {isPlaying ? "Detener Animación" : "Simulación Temporal"}
+                </button>
+              </div>
               <input
                 type="range"
                 min="8" max="20"
