@@ -4,8 +4,7 @@
 
 **Madrid Refugio** no es solo un mapa; es un **motor de simulación climática urbana** diseñado para proteger a la población más vulnerable de la capital —los más de 430.000 ciudadanos mayores de 65 años— frente al fenómeno de la isla de calor y los episodios de calor extremo.
 
-A diferencia de soluciones estáticas que simplemente muestran "islas de calor" históricas, nuestra plataforma ofrece una **operatividad real** mediante el cálculo de rutas de confort térmico en tiempo real.
-
+A diferencia de soluciones estáticas que simplemente muestran "islas de calor" históricas, nuestra plataforma ofrece una **operatividad real** mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una **Aplicación Web Progresiva (Next.js + FastAPI)** de acceso público y conectada al momento, diseñada con altas métricas de usabilidad para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda interactuar con el entorno.
 ## 2. Innovación Tecnológica: Motor de Sombra Dinámica Proyectada
 
 La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cálculo de **Sombra Dinámica Proyectada por Edificación**. Mientras que otras propuestas se limitan a mapas de calor estáticos o históricos, nosotros hemos implementado:
@@ -30,6 +29,11 @@ Hemos integrado 11 datasets críticos del ecosistema de datos de Madrid:
 
 El análisis territorial ha revelado realidades críticas: **Villaverde y Aluche** emergen como zonas de máxima prioridad por su combinación de población envejecida y déficit de infraestructura de refugio. Madrid Refugio proporciona a los planificadores urbanos una hoja de ruta basada en datos para la creación de la red oficial de refugios climáticos.
 
-## 5. Conclusión
+## 5. Escalabilidad y Open Source
 
-Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada.
+Madrid Refugio nace con vocación de producto estable y exportable. Todo el código fuente (Front, Back y Algoritmia) se publica bajo licencia abierta en GitHub para permitir su reproducibilidad por otros consistorios. 
+Además, la arquitectura algorítmica expuesta en este demostrador está diseñada para escalar: el salto a *Madrid Completo* abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (**PostgreSQL + PostGIS con `pgRouting`**), permitiendo cálculos de millones de aristas con sombra dinámica en apenas milisegundos gracias al pre-cálculo masivo en formato Parquet.
+
+## 6. Conclusión
+
+Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. **No es una prueba de concepto, es infraestructura de código abierto lista para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.**
