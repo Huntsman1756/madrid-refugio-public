@@ -315,7 +315,7 @@ export default function Home() {
                         <div className={`p-3 rounded-md border col-span-2 ${no2NearUE ? 'bg-[#fff7ed] border-[#fed7aa]' : 'bg-[var(--ds-gray-50)] border-[var(--ds-gray-100)]'}`}>
                           <div className="flex justify-between items-baseline mb-1.5">
                             <span className="text-xs text-[var(--ds-gray-500)]">NO₂ medio</span>
-                            <span className="font-mono font-semibold text-sm text-[var(--ds-black)]">{no2?.toFixed(1)} µg/m³</span>
+                            <span className="font-mono font-semibold text-sm text-[var(--ds-black)]">{no2?.toFixed(1).replace('.', ',')} µg/m³</span>
                           </div>
                           {/* Visual bar: 0–40 µg/m³ scale */}
                           <div className="relative w-full h-2 bg-[var(--ds-gray-100)] rounded-full overflow-visible mb-2">
@@ -428,7 +428,7 @@ export default function Home() {
                               <span className="text-sm font-medium text-[var(--ds-black)] truncate flex-1 group-hover:text-[#0a72ef] transition-colors">
                                 {f.properties.NOMBRE}
                               </span>
-                              <span className="font-mono text-xs text-[var(--ds-gray-600)] shrink-0">{s.toFixed(3)}</span>
+                              <span className="font-mono text-xs text-[var(--ds-gray-600)] shrink-0">{s.toFixed(3).replace('.', ',')}</span>
                             </div>
                             {/* Mini progress bar */}
                             <div className="ml-7 w-full h-1 bg-[var(--ds-gray-100)] rounded-full overflow-hidden">
