@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity } from "lucide-react";
+import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
 import { RoutingSection } from "@/components/RoutingSection";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
@@ -55,6 +55,26 @@ export default function Home() {
     fetch('/data/refugios_sustitutos.geojson').then(res => res.json()).then(setRefugios);
     fetch('/data/fuentes.geojson').then(res => res.json()).then(setFuentes);
   }, []);
+
+  // ── Scroll reveal observer ──
+  const mainRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+    const el = mainRef.current;
+    if (el) {
+      el.querySelectorAll('.fade-in-up').forEach((node) => observer.observe(node));
+    }
+    return () => observer.disconnect();
+  }, [mergedData]);
 
   const changeScale = (delta: number) => {
     const newScale = Math.max(0.8, Math.min(1.5, fontScale + delta));
@@ -107,7 +127,7 @@ export default function Home() {
     : [];
 
   return (
-    <main className="min-h-screen bg-[var(--background)]">
+    <main ref={mainRef} className="min-h-screen bg-[var(--background)]">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-[rgba(255,255,255,0.8)] backdrop-blur-md border-b shadow-[var(--shadow-border)] px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -128,13 +148,31 @@ export default function Home() {
 
       <div className="max-w-[1200px] mx-auto px-6 py-16 sm:py-24">
         {/* Hero Section */}
-        <div className="flex flex-col items-center text-center mb-24 max-w-3xl mx-auto space-y-6">
+        <div className="flex flex-col items-center text-center mb-24 max-w-3xl mx-auto space-y-6 relative">
+          {/* Animated skyline shadow behind hero */}
+          <div className="absolute inset-0 flex items-end justify-center pointer-events-none overflow-hidden -z-10" aria-hidden="true">
+            <svg viewBox="0 0 800 200" className="w-full max-w-2xl opacity-[0.06]" preserveAspectRatio="xMidYMax meet">
+              <g fill="#171717">
+                <rect x="80" y="60" width="40" height="140" rx="2" />
+                <rect x="140" y="30" width="55" height="170" rx="2" />
+                <rect x="220" y="80" width="35" height="120" rx="2" />
+                <rect x="280" y="20" width="60" height="180" rx="2" />
+                <rect x="370" y="50" width="45" height="150" rx="2" />
+                <rect x="440" y="70" width="50" height="130" rx="2" />
+                <rect x="520" y="40" width="65" height="160" rx="2" />
+                <rect x="610" y="90" width="40" height="110" rx="2" />
+                <rect x="670" y="55" width="50" height="145" rx="2" />
+              </g>
+              <ellipse cx="400" cy="200" rx="380" ry="30" className="hero-shadow" fill="#171717" />
+            </svg>
+          </div>
+
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] shadow-[var(--shadow-border)] text-[var(--ds-gray-600)] text-sm font-medium mb-4">
-            <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+            <span className="flex h-2 w-2 rounded-full bg-green-500 pulse-live"></span>
             Madrid 2026 Data Open
           </div>
           <h1 className="display-hero text-[var(--ds-black)]">
-            Protegiendo a la población mayor del calor extremo
+            Protegiendo a la población mayor del <span className="gradient-text">calor extremo</span>
           </h1>
           <p className="body-large text-[var(--ds-gray-600)]">
             Madrid Refugio es un motor dinámico de sombras que cruza la altura de los edificios (LiDAR) y la posición del sol con la densidad demográfica. Identificamos la ruta de mayor confort térmico calle a calle.
@@ -146,8 +184,8 @@ export default function Home() {
         </div>
 
         {/* Workflow / Pillars Section */}
-        <div className="grid md:grid-cols-3 gap-8 mb-24">
-          <Card level={2} className="p-6 flex flex-col gap-4">
+        <div className="grid md:grid-cols-3 gap-8 mb-24 stagger-children">
+          <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
             <div className="w-10 h-10 rounded-full bg-[#ebf5ff] flex items-center justify-center text-[#0a72ef] mb-2 shadow-[var(--shadow-border)]">
               <Activity className="w-5 h-5" />
             </div>
@@ -155,7 +193,7 @@ export default function Home() {
             <p className="text-[var(--ds-gray-600)] mb-1">Reducción del estrés térmico en el grupo de mayor mortalidad (Mayores 65+). Protección Activa.</p>
             <span className="text-sm font-semibold text-[#0a72ef] mt-auto">+<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra acumulada en ruta óptima</span>
           </Card>
-          <Card level={2} className="p-6 flex flex-col gap-4">
+          <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
             <div className="w-10 h-10 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] mb-2 shadow-[var(--shadow-border)]">
               <TreePine className="w-5 h-5" />
             </div>
@@ -163,7 +201,7 @@ export default function Home() {
             <p className="text-[var(--ds-gray-600)] mb-1">Optimización de la sombra urbana como activo de salud pública precalculado. Infraestructura Verde.</p>
             <span className="text-sm font-semibold text-[#de1d8d] mt-auto">490.000 polígonos LiDAR procesados</span>
           </Card>
-          <Card level={2} className="p-6 flex flex-col gap-4">
+          <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
             <div className="w-10 h-10 rounded-full bg-[#fef2f2] flex items-center justify-center text-[#ff5b4f] mb-2 shadow-[var(--shadow-border)]">
               <MapIcon className="w-5 h-5" />
             </div>
@@ -174,19 +212,19 @@ export default function Home() {
         </div>
 
         {/* Diagnóstico Urbano (Insights) */}
-        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6">
+        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
           <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico Urbano</h2>
         </div>
-        <div className="grid md:grid-cols-3 gap-6 mb-24">
-          <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30">
+        <div className="grid md:grid-cols-3 gap-6 mb-24 stagger-children">
+          <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30 fade-in-up">
             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo Sur</span>
             <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
           </Card>
-          <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30">
+          <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30 fade-in-up">
              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de Proximidad</span>
              <p className="text-sm text-[var(--ds-black)] font-medium"><span className="font-bold">64,1% de los barrios</span> de Madrid no cuentan con un refugio climático operativo a menos de 300 metros caminables.</p>
           </Card>
-          <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30">
+          <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas Optimizadas</span>
              <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse 194 metros permite multiplicar por <span className="font-bold">20 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
           </Card>
@@ -382,6 +420,32 @@ export default function Home() {
               )}
             </Card>
           </div>
+        </div>
+
+        {/* Data Sources Section */}
+        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
+          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de Datos Abiertos</h2>
+          <p className="text-[var(--ds-gray-600)] mt-2">Todos los datos provienen del ecosistema abierto del Ayuntamiento de Madrid.</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
+          {[
+            { icon: Building2, label: "Alturas de Edificación", detail: "490.077 polígonos LiDAR", color: "#0a72ef" },
+            { icon: TreePine, label: "Arbolado Viario", detail: "661.192 ejemplares", color: "#16a34a" },
+            { icon: Users, label: "Padrón Municipal", detail: "Enero 2026", color: "#de1d8d" },
+            { icon: Wind, label: "Calidad del Aire", detail: "NO₂ horario por estación", color: "#f97316" },
+            { icon: Droplets, label: "Fuentes de Agua", detail: "Red de hidrantes", color: "#0ea5e9" },
+            { icon: Landmark, label: "Equipamientos", detail: "Bibliotecas y CDM", color: "#8b5cf6" },
+            { icon: MapPin, label: "Límites Administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
+            { icon: Database, label: "Portal datos.madrid.es", detail: "Fuente oficial", color: "#171717" },
+          ].map((src) => (
+            <div key={src.label} className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 hover:border-[var(--ds-gray-400)] hover:shadow-md transition-all group cursor-default">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
+                <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
+              </div>
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 group-hover:text-[var(--ds-black)] leading-tight">{src.label}</p>
+              <p className="text-xs text-[var(--ds-gray-500)]">{src.detail}</p>
+            </div>
+          ))}
         </div>
 
         {/* Footer */}
