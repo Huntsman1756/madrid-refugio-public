@@ -245,8 +245,8 @@ export default function Home() {
           <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de Vulnerabilidad Territorial</h2>
           <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8 h-[600px] mb-24">
-          <div className="md:col-span-2 h-full">
+        <div className="grid md:grid-cols-3 gap-8 mb-24">
+          <div className="md:col-span-2 h-[500px] md:h-[750px]">
           <MapComponent
               mergedData={mergedData}
               refugios={null}
@@ -257,8 +257,8 @@ export default function Home() {
             />
           </div>
           
-          <div className="h-full">
-            <Card level={3} className="h-full p-6 flex flex-col relative overflow-y-auto">
+          <div className="h-[600px] md:h-[750px] flex flex-col min-h-0">
+            <Card level={3} className="flex-1 p-6 flex flex-col relative overflow-y-auto min-h-0">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0a72ef] via-[#de1d8d] to-[#ff5b4f]" />
 
               {selectedBarrio && barrioStats ? (() => {
