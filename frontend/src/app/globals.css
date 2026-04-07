@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Vercel Design System Colors */
+  --ds-black: #171717;
+  --ds-white: #ffffff;
+  --ds-gray-50: #fafafa;
+  --ds-gray-100: #ebebeb;
+  --ds-gray-400: #808080;
+  --ds-gray-500: #666666;
+  --ds-gray-600: #4d4d4d;
+  --ds-gray-900: #171717;
+  
+  --ds-focus-color: hsla(212, 100%, 48%, 1);
+  --ship-text: #ff5b4f;
+  --preview-text: #de1d8d;
+  --develop-text: #0a72ef;
+
+  /* Vercel Design System Shadows */
+  --shadow-border: 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+  --shadow-ring-light: 0px 0px 0px 1px rgb(235, 235, 235);
+  --shadow-card-subtle: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.04), 0px 8px 8px -8px rgba(0, 0, 0, 0.04), inset 0px 0px 0px 1px #fafafa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-ds-gray-50: var(--ds-gray-50);
+  --color-ds-gray-100: var(--ds-gray-100);
+  --color-ds-gray-400: var(--ds-gray-400);
+  --color-ds-gray-500: var(--ds-gray-500);
+  --color-ds-gray-600: var(--ds-gray-600);
+  --color-ds-gray-900: var(--ds-gray-900);
+  --color-ds-focus: var(--ds-focus-color);
+  
+  --color-ship: var(--ship-text);
+  --color-preview: var(--preview-text);
+  --color-develop: var(--develop-text);
+
+  --shadow-border: var(--shadow-border);
+  --shadow-ring-light: var(--shadow-ring-light);
+  --shadow-card-subtle: var(--shadow-card-subtle);
+  --shadow-card: var(--shadow-card);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Forcing light mode base for this Vercel design as per spec, 
+       but keeping dark mode definitions neutral if user forces it */
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* OpenType features globally enabled */
+  font-feature-settings: "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Scale adjustments from DESIGN.md */
+h1, .display-hero {
+  font-size: 3rem; /* 48px */
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -2.4px;
+}
+
+h2, .section-heading {
+  font-size: 2.5rem; /* 40px */
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -2.4px;
+}
+
+h3, .sub-heading-large {
+  font-size: 2rem; /* 32px */
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -1.28px;
+}
+
+h4, .card-title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: -0.96px;
+}
+
+p.body-large {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+p {
+  font-size: 1rem; /* 16px */
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.mono-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+/* Fix for Leaflet SVG polygon focus outline (prevents black box on click) */
+path.leaflet-interactive:focus {
+  outline: none;
+}

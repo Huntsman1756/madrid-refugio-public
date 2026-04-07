@@ -1,0 +1,15 @@
+{
+  "origin": "Calle Bravo Murillo 1, Madrid, Spain",
+  "destination": "Calle Bravo Murillo 100, Madrid, Spain",
+  "corridor_radius_m": 250,
+  "shortest_length_m": 611.5,
+  "comfort_length_m": 637.5,
+  "distance_delta_m": 26.0,
+  "distance_delta_pct": 4.3,
+  "shortest_shade_score": 21.675,
+  "comfort_shade_score": 117.807,
+  "shade_delta": 96.132,
+  "shade_ratio": 5.4,
+  "routes_are_different": true,
+  "estimated_crown_diameter_m": 6.0
+}

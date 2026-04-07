@@ -1,0 +1,35 @@
+# Cache and local files
+__pycache__/
+*.pyc
+cache/
+.env
+.ipynb_checkpoints
+.vscode/
+.idea/
+
+# Data (large files)
+data/raw/
+data/processed/edificios_alturas.geojson
+data/processed/madrid_walk_graph.graphml
+data/processed/shadow_matrix.parquet
+data/processed/*.csv
+data/processed/*.json
+data/processed/*.graphml
+data/processed/*.parquet
+data/processed/*.geojson
+!data/processed/refugios_sustitutos.geojson
+!data/processed/fuentes.geojson
+!data/processed/routing_summary.json
+!data/processed/shadow_summary.json
+
+
+# Logs
+*.log
+
+# Frontend build
+frontend/.next/
+frontend/node_modules/
+frontend/.env.local
+frontend/.env.*.local
+frontend/dist/
+frontend/build/
