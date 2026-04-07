@@ -51,14 +51,6 @@
   --shadow-card: var(--shadow-card);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Forcing light mode base for this Vercel design as per spec, 
-       but keeping dark mode definitions neutral if user forces it */
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 html {
   font-size: calc(16px * var(--scale, 1));
