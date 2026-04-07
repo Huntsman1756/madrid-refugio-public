@@ -290,7 +290,7 @@ export default function Home() {
                       <div>
                         <div className="flex justify-between items-baseline mb-1">
                           <span className="text-xs font-medium text-[var(--ds-gray-600)]">Índice de Prioridad</span>
-                          <span className="font-mono font-semibold text-[var(--ds-black)] text-sm">{score.toFixed(3)} / 1,00</span>
+                          <span className="font-mono font-semibold text-[var(--ds-black)] text-sm">{score.toFixed(3).replace('.', ',')} / 1,00</span>
                         </div>
                         <div className="w-full bg-[var(--ds-gray-100)] h-2.5 rounded-full overflow-hidden">
                           <div

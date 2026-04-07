@@ -52,6 +52,23 @@ function RouteViewController({ routeResult }: { routeResult: any }) {
   return null;
 }
 
+/** Fits map to the entire dataset (Madrid bounds) on mount if no route is active */
+function FitDataController({ data, isActive }: { data: any, isActive: boolean }) {
+  const map = useMap();
+  useEffect(() => {
+    if (isActive && data?.features?.length > 0) {
+      try {
+        const geoJsonLayer = L.geoJSON(data);
+        map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20], maxZoom: 14 });
+      } catch (e) {
+        // Fallback to center if fitBounds fails
+        map.setView([40.4168, -3.7038], 12);
+      }
+    }
+  }, [data, isActive, map]);
+  return null;
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 
 const originIcon = new L.Icon({
@@ -122,6 +139,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
         {/* View controllers */}
         <FlyController target={flyTarget} />
         <RouteViewController routeResult={routeResult} />
+        <FitDataController data={mergedData} isActive={!routeResult && !flyTarget} />
 
         {/* ── Route mode ── */}
         {routeResult && (
