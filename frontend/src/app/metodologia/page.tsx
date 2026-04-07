@@ -95,9 +95,9 @@ export default function MetodologiaPage() {
 
         {/* 5. Escalabilidad */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Escalabilidad y Open Source</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Escalabilidad y Arquitectura</h2>
           <p className="text-[var(--ds-gray-600)] mb-4">
-            Madrid Refugio nace con vocación de producto estable y exportable. Todo el código fuente (Front, Back y Algoritmia) se publica bajo licencia abierta para permitir su reproducibilidad por otros consistorios.
+            Madrid Refugio nace con vocación de producto estable y exportable. La arquitectura modular (Frontend, Backend y Motor Algorítmico) está diseñada para ser replicable por otros consistorios que deseen implementar sistemas similares de protección climática.
           </p>
           <p className="text-[var(--ds-gray-600)]">
             La arquitectura algorítmica expuesta en este demostrador está diseñada para escalar: el salto a <em>Madrid Completo</em> abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (<strong>PostgreSQL + PostGIS con pgRouting</strong>), permitiendo cálculos de millones de aristas con sombra dinámica en apenas milisegundos gracias al pre-cálculo masivo en formato Parquet.
@@ -108,7 +108,7 @@ export default function MetodologiaPage() {
         <section className="mb-12">
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">6. Conclusión</h2>
           <p className="text-[var(--ds-gray-600)]">
-            Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. <strong>No es una prueba de concepto, es infraestructura de código abierto lista para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.</strong>
+            Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. <strong>No es una prueba de concepto, es infraestructura lista para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.</strong>
           </p>
         </section>
 

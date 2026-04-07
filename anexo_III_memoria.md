@@ -29,11 +29,11 @@ Hemos integrado 11 datasets críticos del ecosistema de datos de Madrid:
 
 El análisis territorial ha revelado realidades críticas: **Villaverde y Aluche** emergen como zonas de máxima prioridad por su combinación de población envejecida y déficit de infraestructura de refugio. Madrid Refugio proporciona a los planificadores urbanos una hoja de ruta basada en datos para la creación de la red oficial de refugios climáticos.
 
-## 5. Escalabilidad y Open Source
+## 5. Escalabilidad y Arquitectura
 
-Madrid Refugio nace con vocación de producto estable y exportable. Todo el código fuente (Front, Back y Algoritmia) se publica bajo licencia abierta en GitHub para permitir su reproducibilidad por otros consistorios. 
+Madrid Refugio nace con vocación de producto estable y exportable. La arquitectura modular (Frontend, Backend y Motor Algorítmico) está diseñada para ser replicable por otros consistorios que deseen implementar sistemas similares de protección climática.
 Además, la arquitectura algorítmica expuesta en este demostrador está diseñada para escalar: el salto a *Madrid Completo* abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (**PostgreSQL + PostGIS con `pgRouting`**), permitiendo cálculos de millones de aristas con sombra dinámica en apenas milisegundos gracias al pre-cálculo masivo en formato Parquet.
 
 ## 6. Conclusión
 
-Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. **No es una prueba de concepto, es infraestructura de código abierto lista para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.**
+Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. **No es una prueba de concepto, es infraestructura lista para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.**
