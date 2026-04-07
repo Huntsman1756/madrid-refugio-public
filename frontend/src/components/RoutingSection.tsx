@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Share2, Download } from "lucide-react";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -82,6 +82,28 @@ ${gpxPoints}
     link.download = "ruta_madrid_refugio.gpx";
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleShareRoute = async () => {
+    if (!routeResult || !metrics) {
+      alert("Primero debes calcular una ruta.");
+      return;
+    }
+    const text = `Ruta Eco-Refugio (${hour}:00)\n📍 Origen: ${origin}\n📍 Destino: ${destination}\n🌳 Sombra ganada: +${metrics.comfort.building_shade.toFixed(0)}m\n¡Calculado con el motor de Madrid Refugio!`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Mi Ruta Climática - Madrid Refugio",
+          text: text,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log("Error compartiendo", err);
+      }
+    } else {
+      navigator.clipboard.writeText(text);
+      alert("¡Resumen de ruta copiado al portapapeles!");
+    }
   };
 
   return (
@@ -215,9 +237,14 @@ ${gpxPoints}
             <div className="mt-6">
               <div className="flex justify-between items-center mb-3">
                 <h4 className="font-semibold text-[var(--ds-black)]">Comparativa de Rutas</h4>
-                <Button variant="secondary" onClick={handleDownloadGPX} className="text-xs h-8 py-1">
-                  Descargar GPX
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="secondary" onClick={handleShareRoute} className="text-xs h-8 py-1 flex items-center justify-center gap-1">
+                    <Share2 className="w-3 h-3" /> Compartir
+                  </Button>
+                  <Button variant="secondary" onClick={handleDownloadGPX} className="text-xs h-8 py-1 flex items-center justify-center gap-1">
+                    <Download className="w-3 h-3" /> GPX
+                  </Button>
+                </div>
               </div>
               <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden">
                 <table className="w-full text-sm text-left">
