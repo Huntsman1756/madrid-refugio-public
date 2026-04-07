@@ -56,6 +56,10 @@ html {
   font-size: calc(16px * var(--scale, 1));
 }
 
+html {
+  font-size: calc(16px * var(--scale, 1));
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
