@@ -21,8 +21,8 @@ interface RoutingSectionProps {
 }
 
 export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
-  const [origin, setOrigin] = useState("Nuevos Ministerios, Madrid");
-  const [destination, setDestination] = useState("Plaza de Castilla, Madrid");
+  const [origin, setOrigin] = useState("Moncloa, Madrid");
+  const [destination, setDestination] = useState("Chamberí, Madrid");
   const [hour, setHour] = useState(14);
   const [preference, setPreference] = useState(1.0);
   const [loading, setLoading] = useState(false);
@@ -268,7 +268,7 @@ ${gpxPoints}
             )}
 
             <p className="text-xs text-[var(--ds-gray-500)] text-center mb-3">
-              En el corredor de demo (14:00): ruta estándar ~3.075 m · ruta confort ~3.549 m · sombra acumulada ×7,8
+              En el corredor de demo (14:00): ruta estándar ~1.748 m · ruta confort ~1.791 m · sombra acumulada ×4,4
             </p>
 
             <div className="flex gap-3">
