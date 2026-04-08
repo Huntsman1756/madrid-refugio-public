@@ -57,6 +57,15 @@ export default function MetodologiaPage() {
               <p className="text-sm text-[var(--ds-gray-600)]">El grafo urbano utiliza un peso combinado (<code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">comfort_weight</code>) que penaliza la insolación directa, permitiendo desvíos inteligentes hacia calles en sombra que multiplican la protección frente al estrés térmico.</p>
             </Card>
           </div>
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[var(--ds-black)] mb-3">Simulación temporal de sombras</h3>
+            <p className="text-[var(--ds-gray-600)] mb-4">
+              La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). No se consultan APIs meteorológicas externas: el sistema es completamente determinista y reproducible, lo que garantiza su funcionamiento offline y sin coste operativo.
+            </p>
+            <p className="text-[var(--ds-gray-600)]">
+              Los pesos de sombra se precomputan para tres franjas horarias (8:00, 14:00, 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecución, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
+            </p>
+          </div>
         </section>
 
         {/* 3. Reutilización de Datos Abiertos */}
@@ -82,6 +91,12 @@ export default function MetodologiaPage() {
                 <tr><td className="px-4 py-3 font-mono text-xs">7</td><td className="px-4 py-3 font-medium">Límites Administrativos</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Geometría oficial de barrios y distritos.</td></tr>
               </tbody>
             </table>
+          </div>
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[var(--ds-black)] mb-3">Datos de NO₂</h3>
+            <p className="text-[var(--ds-gray-600)]">
+              Los valores de contaminación por dióxido de nitrógeno provienen del dataset histórico de la Red de Vigilancia de la Calidad del Aire del Ayuntamiento de Madrid (datos.madrid.es). Se utilizan medias anuales por estación, suficientes para identificar patrones estructurales de exposición crónica en los barrios. La integración de lecturas en tiempo real es una extensión prevista del sistema.
+            </p>
           </div>
         </section>
 
