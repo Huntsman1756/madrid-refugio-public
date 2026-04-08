@@ -26,7 +26,16 @@ from shapely.geometry import LineString, Point
 
 # --- Configuration & Paths ---
 BASE_DIR = Path(__file__).resolve().parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+
+
+def get_processed_dir() -> Path:
+    data_dir = os.getenv("DATA_DIR")
+    if data_dir:
+        return Path(data_dir)
+    return BASE_DIR / "data" / "processed"
+
+
+PROCESSED_DIR = get_processed_dir()
 GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
 REFUGIOS_PATH = PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
@@ -364,16 +373,22 @@ app.add_middleware(
 def health_check():
     return {"status": "ok"}
 
+
+@app.get("/api/health")
+def api_health_check():
+    return health_check()
+
 @app.on_event("startup")
 def startup_event():
     print(f"\n--- Madrid Refugio: Iniciando Backend ---")
+    print(f"Directorio de datos resuelto: {PROCESSED_DIR}")
     
     # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
     def download_and_extract(path: Path, url: str):
         # Si el archivo real no existe o es un puntero LFS
         if not path.exists() or path.stat().st_size < 1000000:
             gz_path = path.with_suffix(path.suffix + ".gz")
-            print(f"Descargando {gz_path.name} desde GitHub Releases...")
+            print(f"⚠️  {path.name} no encontrado en volumen. Descargando desde GitHub Releases...")
             try:
                 r = requests.get(url, stream=True, timeout=300)
                 r.raise_for_status()
@@ -392,6 +407,9 @@ def startup_event():
             except Exception as e:
                 print(f"❌ Error procesando {path.name}: {e}")
 
+        else:
+            print(f"Grafo cargado desde volumen local ({path.stat().st_size / 1e6:.1f} MB)")
+
     RELEASE_BASE_URL = "https://github.com/Huntsman1756/madrid-refugio/releases/download/v1.2"
     
     # Descargar y descomprimir el grafo
@@ -399,8 +417,9 @@ def startup_event():
     
     # Descargar la matriz (esta no va comprimida en .gz extra, ya es parquet)
     if not SHADOW_MATRIX_PATH.exists() or SHADOW_MATRIX_PATH.stat().st_size < 100000:
-        print(f"Descargando matriz de sombras...")
+        print("shadow_matrix.parquet no encontrada en volumen. Descargando desde GitHub Releases...")
         try:
+            SHADOW_MATRIX_PATH.parent.mkdir(parents=True, exist_ok=True)
             r = requests.get(f"{RELEASE_BASE_URL}/shadow_matrix.parquet", stream=True, timeout=300)
             r.raise_for_status()
             with open(SHADOW_MATRIX_PATH, "wb") as f:
@@ -409,6 +428,9 @@ def startup_event():
             print(f"✓ Matriz descargada.")
         except Exception as e:
             print(f"❌ Error descargando matriz: {e}")
+
+    else:
+        print(f"shadow_matrix.parquet cargada desde volumen local ({SHADOW_MATRIX_PATH.stat().st_size / 1e6:.1f} MB)")
 
     print(f"Verificando integridad de datos en {GRAPH_PATH}...")
     
