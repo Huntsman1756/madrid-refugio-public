@@ -4,8 +4,6 @@ import json
 import os
 import requests
 import socket
-import gzip
-import shutil
 from datetime import datetime
 try:
     from zoneinfo import ZoneInfo
@@ -40,6 +38,11 @@ GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
 REFUGIOS_PATH = PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
+GITHUB_REPO = "Huntsman1756/madrid-refugio"
+RELEASE_TAG = "v1.2"
+RELEASE_BASE_URL = f"https://github.com/{GITHUB_REPO}/releases/download/{RELEASE_TAG}"
+GRAPH_RELEASE_URL = f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml"
+SHADOW_MATRIX_RELEASE_URL = f"{RELEASE_BASE_URL}/shadow_matrix.parquet"
 
 import sys
 import time
@@ -161,6 +164,33 @@ def fetch_aemet_data():
         return result
     except Exception as e:
         return {"error": f"Error conectando con AEMET: {str(e)}"}
+
+
+def resolve_release_asset_download(asset_name: str) -> tuple[str, dict]:
+    github_token = os.getenv("GITHUB_TOKEN")
+    if not github_token:
+        return f"{RELEASE_BASE_URL}/{asset_name}", {}
+
+    api_headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+    }
+    release_resp = requests.get(
+        f"https://api.github.com/repos/{GITHUB_REPO}/releases/tags/{RELEASE_TAG}",
+        headers=api_headers,
+        timeout=30,
+    )
+    release_resp.raise_for_status()
+    release_data = release_resp.json()
+
+    for asset in release_data.get("assets", []):
+        if asset.get("name") == asset_name:
+            return asset["url"], {
+                "Authorization": f"Bearer {github_token}",
+                "Accept": "application/octet-stream",
+            }
+
+    raise RuntimeError(f"No se ha encontrado el asset '{asset_name}' en el release {RELEASE_TAG}.")
 
 
 # --- Utility Functions ---
@@ -384,25 +414,22 @@ def startup_event():
     print(f"Directorio de datos resuelto: {PROCESSED_DIR}")
     
     # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
-    def download_and_extract(path: Path, url: str):
+    def download_release_file(path: Path, asset_name: str, public_url: str):
         # Si el archivo real no existe o es un puntero LFS
         if not path.exists() or path.stat().st_size < 1000000:
-            gz_path = path.with_suffix(path.suffix + ".gz")
+            path.parent.mkdir(parents=True, exist_ok=True)
             print(f"⚠️  {path.name} no encontrado en volumen. Descargando desde GitHub Releases...")
             try:
-                r = requests.get(url, stream=True, timeout=300)
-                r.raise_for_status()
-                path.parent.mkdir(parents=True, exist_ok=True)
-                with open(gz_path, "wb") as f:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        f.write(chunk)
+                download_url, headers = resolve_release_asset_download(asset_name)
+                if download_url != public_url:
+                    print(f"Usando descarga autenticada de GitHub para {asset_name}.")
+                with requests.get(download_url, headers=headers, stream=True, timeout=300) as r:
+                    r.raise_for_status()
+                    with open(path, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
                 
-                print(f"Descomprimiendo {gz_path.name}...")
-                with gzip.open(gz_path, 'rb') as f_in:
-                    with open(path, 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
                 
-                gz_path.unlink() # Borrar el comprimido
                 print(f"✓ {path.name} listo ({path.stat().st_size / 1e6:.1f} MB)")
             except Exception as e:
                 print(f"❌ Error procesando {path.name}: {e}")
@@ -410,17 +437,18 @@ def startup_event():
         else:
             print(f"Grafo cargado desde volumen local ({path.stat().st_size / 1e6:.1f} MB)")
 
-    RELEASE_BASE_URL = "https://github.com/Huntsman1756/madrid-refugio/releases/download/v1.2"
-    
-    # Descargar y descomprimir el grafo
-    download_and_extract(GRAPH_PATH, f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml.gz")
+    # Descargar el grafo tal y como estÃ¡ publicado en GitHub Releases.
+    download_release_file(GRAPH_PATH, "madrid_shadow_graph.graphml", GRAPH_RELEASE_URL)
     
     # Descargar la matriz (esta no va comprimida en .gz extra, ya es parquet)
     if not SHADOW_MATRIX_PATH.exists() or SHADOW_MATRIX_PATH.stat().st_size < 100000:
         print("shadow_matrix.parquet no encontrada en volumen. Descargando desde GitHub Releases...")
         try:
             SHADOW_MATRIX_PATH.parent.mkdir(parents=True, exist_ok=True)
-            r = requests.get(f"{RELEASE_BASE_URL}/shadow_matrix.parquet", stream=True, timeout=300)
+            download_url, headers = resolve_release_asset_download("shadow_matrix.parquet")
+            if download_url != SHADOW_MATRIX_RELEASE_URL:
+                print("Usando descarga autenticada de GitHub para shadow_matrix.parquet.")
+            r = requests.get(download_url, headers=headers, stream=True, timeout=300)
             r.raise_for_status()
             with open(SHADOW_MATRIX_PATH, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
