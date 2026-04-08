@@ -138,9 +138,6 @@ def fetch_aemet_data():
     except Exception as e:
         return {"error": f"Error conectando con AEMET: {str(e)}"}
 
-@app.get("/api/weather")
-def get_weather():
-    return fetch_aemet_data()
 
 # --- Utility Functions ---
 
@@ -326,6 +323,10 @@ def extract_wgs84_coords(graph: nx.MultiDiGraph, route: list[int]) -> List[Tuple
 # --- FastAPI App Setup ---
 
 app = FastAPI(title="Madrid Refugio API")
+
+@app.get("/api/weather")
+def get_weather():
+    return fetch_aemet_data()
 
 app.add_middleware(
     CORSMiddleware,
