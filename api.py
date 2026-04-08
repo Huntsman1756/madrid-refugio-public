@@ -22,6 +22,8 @@ from pydantic import BaseModel
 from pyproj import Transformer
 from shapely.geometry import LineString, Point
 
+from shade_model import combine_shade_scores, compute_comfort_weight
+
 # --- Configuration & Paths ---
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -40,7 +42,7 @@ REFUGIOS_PATH = APP_PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = APP_PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
 GITHUB_REPO = "Huntsman1756/madrid-refugio"
-RELEASE_TAG = "v1.2"
+RELEASE_TAG = "v1.3"
 RELEASE_BASE_URL = f"https://github.com/{GITHUB_REPO}/releases/download/{RELEASE_TAG}"
 GRAPH_RELEASE_URL = f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml"
 SHADOW_MATRIX_RELEASE_URL = f"{RELEASE_BASE_URL}/shadow_matrix.parquet"
@@ -206,6 +208,24 @@ def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
                 ]
             )
 
+
+def get_tree_shade_score(data: dict) -> float:
+    if "tree_shade_score" in data:
+        return float(data.get("tree_shade_score", 0.0) or 0.0)
+    return float(data.get("shade_score", 0.0) or 0.0)
+
+
+def get_building_shade_score(
+    shadow_dict: dict | None,
+    u: int,
+    v: int,
+    key: int,
+    hour_col: str | None,
+) -> float:
+    if not hour_col or not shadow_dict or (u, v, key) not in shadow_dict:
+        return 0.0
+    return float(shadow_dict[(u, v, key)].get(hour_col, 0.0) or 0.0)
+
 def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None, shadow_dict: dict = None, pref: float = 0.0) -> gpd.GeoDataFrame:
     rows = []
     for u, v in zip(route[:-1], route[1:]):
@@ -217,16 +237,16 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = No
         best_key = None
         min_w = float('inf')
         for key, data in edge_data_dict.items():
-            t_shade = float(data.get("shade_score", 0.0))
-            b_shade = 0.0
-            if shadow_dict and (u, v, key) in shadow_dict:
-                b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
-            
-            combined_shade = max(t_shade, b_shade)
+            t_shade = get_tree_shade_score(data)
+            b_shade = get_building_shade_score(shadow_dict, u, v, key, hour_col)
             res_bonus = float(data.get("resource_bonus", 1.0))
-            shadow_factor = (1.0 - (combined_shade * 0.8 * pref)) * (1.0 + (res_bonus - 1.0) * pref)
-            
-            w = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
+            w = compute_comfort_weight(
+                length=float(data.get("length", 1.0)),
+                tree_shade=t_shade,
+                building_shade=b_shade,
+                preference=pref,
+                resource_bonus=res_bonus,
+            )
             if w < min_w:
                 min_w = w
                 best_key = key
@@ -243,16 +263,28 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = No
                 "v": v,
                 "key": best_key,
                 "length": float(edge_data.get("length", 0.0)),
-                "shade_score": float(edge_data.get("shade_score", 0.0)),
+                "tree_shade_score": get_tree_shade_score(edge_data),
+                "building_shade_score": get_building_shade_score(shadow_dict, u, v, best_key, hour_col),
+                "shade_score": combine_shade_scores(
+                    get_tree_shade_score(edge_data),
+                    get_building_shade_score(shadow_dict, u, v, best_key, hour_col),
+                ),
                 "geometry": geom,
             }
         )
     return gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:25830")
 
-def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None, shadow_dict: dict = None, pref: float = 0.0) -> tuple[float, float, float]:
+def route_metrics(
+    graph: nx.MultiDiGraph,
+    route: list[int],
+    hour_col: str = None,
+    shadow_dict: dict = None,
+    pref: float = 0.0,
+) -> tuple[float, float, float, float]:
     total_length = 0.0
     total_t_shade = 0.0
     total_b_shade = 0.0
+    total_combined_shade = 0.0
     for u, v in zip(route[:-1], route[1:]):
         edge_data_dict = graph.get_edge_data(u, v)
         if not edge_data_dict:
@@ -261,34 +293,32 @@ def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None
         best_key = None
         min_w = float('inf')
         for key, data in edge_data_dict.items():
-            t_shade = float(data.get("shade_score", 0.0))
-            b_shade = 0.0
-            if shadow_dict and (u, v, key) in shadow_dict:
-                b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
-            
-            combined_shade = max(t_shade, b_shade)
+            t_shade = get_tree_shade_score(data)
+            b_shade = get_building_shade_score(shadow_dict, u, v, key, hour_col)
             res_bonus = float(data.get("resource_bonus", 1.0))
-            shadow_factor = (1.0 - (combined_shade * 0.8 * pref)) * (1.0 + (res_bonus - 1.0) * pref)
-            
-            w = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
+            w = compute_comfort_weight(
+                length=float(data.get("length", 1.0)),
+                tree_shade=t_shade,
+                building_shade=b_shade,
+                preference=pref,
+                resource_bonus=res_bonus,
+            )
             if w < min_w:
                 min_w = w
                 best_key = key
         
         edge_data = edge_data_dict[best_key]
         edge_length = float(edge_data.get("length", 0.0))
-        edge_t_shade = float(edge_data.get("shade_score", 0.0))
-        edge_b_shade = 0.0
-        
-        if hour_col and shadow_dict:
-            if (u, v, best_key) in shadow_dict:
-                edge_b_shade = float(shadow_dict[(u, v, best_key)].get(hour_col, 0.0))
+        edge_t_shade = get_tree_shade_score(edge_data)
+        edge_b_shade = get_building_shade_score(shadow_dict, u, v, best_key, hour_col)
+        edge_total_shade = combine_shade_scores(edge_t_shade, edge_b_shade)
         
         total_length += edge_length
         total_t_shade += edge_t_shade * edge_length
         total_b_shade += edge_b_shade * edge_length
+        total_combined_shade += edge_total_shade * edge_length
         
-    return total_length, total_t_shade, total_b_shade
+    return total_length, total_t_shade, total_b_shade, total_combined_shade
 
 def count_points_near_route(points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFrame, buffer_m: float) -> int:
     if route_gdf.empty:
@@ -415,11 +445,14 @@ def startup_event():
     print(f"Directorio de datos resuelto: {PROCESSED_DIR}")
     
     # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
-    def download_release_file(path: Path, asset_name: str, public_url: str):
-        # Si el archivo real no existe o es un puntero LFS
-        if not path.exists() or path.stat().st_size < 1000000:
+    def download_release_file(path: Path, asset_name: str, public_url: str, force_refresh: bool = False):
+        # Si el archivo real no existe, es un puntero LFS o se ha pedido un refresco forzado
+        if force_refresh or not path.exists() or path.stat().st_size < 1000000:
             path.parent.mkdir(parents=True, exist_ok=True)
-            print(f"⚠️  {path.name} no encontrado en volumen. Descargando desde GitHub Releases...")
+            if force_refresh:
+                print(f"Refresco forzado activo para {path.name}. Descargando desde GitHub Releases...")
+            else:
+                print(f"{path.name} no encontrado en volumen. Descargando desde GitHub Releases...")
             try:
                 download_url, headers = resolve_release_asset_download(asset_name)
                 if download_url != public_url:
@@ -439,7 +472,12 @@ def startup_event():
             print(f"Grafo cargado desde volumen local ({path.stat().st_size / 1e6:.1f} MB)")
 
     # Descargar el grafo tal y como estÃ¡ publicado en GitHub Releases.
-    download_release_file(GRAPH_PATH, "madrid_shadow_graph.graphml", GRAPH_RELEASE_URL)
+    download_release_file(
+        GRAPH_PATH,
+        "madrid_shadow_graph.graphml",
+        GRAPH_RELEASE_URL,
+        force_refresh=os.getenv("FORCE_REFRESH_GRAPH_FROM_RELEASE") == "1",
+    )
     
     # Descargar la matriz (esta no va comprimida en .gz extra, ya es parquet)
     if not SHADOW_MATRIX_PATH.exists() or SHADOW_MATRIX_PATH.stat().st_size < 100000:
@@ -493,7 +531,10 @@ def startup_event():
     for u, v, key, data in graph.edges(keys=True, data=True):
         data["key"] = key
         data["length"] = float(data.get("length", 0.0) or 0.0)
-        data["shade_score"] = float(data.get("shade_score", 0.0) or 0.0)
+        tree_shade = get_tree_shade_score(data)
+        data["tree_shade_score"] = tree_shade
+        data["shade_score"] = tree_shade
+        data["tree_count"] = int(float(data.get("tree_count", 0) or 0))
         
         # Calculate resource bonus (discount factor)
         # Default bonus is 1.0 (no discount)
@@ -506,9 +547,13 @@ def startup_event():
         data["resource_bonus"] = max(0.8, bonus) # Max 20% total discount
 
         # Siempre recalculamos el peso base de confort incorporando el bonus de recursos
-        shade = float(data.get("shade_score", 0.0))
-        shadow_factor = (1.0 - (shade * 0.8)) * data["resource_bonus"]
-        data["comfort_weight"] = data["length"] * max(shadow_factor, 0.1)
+        data["comfort_weight"] = compute_comfort_weight(
+            length=data["length"],
+            tree_shade=tree_shade,
+            building_shade=0.0,
+            preference=1.0,
+            resource_bonus=data["resource_bonus"],
+        )
     
     app_state.graph = graph
     
@@ -551,19 +596,18 @@ def calculate_route(req: RouteRequest):
             # En MultiDiGraph, d es un diccionario de aristas {key: attr_dict}
             weights = []
             for key, data in d.items():
-                t_shade = float(data.get("shade_score", 0.0))
-                b_shade = 0.0
-                if app_state.shadow_dict and (u, v, key) in app_state.shadow_dict:
-                    b_shade = float(app_state.shadow_dict[(u, v, key)].get(hour_col, 0.0))
-                
-                combined_shade = max(t_shade, b_shade)
+                t_shade = get_tree_shade_score(data)
+                b_shade = get_building_shade_score(app_state.shadow_dict, u, v, key, hour_col)
                 res_bonus = float(data.get("resource_bonus", 1.0))
-                
-                # El factor de sombra se escala por la preferencia del usuario
-                # Aplicamos el bonus de recursos solo si la preferencia es > 0
-                shadow_factor = (1.0 - (combined_shade * 0.8 * pref)) * (1.0 + (res_bonus - 1.0) * pref)
-                edge_weight = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
-                weights.append(edge_weight)
+                weights.append(
+                    compute_comfort_weight(
+                        length=float(data.get("length", 1.0)),
+                        tree_shade=t_shade,
+                        building_shade=b_shade,
+                        preference=pref,
+                        resource_bonus=res_bonus,
+                    )
+                )
             
             return min(weights) if weights else 1.0e6
 
@@ -573,8 +617,8 @@ def calculate_route(req: RouteRequest):
         if shortest_route is None or comfort_route is None:
             raise ValueError("No se ha podido calcular una ruta válida entre estos puntos.")
 
-        shortest_length, shortest_t_shade, shortest_b_shade = route_metrics(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
-        comfort_length, comfort_t_shade, comfort_b_shade = route_metrics(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
+        shortest_length, shortest_t_shade, shortest_b_shade, shortest_total_shade = route_metrics(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
+        comfort_length, comfort_t_shade, comfort_b_shade, comfort_total_shade = route_metrics(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
         
         shortest_gdf = route_edges_gdf(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
         comfort_gdf = route_edges_gdf(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
@@ -589,7 +633,7 @@ def calculate_route(req: RouteRequest):
         WALKING_SPEED = 1.4
         
         # Sombra total ganada en metros
-        shade_gain_m = (comfort_t_shade + comfort_b_shade) - (shortest_t_shade + shortest_b_shade)
+        shade_gain_m = comfort_total_shade - shortest_total_shade
         # Tiempo "ahorrado" bajo el sol directo (segundos)
         time_saved_sun_sec = shade_gain_m / WALKING_SPEED
         # Tiempo extra de caminata total (segundos)
@@ -605,6 +649,7 @@ def calculate_route(req: RouteRequest):
                     "length": shortest_length,
                     "tree_shade": shortest_t_shade,
                     "building_shade": shortest_b_shade,
+                    "total_shade": shortest_total_shade,
                     "fuentes": len(shortest_fuentes_pts),
                     "fuentes_pts": shortest_fuentes_pts,
                     "refugios": len(shortest_refugios_pts),
@@ -614,6 +659,7 @@ def calculate_route(req: RouteRequest):
                     "length": comfort_length,
                     "tree_shade": comfort_t_shade,
                     "building_shade": comfort_b_shade,
+                    "total_shade": comfort_total_shade,
                     "fuentes": len(comfort_fuentes_pts),
                     "fuentes_pts": comfort_fuentes_pts,
                     "refugios": len(comfort_refugios_pts),

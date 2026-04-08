@@ -73,6 +73,18 @@ class ApiConfigTests(unittest.TestCase):
 
             importlib.reload(api)
 
+    def test_tree_shade_score_prefers_new_attribute_when_present(self):
+        import api
+
+        self.assertEqual(
+            api.get_tree_shade_score({"tree_shade_score": 0.45, "shade_score": 0.10}),
+            0.45,
+        )
+        self.assertEqual(
+            api.get_tree_shade_score({"shade_score": 0.25}),
+            0.25,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
