@@ -3,6 +3,10 @@ from __future__ import annotations
 import json
 import socket
 from datetime import datetime
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import List, Tuple
 
@@ -105,11 +109,14 @@ def fetch_aemet_data():
         datos = resp_datos.json()
         
         # Extraer info relevante buscando la hora más cercana a la actual
-        # Ajustamos por zona horaria: Railway suele estar en UTC, Madrid es UTC+2 en verano
-        # Para simplificar y ser exactos, mostramos la hora del periodo que AEMET nos da
+        # Ajustamos por zona horaria de forma robusta
         prediccion = datos[0]["prediccion"]["dia"][0]
-        # Obtenemos la hora actual en Madrid (UTC+2 aproximado para Abril)
-        hora_madrid = (datetime.utcnow().hour + 2) % 24
+        try:
+            from zoneinfo import ZoneInfo
+            hora_madrid = datetime.now(ZoneInfo("Europe/Madrid")).hour
+        except Exception:
+            # Fallback si zoneinfo no está disponible o falla
+            hora_madrid = (datetime.utcnow().hour + 2) % 24
         
         # Filtrar temperatura por periodo más cercano
         temp_list = prediccion.get("temperatura", [])
@@ -406,13 +413,10 @@ def startup_event():
             bonus -= 0.10 # 10% discount for shelters
         data["resource_bonus"] = max(0.8, bonus) # Max 20% total discount
 
-        stored_comfort = data.get("comfort_weight", "")
-        if stored_comfort in ("", None):
-            shade = float(data.get("shade_score", 0.0))
-            shadow_factor = (1.0 - (shade * 0.8)) * data["resource_bonus"]
-            data["comfort_weight"] = data["length"] * max(shadow_factor, 0.1)
-        else:
-            data["comfort_weight"] = float(stored_comfort)
+        # Siempre recalculamos el peso base de confort incorporando el bonus de recursos
+        shade = float(data.get("shade_score", 0.0))
+        shadow_factor = (1.0 - (shade * 0.8)) * data["resource_bonus"]
+        data["comfort_weight"] = data["length"] * max(shadow_factor, 0.1)
     
     app_state.graph = graph
     
