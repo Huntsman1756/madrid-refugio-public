@@ -50,7 +50,7 @@ export default function MetodologiaPage() {
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Matriz de Intersección Calle-Sombra</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 131.620 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
+              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 282.438 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#16a34a]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Optimización de Confort Térmico</h4>
@@ -82,7 +82,7 @@ export default function MetodologiaPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
-                <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de Alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">448.997 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de Alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">646.281 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Arbolado Viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados para sombra biológica.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">3</td><td className="px-4 py-3 font-medium">Padrón Municipal (2026)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Población por barrio segregada por edad (&gt;65 años).</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Calidad del Aire</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Series históricas de NO₂ interpoladas mediante IDW.</td></tr>

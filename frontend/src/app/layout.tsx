@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Madrid Refugio | Motor de Simulación Climática Urbana",
-    description: "Protegiendo a 430.000 mayores del calor extremo con rutas de sombra calculadas en tiempo real. 448.997 polígonos LiDAR · 661.000 árboles · 13 franjas horarias.",
+    description: "Protegiendo a 430.000 mayores del calor extremo con rutas de sombra calculadas en tiempo real. 646.281 polígonos LiDAR · 661.000 árboles · 13 franjas horarias.",
     type: "website",
     locale: "es_ES",
     siteName: "Madrid Refugio",
