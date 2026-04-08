@@ -219,7 +219,6 @@ app.add_middleware(
     allow_origins=[
         "https://madrid-refugio.vercel.app",
         "http://localhost:3000",
-        "*"  # temporal para diagnóstico
     ],
     allow_credentials=True,
     allow_methods=["*"],
