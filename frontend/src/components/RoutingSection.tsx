@@ -316,41 +316,53 @@ ${gpxPoints}
           {metrics && (
             <div className="mt-6">
               <div className="flex justify-between items-center mb-3">
-                <h4 className="font-semibold text-[var(--ds-black)]">Comparativa de Rutas</h4>
+                <h4 className="font-semibold text-[var(--ds-black)] text-lg">Impacto del Confort Térmico</h4>
                 <div className="flex gap-2">
-                  <Button variant="secondary" onClick={handleShareRoute} className="text-xs h-8 py-1 flex items-center justify-center gap-1">
-                    <Share2 className="w-3 h-3" /> Compartir
-                  </Button>
-                  <Button variant="secondary" onClick={handleDownloadGPX} className="text-xs h-8 py-1 flex items-center justify-center gap-1">
-                    <Download className="w-3 h-3" /> GPX
+                  <Button variant="secondary" onClick={handleDownloadGPX} className="text-sm h-10 py-2 flex items-center justify-center gap-2">
+                    <Download className="w-4 h-4" /> Exportar GPX
                   </Button>
                 </div>
               </div>
-              <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden">
+
+              {/* Human Metrics Highlights */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <Card level={1} className="p-4 bg-orange-50 border-orange-100 flex flex-col items-center text-center">
+                  <span className="text-[10px] uppercase tracking-wider text-orange-600 font-bold mb-1">Protección Activa</span>
+                  <span className="text-2xl font-bold text-orange-700">~{routeResult.metrics?.human?.sun_time_saved_min ?? 0} min</span>
+                  <span className="text-xs text-orange-600 font-medium leading-tight">menos de exposición al sol directo</span>
+                </Card>
+                <Card level={1} className="p-4 bg-blue-50 border-blue-100 flex flex-col items-center text-center">
+                  <span className="text-[10px] uppercase tracking-wider text-blue-600 font-bold mb-1">Esfuerzo Adicional</span>
+                  <span className="text-2xl font-bold text-blue-700">+{routeResult.metrics?.human?.extra_effort_min ?? 0} min</span>
+                  <span className="text-xs text-blue-600 font-medium leading-tight">de caminata total vs. ruta rápida</span>
+                </Card>
+              </div>
+
+              <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden shadow-sm">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-[var(--ds-gray-50)] text-[var(--ds-gray-500)] border-b border-[var(--ds-gray-100)]">
                     <tr>
                       <th className="px-4 py-3 font-medium">Métrica</th>
-                      <th className="px-4 py-3 font-medium">Ruta Estándar</th>
-                      <th className="px-4 py-3 font-medium text-[#16a34a]">Ruta Refugio</th>
+                      <th className="px-4 py-3 font-medium text-center">Ruta Rápida</th>
+                      <th className="px-4 py-3 font-medium text-[#16a34a] text-center">Ruta Refugio</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
                     <tr>
-                      <td className="px-4 py-3">Distancia total</td>
-                      <td className="px-4 py-3 font-mono">{metrics.shortest.length.toFixed(0)} m</td>
-                      <td className="px-4 py-3 font-mono font-semibold">{metrics.comfort.length.toFixed(0)} m</td>
+                      <td className="px-4 py-3 font-medium text-[var(--ds-gray-600)]">Distancia total</td>
+                      <td className="px-4 py-3 font-mono text-center">{metrics.shortest.length.toFixed(0)} m</td>
+                      <td className="px-4 py-3 font-mono font-bold text-center text-[#16a34a]">{metrics.comfort.length.toFixed(0)} m</td>
                     </tr>
                     <tr>
-                      <td className="px-4 py-3">Sombra proyectada</td>
-                      <td className="px-4 py-3 font-mono">{(metrics.shortest.tree_shade + metrics.shortest.building_shade).toFixed(0)} m</td>
-                      <td className="px-4 py-3 font-mono text-[#16a34a] font-semibold">{(metrics.comfort.tree_shade + metrics.comfort.building_shade).toFixed(0)} m</td>
+                      <td className="px-4 py-3 font-medium text-[var(--ds-gray-600)]">Sombra proyectada</td>
+                      <td className="px-4 py-3 font-mono text-center">{(metrics.shortest.tree_shade + metrics.shortest.building_shade).toFixed(0)} m</td>
+                      <td className="px-4 py-3 font-mono font-bold text-center text-[#16a34a]">{(metrics.comfort.tree_shade + metrics.comfort.building_shade).toFixed(0)} m</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <p className="mt-2 text-[10px] text-[var(--ds-gray-400)] italic px-1">
-                * Sombra de arbolado en integración — datos de 661.192 ejemplares disponibles para siguiente fase.
+              <p className="mt-3 text-[10px] text-[var(--ds-gray-400)] italic px-1">
+                * Estimación basada en velocidad media de 5 km/h. Sombra proyectada incluye edificación y arbolado viario.
               </p>
             </div>
           )}
