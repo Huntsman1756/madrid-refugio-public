@@ -11,6 +11,7 @@ Uso:
 Tiempo estimado: 1-2 horas para 4 distritos.
 """
 
+import argparse
 import json
 import time
 import warnings
@@ -64,14 +65,14 @@ def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
             )
 
 
-def download_multi_district_graph() -> nx.MultiDiGraph:
+def download_multi_district_graph(distritos_list) -> nx.MultiDiGraph:
     """Download a walk graph covering multiple districts and merge them."""
     print(f"\n{'='*60}")
-    print(f"PASO 1: Descargando grafo peatonal para {len(DISTRITOS)} distritos")
+    print(f"PASO 1: Descargando grafo peatonal para {len(distritos_list)} distritos")
     print(f"{'='*60}")
     
     graphs = []
-    for distrito in DISTRITOS:
+    for distrito in distritos_list:
         print(f"  → Descargando: {distrito}...")
         try:
             g = ox.graph_from_place(distrito, network_type="walk", simplify=True)
@@ -134,12 +135,15 @@ def calculate_shadow_fractions(shadows: gpd.GeoDataFrame, graph: nx.MultiDiGraph
     return shadow_fractions
 
 
-def main():
+def main(distritos_list=None):
+    if distritos_list is None:
+        distritos_list = DISTRITOS
+        
     t0 = time.time()
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     
     # ─── PASO 1: Descargar grafo ───
-    merged_graph = download_multi_district_graph()
+    merged_graph = download_multi_district_graph(distritos_list)
     
     # Project to EPSG:25830 (Madrid UTM)
     print("\n  Proyectando a EPSG:25830...")
@@ -245,7 +249,7 @@ def main():
     # Save summary
     summary = {
         "reference_date": "2025-07-15",
-        "distritos": DISTRITOS,
+        "distritos": distritos_list,
         "hours": [f"h{h:02d}" for h in HOURS],
         "num_nodes": num_nodes,
         "num_edges": num_edges,
@@ -268,4 +272,19 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Precomputar matriz de sombras de Madrid Refugio.")
+    parser.add_argument(
+        "--distrito", 
+        type=str, 
+        help="Distrito específico a procesar (ej. 'Centro' o 'Centro, Madrid, Spain'). Si se omite, se usan los distritos por defecto."
+    )
+    args = parser.parse_args()
+    
+    if args.distrito:
+        # Asegurarse de que termine en ', Madrid, Spain' para Nominatim/OSMnx
+        distrito = args.distrito.strip()
+        if ", madrid" not in distrito.lower():
+            distrito = f"{distrito}, Madrid, Spain"
+        main(distritos_list=[distrito])
+    else:
+        main()
