@@ -232,7 +232,7 @@ export default function Home() {
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas Optimizadas</span>
-             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse 409 metros permite multiplicar por <span className="font-bold">10 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
+             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse 474 metros permite multiplicar por <span className="font-bold">7 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
           </Card>
         </div>
 
