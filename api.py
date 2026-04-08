@@ -267,11 +267,29 @@ def health_check():
 
 @app.on_event("startup")
 def startup_event():
-    print("Cargando grafo y datasets geespaciales...")
-    if not GRAPH_PATH.exists():
-        raise RuntimeError(f"No se encuentra el grafo en {GRAPH_PATH}")
+    print(f"\n--- Madrid Refugio: Iniciando Backend ---")
+    print(f"Verificando integridad de datos en {GRAPH_PATH}...")
     
-    graph = ox.load_graphml(GRAPH_PATH)
+    if not GRAPH_PATH.exists():
+        raise RuntimeError(f"ERROR: No se encuentra el grafo en {GRAPH_PATH}")
+    
+    file_size = GRAPH_PATH.stat().st_size
+    print(f"Tamaño del archivo de grafo: {file_size / (1024*1024):.2f} MB")
+    
+    if file_size < 1024:
+        print("❌ ERROR CRÍTICO: El archivo .graphml parece ser un puntero de Git LFS (archivo demasiado pequeño).")
+        print("Asegúrate de que Railway tiene configurado GIT_LFS_SKIP_SMUDGE=0 en las variables de entorno.")
+        # No abortamos para que el error suba a los logs correctamente
+    
+    print("Cargando grafo en memoria (esto puede tardar 1-2 min)...")
+    t_start = time.time()
+    try:
+        graph = ox.load_graphml(GRAPH_PATH)
+        print(f"✓ Grafo cargado en {time.time() - t_start:.1f} segundos.")
+    except Exception as e:
+        print(f"❌ Error al cargar el grafo: {str(e)}")
+        raise e
+
     ensure_edge_geometry(graph)
     for u, v, key, data in graph.edges(keys=True, data=True):
         data["key"] = key
