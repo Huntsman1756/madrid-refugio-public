@@ -133,7 +133,7 @@ ${gpxPoints}
         <p className="text-[var(--ds-gray-600)] mt-2">Planifica tu trayecto priorizando la sombra y la proximidad a fuentes y refugios.</p>
         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#fffbeb] border border-[#fde68a] text-xs text-[#92400e]">
           <span>⚡</span>
-          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Tetuán, Chamberí, Fuencarral, Moncloa-Aravaca, Centro y Arganzuela</strong>. Origen y destino deben estar en esa zona.</span>
+          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Tetuán, Chamberí, Fuencarral, Moncloa-Aravaca, Centro, Arganzuela, Retiro y Salamanca</strong>. Origen y destino deben estar en esa zona.</span>
         </div>
       </div>
 
