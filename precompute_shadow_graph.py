@@ -135,7 +135,7 @@ def calculate_shadow_fractions(shadows: gpd.GeoDataFrame, graph: nx.MultiDiGraph
     return shadow_fractions
 
 
-def main(distritos_list=None):
+def main(distritos_list=None, merge=False):
     if distritos_list is None:
         distritos_list = DISTRITOS
         
@@ -227,14 +227,22 @@ def main(distritos_list=None):
     print("PASO 4: Guardando resultados")
     print(f"{'='*60}")
     
-    # Save graph
+    # 4.1 Merge Graph if required
+    if merge and OUTPUT_GRAPH.exists():
+        print("  [Merge] Cargando grafo existente para fusionar...")
+        g_existing = ox.load_graphml(OUTPUT_GRAPH)
+        graph_proj = nx.compose(g_existing, graph_proj)
+        num_nodes = len(graph_proj.nodes)
+        num_edges = len(graph_proj.edges)
+        print(f"  [Merge] ✓ Grafo fusionado: {num_nodes} nodos, {num_edges} aristas")
+
     print(f"  Guardando grafo → {OUTPUT_GRAPH}")
     ox.save_graphml(graph_proj, OUTPUT_GRAPH)
     graph_size_mb = OUTPUT_GRAPH.stat().st_size / (1024 * 1024)
-    print(f"  ✓ Grafo: {graph_size_mb:.1f} MB")
+    print(f"  ✓ Grafo guardado: {graph_size_mb:.1f} MB")
     
-    # Save shadow matrix as parquet
-    print(f"  Guardando matriz de sombras → {OUTPUT_MATRIX}")
+    # 4.2 Merge Matrix
+    print(f"  Procesando matriz de sombras...")
     records = []
     for (u, v, key), hour_data in matrix_data.items():
         row = {'u': u, 'v': v, 'key': key}
@@ -242,18 +250,37 @@ def main(distritos_list=None):
         records.append(row)
     
     df = pd.DataFrame(records)
+    
+    if merge and OUTPUT_MATRIX.exists():
+        print("  [Merge] Combinando matriz de sombras existente...")
+        df_existing = pd.read_parquet(OUTPUT_MATRIX)
+        df = pd.concat([df_existing, df])
+        df = df.drop_duplicates(subset=['u', 'v', 'key'], keep='last').reset_index(drop=True)
+        print(f"  [Merge] ✓ Matriz fusionada: {len(df)} registros totales")
+        
+    print(f"  Guardando matriz → {OUTPUT_MATRIX}")
     df.to_parquet(OUTPUT_MATRIX, engine="pyarrow")
     matrix_size_mb = OUTPUT_MATRIX.stat().st_size / (1024 * 1024)
-    print(f"  ✓ Matriz: {matrix_size_mb:.1f} MB")
+    print(f"  ✓ Matriz guardada: {matrix_size_mb:.1f} MB")
     
-    # Save summary
+    # 4.3 Merge Summary
+    if merge and OUTPUT_SUMMARY.exists():
+        print("  [Merge] Actualizando resumen...")
+        with open(OUTPUT_SUMMARY, "r") as f:
+            old_summary = json.load(f)
+        merged_distritos = list(set(old_summary.get("distritos", []) + distritos_list))
+        total_buildings = old_summary.get("num_buildings_used", 0) + len(edificios)
+    else:
+        merged_distritos = distritos_list
+        total_buildings = len(edificios)
+        
     summary = {
         "reference_date": "2025-07-15",
-        "distritos": distritos_list,
+        "distritos": merged_distritos,
         "hours": [f"h{h:02d}" for h in HOURS],
         "num_nodes": num_nodes,
         "num_edges": num_edges,
-        "num_buildings_used": len(edificios),
+        "num_buildings_used": total_buildings,
         "graph_file_mb": round(graph_size_mb, 1),
         "matrix_file_mb": round(matrix_size_mb, 1),
         "processing_time_minutes": round((time.time() - t0) / 60, 1),
@@ -264,10 +291,12 @@ def main(distritos_list=None):
     elapsed = time.time() - t0
     print(f"\n{'='*60}")
     print(f"✅ COMPLETADO en {elapsed/60:.1f} minutos")
+    if merge:
+        print(f"   MODO: Merge (Fusión incremental)")
     print(f"   Grafo:  {OUTPUT_GRAPH} ({graph_size_mb:.1f} MB)")
     print(f"   Matriz: {OUTPUT_MATRIX} ({matrix_size_mb:.1f} MB)")
     print(f"   Nodos:  {num_nodes}, Aristas: {num_edges}")
-    print(f"   Edificios procesados: {len(edificios)}")
+    print(f"   Edificios nuevos: {len(edificios)} (Total acumulado: {total_buildings})")
     print(f"{'='*60}")
 
 
@@ -278,6 +307,11 @@ if __name__ == "__main__":
         type=str, 
         help="Distrito específico a procesar (ej. 'Centro' o 'Centro, Madrid, Spain'). Si se omite, se usan los distritos por defecto."
     )
+    parser.add_argument(
+        "--merge", 
+        action="store_true", 
+        help="Fusionar con el grafo y matriz existentes en lugar de sobreescribirlos."
+    )
     args = parser.parse_args()
     
     if args.distrito:
@@ -285,6 +319,6 @@ if __name__ == "__main__":
         distrito = args.distrito.strip()
         if ", madrid" not in distrito.lower():
             distrito = f"{distrito}, Madrid, Spain"
-        main(distritos_list=[distrito])
+        main(distritos_list=[distrito], merge=args.merge)
     else:
-        main()
+        main(merge=args.merge)
