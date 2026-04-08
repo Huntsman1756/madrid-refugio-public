@@ -50,7 +50,7 @@ export default function MetodologiaPage() {
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Matriz de Intersección Calle-Sombra</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 2.112 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
+              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 131.620 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#16a34a]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Optimización de Confort Térmico</h4>
@@ -63,7 +63,7 @@ export default function MetodologiaPage() {
               La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). No se consultan APIs meteorológicas externas: el sistema es completamente determinista y reproducible, lo que garantiza su funcionamiento offline y sin coste operativo.
             </p>
             <p className="text-[var(--ds-gray-600)]">
-              Los pesos de sombra se precomputan para tres franjas horarias (8:00, 14:00, 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecución, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
+              Los pesos de sombra se precomputan para 13 franjas horarias (08:00 a 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecución, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
             </p>
           </div>
         </section>
