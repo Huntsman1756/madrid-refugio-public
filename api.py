@@ -46,7 +46,8 @@ _LOCAL_GEOCACHE = {
     "calle de bravo murillo 243, madrid": (40.46250, -3.69800),
     "calle de bravo murillo 243, madrid, spain": (40.46250, -3.69800),
     "calle de bravo murillo 303, madrid": (40.46500, -3.69300),
-    "calle de bravo murillo 303, madrid, spain": (40.46500, -3.69300),
+    "nuevos ministerios, madrid": (40.4460, -3.6933),
+    "nuevos ministerios, madrid, spain": (40.4460, -3.6933),
 }
 MADRID_BBOX = {
     "lat_min": 40.31,
@@ -111,16 +112,16 @@ def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None
         edge_data_dict = graph.get_edge_data(u, v)
         if not edge_data_dict:
             continue
-        edge_data = min(
-            edge_data_dict.values(),
-            key=lambda item: float(item.get("length", float("inf"))),
+        key, edge_data = min(
+            edge_data_dict.items(),
+            key=lambda item: float(item[1].get("length", float("inf"))),
         )
         edge_length = float(edge_data.get("length", 0.0))
         edge_t_shade = float(edge_data.get("shade_score", 0.0))
         edge_b_shade = 0.0
         
         if hour_col and shadow_dict:
-            edge_key = edge_data.get("key", 0)
+            edge_key = edge_data.get("key", key)
             if (u, v, edge_key) in shadow_dict:
                 edge_b_shade = float(shadow_dict[(u, v, edge_key)].get(hour_col, 0.0))
         
@@ -289,8 +290,18 @@ def calculate_route(req: RouteRequest):
         def get_dynamic_weight(u, v, d):
             t_shade = float(d.get("shade_score", 0.0))
             b_shade = 0.0
-            if app_state.shadow_dict and (u, v, d.get("key", 0)) in app_state.shadow_dict:
-                b_shade = float(app_state.shadow_dict[(u, v, d.get("key", 0))].get(hour_col, 0.0))
+            edge_key = d.get("key")
+            if edge_key is None:
+                # If key isn't in d, fallback to finding the edge key from the graph itself
+                edge_dict = graph.get_edge_data(u, v)
+                if edge_dict:
+                    # Find the key whose data matches d, or just use min length
+                    edge_key, _ = min(edge_dict.items(), key=lambda item: float(item[1].get("length", float("inf"))))
+                else:
+                    edge_key = 0
+
+            if app_state.shadow_dict and (u, v, edge_key) in app_state.shadow_dict:
+                b_shade = float(app_state.shadow_dict[(u, v, edge_key)].get(hour_col, 0.0))
             combined_shade = max(t_shade, b_shade)
             shadow_factor = 1.0 - (combined_shade * 0.8)
             return float(d.get("length", 1.0)) * max(shadow_factor, 0.1)
