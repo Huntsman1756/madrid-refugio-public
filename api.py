@@ -74,6 +74,10 @@ _GEOCODING_CACHE = {
     "calle de bravo murillo 303, madrid": (40.46500, -3.69300),
     "nuevos ministerios, madrid": (40.4460, -3.6933),
     "nuevos ministerios, madrid, spain": (40.4460, -3.6933),
+    "moncloa, madrid": (40.43547, -3.71894),
+    "moncloa, madrid, spain": (40.43547, -3.71894),
+    "chamberí, madrid": (40.4362, -3.7032),
+    "chamberí, madrid, spain": (40.4362, -3.7032),
 }
 MADRID_BBOX = {
     "lat_min": 40.31,
