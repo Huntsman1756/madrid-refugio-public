@@ -103,18 +103,33 @@ def fetch_aemet_data():
         resp_datos = requests.get(url_datos, timeout=10)
         datos = resp_datos.json()
         
-        # Extraer info relevante (simplificado para el frontend)
-        # Tomamos el primer día, primera hora disponible
+        # Extraer info relevante buscando la hora más cercana a la actual
         prediccion = datos[0]["prediccion"]["dia"][0]
-        temp_actual = prediccion["temperatura"][0]["value"]
-        cielo_desc = prediccion["estadoCielo"][0]["descripcion"]
+        hora_actual = datetime.now().hour
+        
+        # Filtrar temperatura por periodo más cercano
+        temp_list = prediccion.get("temperatura", [])
+        if temp_list:
+            # El periodo suele venir como '01', '02'... o rangos. Intentamos matchear la hora.
+            best_t = min(temp_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_actual))
+            temp_actual = best_t.get("value")
+        else:
+            temp_actual = "N/A"
+
+        # Filtrar estado del cielo
+        cielo_list = prediccion.get("estadoCielo", [])
+        if cielo_list:
+            best_c = min(cielo_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_actual))
+            cielo_desc = best_c.get("descripcion")
+        else:
+            cielo_desc = "Despejado"
         
         result = {
             "municipio": "Madrid",
             "temperatura": temp_actual,
             "estado_cielo": cielo_desc,
             "timestamp": datetime.now().strftime("%H:%M"),
-            "fuente": "AEMET"
+            "fuente": "AEMET (OpenData)"
         }
         
         app_state.weather_cache = result
