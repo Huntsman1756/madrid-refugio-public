@@ -226,6 +226,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 @app.on_event("startup")
 def startup_event():
     print("Cargando grafo y datasets geespaciales...")
