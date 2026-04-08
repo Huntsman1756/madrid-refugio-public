@@ -25,6 +25,18 @@ class ApiConfigTests(unittest.TestCase):
                 reloaded.GRAPH_PATH,
                 expected_dir / "madrid_shadow_graph.graphml",
             )
+            self.assertEqual(
+                reloaded.SHADOW_MATRIX_PATH,
+                expected_dir / "shadow_matrix.parquet",
+            )
+            self.assertEqual(
+                reloaded.REFUGIOS_PATH,
+                reloaded.BASE_DIR / "data" / "processed" / "refugios_sustitutos.geojson",
+            )
+            self.assertEqual(
+                reloaded.FUENTES_PATH,
+                reloaded.BASE_DIR / "data" / "processed" / "fuentes.geojson",
+            )
         finally:
             if previous is None:
                 os.environ.pop("DATA_DIR", None)

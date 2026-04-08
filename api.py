@@ -34,9 +34,10 @@ def get_processed_dir() -> Path:
 
 
 PROCESSED_DIR = get_processed_dir()
+APP_PROCESSED_DIR = BASE_DIR / "data" / "processed"
 GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
-REFUGIOS_PATH = PROCESSED_DIR / "refugios_sustitutos.geojson"
-FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
+REFUGIOS_PATH = APP_PROCESSED_DIR / "refugios_sustitutos.geojson"
+FUENTES_PATH = APP_PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
 GITHUB_REPO = "Huntsman1756/madrid-refugio"
 RELEASE_TAG = "v1.2"
