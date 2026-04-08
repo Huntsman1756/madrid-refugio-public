@@ -1,5 +1,6 @@
 import importlib
 import os
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -84,6 +85,43 @@ class ApiConfigTests(unittest.TestCase):
             api.get_tree_shade_score({"shade_score": 0.25}),
             0.25,
         )
+
+    def test_release_asset_refreshes_when_release_marker_is_missing_or_stale(self):
+        import api
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            asset_path = Path(tmpdir) / "graph.graphml"
+            asset_path.write_bytes(b"x" * 1_500_000)
+            marker_path = Path(tmpdir) / ".graph_release_tag"
+
+            self.assertTrue(
+                api.should_refresh_release_asset(
+                    asset_path,
+                    min_size_bytes=1_000_000,
+                    marker_path=marker_path,
+                    expected_tag="v1.3",
+                )
+            )
+
+            marker_path.write_text("v1.2", encoding="utf-8")
+            self.assertTrue(
+                api.should_refresh_release_asset(
+                    asset_path,
+                    min_size_bytes=1_000_000,
+                    marker_path=marker_path,
+                    expected_tag="v1.3",
+                )
+            )
+
+            marker_path.write_text("v1.3", encoding="utf-8")
+            self.assertFalse(
+                api.should_refresh_release_asset(
+                    asset_path,
+                    min_size_bytes=1_000_000,
+                    marker_path=marker_path,
+                    expected_tag="v1.3",
+                )
+            )
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ def get_processed_dir() -> Path:
 PROCESSED_DIR = get_processed_dir()
 APP_PROCESSED_DIR = BASE_DIR / "data" / "processed"
 GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
+GRAPH_RELEASE_MARKER_PATH = PROCESSED_DIR / ".graph_release_tag"
 REFUGIOS_PATH = APP_PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = APP_PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
@@ -225,6 +226,22 @@ def get_building_shade_score(
     if not hour_col or not shadow_dict or (u, v, key) not in shadow_dict:
         return 0.0
     return float(shadow_dict[(u, v, key)].get(hour_col, 0.0) or 0.0)
+
+
+def should_refresh_release_asset(
+    path: Path,
+    min_size_bytes: int,
+    force_refresh: bool = False,
+    marker_path: Path | None = None,
+    expected_tag: str | None = None,
+) -> bool:
+    if force_refresh or not path.exists() or path.stat().st_size < min_size_bytes:
+        return True
+    if marker_path and expected_tag:
+        if not marker_path.exists():
+            return True
+        return marker_path.read_text(encoding="utf-8").strip() != expected_tag
+    return False
 
 def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None, shadow_dict: dict = None, pref: float = 0.0) -> gpd.GeoDataFrame:
     rows = []
@@ -445,14 +462,27 @@ def startup_event():
     print(f"Directorio de datos resuelto: {PROCESSED_DIR}")
     
     # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
-    def download_release_file(path: Path, asset_name: str, public_url: str, force_refresh: bool = False):
-        # Si el archivo real no existe, es un puntero LFS o se ha pedido un refresco forzado
-        if force_refresh or not path.exists() or path.stat().st_size < 1000000:
+    def download_release_file(
+        path: Path,
+        asset_name: str,
+        public_url: str,
+        force_refresh: bool = False,
+        marker_path: Path | None = None,
+        expected_tag: str | None = None,
+    ):
+        refresh_needed = should_refresh_release_asset(
+            path,
+            min_size_bytes=1000000,
+            force_refresh=force_refresh,
+            marker_path=marker_path,
+            expected_tag=expected_tag,
+        )
+        if refresh_needed:
             path.parent.mkdir(parents=True, exist_ok=True)
             if force_refresh:
                 print(f"Refresco forzado activo para {path.name}. Descargando desde GitHub Releases...")
             else:
-                print(f"{path.name} no encontrado en volumen. Descargando desde GitHub Releases...")
+                print(f"{path.name} desactualizado o no encontrado en volumen. Descargando desde GitHub Releases...")
             try:
                 download_url, headers = resolve_release_asset_download(asset_name)
                 if download_url != public_url:
@@ -462,11 +492,12 @@ def startup_event():
                     with open(path, "wb") as f:
                         for chunk in r.iter_content(chunk_size=8192):
                             f.write(chunk)
-                
-                
-                print(f"✓ {path.name} listo ({path.stat().st_size / 1e6:.1f} MB)")
+
+                if marker_path and expected_tag:
+                    marker_path.write_text(expected_tag, encoding="utf-8")
+                print(f"{path.name} listo ({path.stat().st_size / 1e6:.1f} MB)")
             except Exception as e:
-                print(f"❌ Error procesando {path.name}: {e}")
+                print(f"Error procesando {path.name}: {e}")
 
         else:
             print(f"Grafo cargado desde volumen local ({path.stat().st_size / 1e6:.1f} MB)")
@@ -477,6 +508,8 @@ def startup_event():
         "madrid_shadow_graph.graphml",
         GRAPH_RELEASE_URL,
         force_refresh=os.getenv("FORCE_REFRESH_GRAPH_FROM_RELEASE") == "1",
+        marker_path=GRAPH_RELEASE_MARKER_PATH,
+        expected_tag=RELEASE_TAG,
     )
     
     # Descargar la matriz (esta no va comprimida en .gz extra, ya es parquet)
