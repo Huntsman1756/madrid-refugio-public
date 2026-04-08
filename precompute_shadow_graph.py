@@ -16,6 +16,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 import argparse
 import json
+import os
 import time
 import warnings
 from datetime import datetime
@@ -32,6 +33,7 @@ from shapely.ops import unary_union
 # Reutilizar el motor de sombras existente
 from importlib.machinery import SourceFileLoader
 generate_shadows = SourceFileLoader("shadow_engine", "06b_shadow_engine.py").load_module().generate_shadows
+tree_integrator = SourceFileLoader("tree_integrator", "06e_integrate_trees.py").load_module()
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -53,9 +55,7 @@ EDIFICIOS_PATH = PROCESSED_DIR / "edificios_alturas.geojson"
 OUTPUT_GRAPH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
 OUTPUT_MATRIX = PROCESSED_DIR / "shadow_matrix.parquet"
 OUTPUT_SUMMARY = PROCESSED_DIR / "shadow_summary.json"
-
-TREE_BUFFER_METERS = 15
-ESTIMATED_CROWN_DIAMETER_M = 6.0
+TREES_PATH = Path(os.getenv("TREES_PATH", BASE_DIR / "data" / "raw" / "arbolado_detalle.xlsx"))
 
 
 def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
@@ -138,7 +138,7 @@ def calculate_shadow_fractions(shadows: gpd.GeoDataFrame, graph: nx.MultiDiGraph
     return shadow_fractions
 
 
-def main(distritos_list=None, merge=False):
+def main(distritos_list=None, merge=False, trees_path: str | Path | None = None):
     if distritos_list is None:
         distritos_list = DISTRITOS
         
@@ -225,9 +225,23 @@ def main(distritos_list=None, merge=False):
         for edge_tuple, frac in fractions.items():
             matrix_data[edge_tuple][f"h{h:02d}"] = frac
     
-    # ─── PASO 4: Guardar resultados ───
+    # ─── PASO 4: Integrar arbolado viario ───
     print(f"\n{'='*60}")
-    print("PASO 4: Guardando resultados")
+    print("PASO 4: Integrando arbolado viario")
+    print(f"{'='*60}")
+    
+    resolved_trees_path = Path(trees_path) if trees_path else TREES_PATH
+    trees_gdf = tree_integrator.load_arbolado_fast(resolved_trees_path)
+    tree_stats = tree_integrator.annotate_tree_shade(graph_proj, trees_gdf)
+    print(
+        "  OK: "
+        f"{tree_stats['edges_with_tree_shade']} aristas con sombra de arbolado, "
+        f"{tree_stats['trees_in_area']} arboles en el area"
+    )
+    
+    # ─── PASO 5: Guardar resultados ───
+    print(f"\n{'='*60}")
+    print("PASO 5: Guardando resultados")
     print(f"{'='*60}")
     
     # 4.1 Merge Graph if required
@@ -284,6 +298,9 @@ def main(distritos_list=None, merge=False):
         "num_nodes": num_nodes,
         "num_edges": num_edges,
         "num_buildings_used": total_buildings,
+        "num_trees_used": tree_stats["trees_in_area"],
+        "edges_with_tree_shade": tree_stats["edges_with_tree_shade"],
+        "tree_influence_radius_m": tree_stats["influence_radius_m"],
         "graph_file_mb": round(graph_size_mb, 1),
         "matrix_file_mb": round(matrix_size_mb, 1),
         "processing_time_minutes": round((time.time() - t0) / 60, 1),
@@ -315,6 +332,11 @@ if __name__ == "__main__":
         action="store_true", 
         help="Fusionar con el grafo y matriz existentes en lugar de sobreescribirlos."
     )
+    parser.add_argument(
+        "--trees-path",
+        type=str,
+        help="Ruta al dataset de arbolado_detalle.xlsx. Si se omite, usa TREES_PATH o data/raw/arbolado_detalle.xlsx.",
+    )
     args = parser.parse_args()
     
     if args.distrito:
@@ -322,6 +344,6 @@ if __name__ == "__main__":
         distrito = args.distrito.strip()
         if ", madrid" not in distrito.lower():
             distrito = f"{distrito}, Madrid, Spain"
-        main(distritos_list=[distrito], merge=args.merge)
+        main(distritos_list=[distrito], merge=args.merge, trees_path=args.trees_path)
     else:
-        main(merge=args.merge)
+        main(merge=args.merge, trees_path=args.trees_path)
