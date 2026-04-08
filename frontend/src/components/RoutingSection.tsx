@@ -31,7 +31,25 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [routeResult, setRouteResult] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // ... (rest of useEffects)
+  // Time slider automation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setHour(prev => prev >= 20 ? 8 : prev + 1);
+      }, 2000); // Wait 2s for backend to calculate
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  // Auto-calculate route when hour changes during playback
+  useEffect(() => {
+    if (isPlaying) {
+      handleCalculate();
+    }
+  }, [hour, isPlaying]);
+
+  const isHeatHour = hour >= 12 && hour <= 17;
 
   const handleCalculate = async () => {
     setLoading(true);
