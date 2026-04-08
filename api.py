@@ -23,7 +23,7 @@ from shapely.geometry import LineString, Point
 # --- Configuration & Paths ---
 BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
-GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
+GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml.gz"
 REFUGIOS_PATH = PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
