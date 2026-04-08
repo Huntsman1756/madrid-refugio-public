@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
 import { RoutingSection } from "@/components/RoutingSection";
+import { WeatherWidget } from "@/components/WeatherWidget";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
@@ -170,6 +171,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4 fade-in-up">
+            <WeatherWidget />
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-sm font-medium shadow-sm">
               <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
               Alerta por ola de calor extrema

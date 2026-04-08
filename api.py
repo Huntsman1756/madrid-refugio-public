@@ -61,14 +61,71 @@ MADRID_BBOX = {
     "lon_max": -3.52,
 }
 
+import os
+import requests
+
 # --- Global State for Caching ---
 class AppState:
     graph: nx.MultiDiGraph | None = None
     refugios_utm: gpd.GeoDataFrame | None = None
     fuentes_utm: gpd.GeoDataFrame | None = None
     shadow_dict: dict | None = None
+    # Caché meteorológica
+    weather_cache: dict | None = None
+    weather_last_update: float = 0
 
 app_state = AppState()
+
+# --- AEMET Integration ---
+AEMET_API_KEY = os.getenv("AEMET_API_KEY")
+MADRID_MUNICIPIO_ID = "28079"
+
+def fetch_aemet_data():
+    """Implementa el patrón de doble fetch de AEMET OpenData"""
+    if not AEMET_API_KEY:
+        return {"error": "AEMET_API_KEY no configurada"}
+    
+    # Cache de 15 minutos (900 segundos)
+    if app_state.weather_cache and (time.time() - app_state.weather_last_update < 900):
+        return app_state.weather_cache
+
+    try:
+        # Paso 1: Obtener URL temporal
+        url_meta = f"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/{MADRID_MUNICIPIO_ID}?api_key={AEMET_API_KEY}"
+        resp_meta = requests.get(url_meta, timeout=10)
+        meta = resp_meta.json()
+        
+        if meta.get("estado") != 200:
+            return {"error": f"AEMET Error: {meta.get('descripcion')}"}
+        
+        # Paso 2: Obtener datos reales de la URL temporal
+        url_datos = meta.get("datos")
+        resp_datos = requests.get(url_datos, timeout=10)
+        datos = resp_datos.json()
+        
+        # Extraer info relevante (simplificado para el frontend)
+        # Tomamos el primer día, primera hora disponible
+        prediccion = datos[0]["prediccion"]["dia"][0]
+        temp_actual = prediccion["temperatura"][0]["value"]
+        cielo_desc = prediccion["estadoCielo"][0]["descripcion"]
+        
+        result = {
+            "municipio": "Madrid",
+            "temperatura": temp_actual,
+            "estado_cielo": cielo_desc,
+            "timestamp": datetime.now().strftime("%H:%M"),
+            "fuente": "AEMET"
+        }
+        
+        app_state.weather_cache = result
+        app_state.weather_last_update = time.time()
+        return result
+    except Exception as e:
+        return {"error": f"Error conectando con AEMET: {str(e)}"}
+
+@app.get("/api/weather")
+def get_weather():
+    return fetch_aemet_data()
 
 # --- Utility Functions ---
 
