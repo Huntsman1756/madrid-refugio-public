@@ -24,6 +24,7 @@ FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
 
 import sys
+import time
 def check_data_files():
     missing = [p for p in [GRAPH_PATH, SHADOW_MATRIX_PATH] if not p.exists()]
     if missing:
