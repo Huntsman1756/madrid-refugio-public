@@ -700,10 +700,6 @@ def suggest(q: str = "", limit: int = 8):
     return filter_search_index(app_state.search_index, q, limit)
 
 
-@app.get("/api/weather")
-def get_weather():
-    return fetch_aemet_data()
-
 @app.on_event("startup")
 def startup_event():
     logger.info("starting backend")
