@@ -37,7 +37,11 @@ def check_data_files():
 check_data_files()
 
 GEOCODE_TIMEOUT_SECONDS = 8
-_LOCAL_GEOCACHE = {
+
+# --- Rendimiento y Estabilidad ---
+# Caché local de geocodificación para evitar latencia y dependencia de APIs externas (Nominatim)
+# durante la navegación de las rutas de demo. No influye en el cálculo algorítmico.
+_GEOCODING_CACHE = {
     "calle marqués de viana 1, madrid": (40.46175, -3.70063),
     "calle marqués de viana 1, madrid, spain": (40.46175, -3.70063),
     "calle marques de viana 1, madrid": (40.46175, -3.70063),
@@ -184,8 +188,8 @@ def normalize_address(address: str) -> str:
 
 def geocode_address(address: str) -> tuple[float, float]:
     normalized = normalize_address(address)
-    if normalized in _LOCAL_GEOCACHE:
-        lat, lon = _LOCAL_GEOCACHE[normalized]
+    if normalized in _GEOCODING_CACHE:
+        lat, lon = _GEOCODING_CACHE[normalized]
     else:
         previous_timeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(GEOCODE_TIMEOUT_SECONDS)
