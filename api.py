@@ -121,9 +121,8 @@ def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None
         edge_b_shade = 0.0
         
         if hour_col and shadow_dict:
-            edge_key = edge_data.get("key", key)
-            if (u, v, edge_key) in shadow_dict:
-                edge_b_shade = float(shadow_dict[(u, v, edge_key)].get(hour_col, 0.0))
+            if (u, v, key) in shadow_dict:
+                edge_b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
         
         total_length += edge_length
         total_t_shade += edge_t_shade * edge_length
