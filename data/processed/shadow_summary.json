@@ -1,5 +1,10 @@
 {
   "reference_date": "2025-07-15",
+  "distritos": [
+    "Tetuán, Madrid, Spain",
+    "Chamberí, Madrid, Spain",
+    "Fuencarral-El Pardo, Madrid, Spain"
+  ],
   "hours": [
     "h08",
     "h09",
@@ -15,6 +20,10 @@
     "h19",
     "h20"
   ],
-  "num_edges": 2112,
-  "num_buildings_used": 9965
+  "num_nodes": 26913,
+  "num_edges": 80794,
+  "num_buildings_used": 190693,
+  "graph_file_mb": 40.9,
+  "matrix_file_mb": 2.1,
+  "processing_time_minutes": 337.2
 }
