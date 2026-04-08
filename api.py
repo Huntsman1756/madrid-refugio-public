@@ -68,9 +68,6 @@ MADRID_BBOX = {
     "lon_max": -3.52,
 }
 
-import os
-import requests
-
 # --- Global State for Caching ---
 class AppState:
     graph: nx.MultiDiGraph | None = None
