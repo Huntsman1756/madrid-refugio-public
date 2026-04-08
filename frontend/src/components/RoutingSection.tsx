@@ -251,13 +251,23 @@ ${gpxPoints}
             </div>
 
             {isHeatHour ? (
-              <div className="mb-4 p-3 bg-[#fef2f2] text-[#991b1b] rounded-md border border-[#fecaca] flex items-start gap-2 text-sm">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <p><strong>Aviso:</strong> Tramo de máxima insolación. La ruta más fresca es crítica para evitar golpes de calor.</p>
+              <div className="mb-4">
+                <div className="p-3 bg-[#fef2f2] text-[#991b1b] rounded-md border border-[#fecaca] flex items-start gap-2 text-sm">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <p><strong>Aviso:</strong> Tramo de máxima insolación. La ruta más fresca es crítica para evitar golpes de calor.</p>
+                </div>
+                <p className="mt-1 text-[10px] text-[#991b1b]/70 italic text-right px-1">
+                  Simulación: condiciones de ola de calor (15 jul · {hour}:00h)
+                </p>
               </div>
             ) : (
-              <div className="mb-4 p-3 bg-[#f0fdf4] text-[#166534] rounded-md border border-[#bbf7d0] text-sm">
-                Tramo de insolación moderada: la ruta óptima sigue priorizando sombra por confort térmico.
+              <div className="mb-4">
+                <div className="p-3 bg-[#f0fdf4] text-[#166534] rounded-md border border-[#bbf7d0] text-sm">
+                  Tramo de insolación moderada: la ruta óptima sigue priorizando sombra por confort térmico.
+                </div>
+                <p className="mt-1 text-[10px] text-[#166534]/70 italic text-right px-1">
+                  Simulación: 15 jul · {hour}:00h
+                </p>
               </div>
             )}
 
