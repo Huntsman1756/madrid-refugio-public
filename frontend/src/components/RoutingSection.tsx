@@ -133,7 +133,7 @@ ${gpxPoints}
         <p className="text-[var(--ds-gray-600)] mt-2">Planifica tu trayecto priorizando la sombra y la proximidad a fuentes y refugios.</p>
         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#fffbeb] border border-[#fde68a] text-xs text-[#92400e]">
           <span>⚡</span>
-          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Tetuán, Chamberí y Fuencarral</strong>. Origen y destino deben estar en esa zona.</span>
+          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Tetuán, Chamberí, Fuencarral y Moncloa-Aravaca</strong>. Origen y destino deben estar en esa zona.</span>
         </div>
       </div>
 
@@ -268,7 +268,7 @@ ${gpxPoints}
             )}
 
             <p className="text-xs text-[var(--ds-gray-500)] text-center mb-3">
-              En el corredor de demo: ruta estándar ~3.075 m · ruta confort ~3.549 m · sombra acumulada ×7,8
+              En el corredor de demo (14:00): ruta estándar ~3.075 m · ruta confort ~3.549 m · sombra acumulada ×7,8
             </p>
 
             <div className="flex gap-3">
@@ -332,14 +332,9 @@ ${gpxPoints}
                       <td className="px-4 py-3 font-mono font-semibold">{metrics.comfort.length.toFixed(0)} m</td>
                     </tr>
                     <tr>
-                      <td className="px-4 py-3">Sombra de árboles</td>
-                      <td className="px-4 py-3 font-mono">{metrics.shortest.tree_shade.toFixed(0)} m</td>
-                      <td className="px-4 py-3 font-mono text-[#16a34a] font-semibold">{metrics.comfort.tree_shade.toFixed(0)} m</td>
-                    </tr>
-                    <tr>
-                      <td className="px-4 py-3">Sombra de edificios</td>
-                      <td className="px-4 py-3 font-mono">{metrics.shortest.building_shade.toFixed(0)} m</td>
-                      <td className="px-4 py-3 font-mono text-[#16a34a] font-semibold">{metrics.comfort.building_shade.toFixed(0)} m</td>
+                      <td className="px-4 py-3">Sombra proyectada</td>
+                      <td className="px-4 py-3 font-mono">{(metrics.shortest.tree_shade + metrics.shortest.building_shade).toFixed(0)} m</td>
+                      <td className="px-4 py-3 font-mono text-[#16a34a] font-semibold">{(metrics.comfort.tree_shade + metrics.comfort.building_shade).toFixed(0)} m</td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3">Fuentes (Agua)</td>
@@ -354,6 +349,9 @@ ${gpxPoints}
                   </tbody>
                 </table>
               </div>
+              <p className="mt-2 text-[10px] text-[var(--ds-gray-400)] italic px-1">
+                * Sombra de arbolado en integración — datos de 661.192 ejemplares disponibles para siguiente fase.
+              </p>
             </div>
           )}
         </div>
