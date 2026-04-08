@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import requests
 import socket
 from datetime import datetime
 try:
@@ -364,6 +366,26 @@ def health_check():
 @app.on_event("startup")
 def startup_event():
     print(f"\n--- Madrid Refugio: Iniciando Backend ---")
+    
+    # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
+    def download_if_pointer(path: Path, url: str):
+        if not path.exists() or path.stat().st_size < 1000000: # < 1MB is likely a pointer
+            print(f"Descargando {path.name} desde GitHub Releases...")
+            try:
+                r = requests.get(url, stream=True, timeout=300)
+                r.raise_for_status()
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with open(path, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                print(f"✓ {path.name} descargado ({path.stat().st_size / 1e6:.1f} MB)")
+            except Exception as e:
+                print(f"❌ Error descargando {path.name}: {e}")
+
+    RELEASE_BASE_URL = "https://github.com/Huntsman1756/madrid-refugio/releases/download/v1.2"
+    download_if_pointer(GRAPH_PATH, f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml.gz")
+    download_if_pointer(SHADOW_MATRIX_PATH, f"{RELEASE_BASE_URL}/shadow_matrix.parquet")
+
     print(f"Verificando integridad de datos en {GRAPH_PATH}...")
     
     if not GRAPH_PATH.exists():
@@ -371,11 +393,6 @@ def startup_event():
     
     file_size = GRAPH_PATH.stat().st_size
     print(f"Tamaño del archivo de grafo: {file_size / (1024*1024):.2f} MB")
-    
-    if file_size < 1024:
-        print("❌ ERROR CRÍTICO: El archivo .graphml parece ser un puntero de Git LFS (archivo demasiado pequeño).")
-        print("Asegúrate de que Railway tiene configurado GIT_LFS_SKIP_SMUDGE=0 en las variables de entorno.")
-        # No abortamos para que el error suba a los logs correctamente
     
     print("Cargando grafo en memoria (esto puede tardar 1-2 min)...")
     t_start = time.time()
