@@ -1,14 +1,18 @@
 {
   "reference_date": "2025-07-15",
   "distritos": [
-    "Tetuán, Madrid, Spain",
+    "Latina, Madrid, Spain",
     "Fuencarral-El Pardo, Madrid, Spain",
-    "Chamberí, Madrid, Spain",
     "Retiro, Madrid, Spain",
-    "Salamanca, Madrid, Spain",
-    "Arganzuela, Madrid, Spain",
+    "Centro, Madrid, Spain",
+    "Chamberí, Madrid, Spain",
+    "Usera, Madrid, Spain",
     "Moncloa-Aravaca, Madrid, Spain",
-    "Centro, Madrid, Spain"
+    "Salamanca, Madrid, Spain",
+    "Tetuán, Madrid, Spain",
+    "Puente de Vallecas, Madrid, Spain",
+    "Arganzuela, Madrid, Spain",
+    "Carabanchel, Madrid, Spain"
   ],
   "hours": [
     "h08",
@@ -25,10 +29,10 @@
     "h19",
     "h20"
   ],
-  "num_nodes": 59840,
-  "num_edges": 181110,
-  "num_buildings_used": 448997,
-  "graph_file_mb": 91.5,
-  "matrix_file_mb": 4.5,
-  "processing_time_minutes": 18.8
+  "num_nodes": 93235,
+  "num_edges": 282438,
+  "num_buildings_used": 646281,
+  "graph_file_mb": 140.9,
+  "matrix_file_mb": 7.4,
+  "processing_time_minutes": 39.9
 }
