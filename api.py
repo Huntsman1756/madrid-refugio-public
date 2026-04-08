@@ -4,6 +4,8 @@ import json
 import os
 import requests
 import socket
+import gzip
+import shutil
 from datetime import datetime
 try:
     from zoneinfo import ZoneInfo
@@ -25,13 +27,14 @@ from shapely.geometry import LineString, Point
 # --- Configuration & Paths ---
 BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
-GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml.gz"
+GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
 REFUGIOS_PATH = PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
 
 import sys
 import time
+
 def check_data_files():
     missing = [p for p in [GRAPH_PATH, SHADOW_MATRIX_PATH] if not p.exists()]
     if missing:
@@ -41,7 +44,8 @@ def check_data_files():
         print("Asegúrate de que los archivos están en 'data/processed/'.\n")
         sys.exit(1)
 
-check_data_files()
+# Se llamará dentro de startup_event tras la descarga
+# check_data_files()
 
 GEOCODE_TIMEOUT_SECONDS = 8
 
@@ -365,23 +369,46 @@ def startup_event():
     print(f"\n--- Madrid Refugio: Iniciando Backend ---")
     
     # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
-    def download_if_pointer(path: Path, url: str):
-        if not path.exists() or path.stat().st_size < 1000000: # < 1MB is likely a pointer
-            print(f"Descargando {path.name} desde GitHub Releases...")
+    def download_and_extract(path: Path, url: str):
+        # Si el archivo real no existe o es un puntero LFS
+        if not path.exists() or path.stat().st_size < 1000000:
+            gz_path = path.with_suffix(path.suffix + ".gz")
+            print(f"Descargando {gz_path.name} desde GitHub Releases...")
             try:
                 r = requests.get(url, stream=True, timeout=300)
                 r.raise_for_status()
                 path.parent.mkdir(parents=True, exist_ok=True)
-                with open(path, "wb") as f:
+                with open(gz_path, "wb") as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
-                print(f"✓ {path.name} descargado ({path.stat().st_size / 1e6:.1f} MB)")
+                
+                print(f"Descomprimiendo {gz_path.name}...")
+                with gzip.open(gz_path, 'rb') as f_in:
+                    with open(path, 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+                
+                gz_path.unlink() # Borrar el comprimido
+                print(f"✓ {path.name} listo ({path.stat().st_size / 1e6:.1f} MB)")
             except Exception as e:
-                print(f"❌ Error descargando {path.name}: {e}")
+                print(f"❌ Error procesando {path.name}: {e}")
 
     RELEASE_BASE_URL = "https://github.com/Huntsman1756/madrid-refugio/releases/download/v1.2"
-    download_if_pointer(GRAPH_PATH, f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml.gz")
-    download_if_pointer(SHADOW_MATRIX_PATH, f"{RELEASE_BASE_URL}/shadow_matrix.parquet")
+    
+    # Descargar y descomprimir el grafo
+    download_and_extract(GRAPH_PATH, f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml.gz")
+    
+    # Descargar la matriz (esta no va comprimida en .gz extra, ya es parquet)
+    if not SHADOW_MATRIX_PATH.exists() or SHADOW_MATRIX_PATH.stat().st_size < 100000:
+        print(f"Descargando matriz de sombras...")
+        try:
+            r = requests.get(f"{RELEASE_BASE_URL}/shadow_matrix.parquet", stream=True, timeout=300)
+            r.raise_for_status()
+            with open(SHADOW_MATRIX_PATH, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"✓ Matriz descargada.")
+        except Exception as e:
+            print(f"❌ Error descargando matriz: {e}")
 
     print(f"Verificando integridad de datos en {GRAPH_PATH}...")
     
@@ -506,6 +533,17 @@ def calculate_route(req: RouteRequest):
         shortest_refugios_pts = get_points_near_route(refugios_utm, shortest_gdf, buffer_m=200.0)
         comfort_refugios_pts = get_points_near_route(refugios_utm, comfort_gdf, buffer_m=200.0)
 
+        # Calcular métricas humanas
+        # Velocidad media de caminata: 1.4 m/s (5 km/h)
+        WALKING_SPEED = 1.4
+        
+        # Sombra total ganada en metros
+        shade_gain_m = (comfort_t_shade + comfort_b_shade) - (shortest_t_shade + shortest_b_shade)
+        # Tiempo "ahorrado" bajo el sol directo (segundos)
+        time_saved_sun_sec = shade_gain_m / WALKING_SPEED
+        # Tiempo extra de caminata total (segundos)
+        extra_effort_sec = (comfort_length - shortest_length) / WALKING_SPEED
+
         return {
             "origin_latlon": origin_latlon,
             "destination_latlon": destination_latlon,
@@ -529,6 +567,10 @@ def calculate_route(req: RouteRequest):
                     "fuentes_pts": comfort_fuentes_pts,
                     "refugios": len(comfort_refugios_pts),
                     "refugios_pts": comfort_refugios_pts
+                },
+                "human": {
+                    "sun_time_saved_min": round(max(0, time_saved_sun_sec / 60), 1),
+                    "extra_effort_min": round(max(0, extra_effort_sec / 60), 1)
                 }
             }
         }
