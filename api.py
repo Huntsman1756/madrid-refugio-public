@@ -267,6 +267,7 @@ class RouteRequest(BaseModel):
     origin: str
     destination: str
     hour: int
+    preference: float = 1.0  # 0.0: Priorizar distancia, 1.0: Priorizar sombra
 
 @app.post("/api/route")
 def calculate_route(req: RouteRequest):
@@ -285,24 +286,25 @@ def calculate_route(req: RouteRequest):
 
         hour_val = max(8, min(20, req.hour))
         hour_col = f"h{hour_val:02d}"
+        pref = max(0.0, min(1.0, req.preference))
 
         def get_dynamic_weight(u, v, d):
             t_shade = float(d.get("shade_score", 0.0))
             b_shade = 0.0
-            edge_key = d.get("key")
-            if edge_key is None:
-                # If key isn't in d, fallback to finding the edge key from the graph itself
-                edge_dict = graph.get_edge_data(u, v)
-                if edge_dict:
-                    # Find the key whose data matches d, or just use min length
-                    edge_key, _ = min(edge_dict.items(), key=lambda item: float(item[1].get("length", float("inf"))))
-                else:
-                    edge_key = 0
+            edge_dict = graph.get_edge_data(u, v)
+            if edge_dict:
+                key, _ = min(edge_dict.items(), key=lambda item: float(item[1].get("length", float("inf"))))
+            else:
+                key = 0
 
-            if app_state.shadow_dict and (u, v, edge_key) in app_state.shadow_dict:
-                b_shade = float(app_state.shadow_dict[(u, v, edge_key)].get(hour_col, 0.0))
+            if app_state.shadow_dict and (u, v, key) in app_state.shadow_dict:
+                b_shade = float(app_state.shadow_dict[(u, v, key)].get(hour_col, 0.0))
+            
             combined_shade = max(t_shade, b_shade)
-            shadow_factor = 1.0 - (combined_shade * 0.8)
+            # El factor de sombra se escala por la preferencia del usuario
+            # Si pref=0, shadow_factor es siempre 1.0 (coste = distancia pura)
+            # Si pref=1, shadow_factor baja hasta 0.2 (max descuento por sombra)
+            shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
             return float(d.get("length", 1.0)) * max(shadow_factor, 0.1)
 
         shortest_route = nx.shortest_path(graph, origin_node, destination_node, weight="length")

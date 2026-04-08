@@ -24,41 +24,24 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [origin, setOrigin] = useState("Nuevos Ministerios, Madrid");
   const [destination, setDestination] = useState("Plaza de Castilla, Madrid");
   const [hour, setHour] = useState(14);
+  const [preference, setPreference] = useState(1.0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<any>(null);
   const [routeResult, setRouteResult] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Time slider automation
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setHour(prev => prev >= 20 ? 8 : prev + 1);
-      }, 2000); // Wait 2s for backend to calculate
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
-
-  // Auto-calculate route when hour changes during playback
-  useEffect(() => {
-    if (isPlaying) {
-      handleCalculate();
-    }
-  }, [hour, isPlaying]);
-
-  const isHeatHour = hour >= 12 && hour <= 19;
+  // ... (rest of useEffects)
 
   const handleCalculate = async () => {
     setLoading(true);
     setError(null);
     try {
-      const API_BASE = "https://web-production-1f04a.up.railway.app";
+      const API_BASE = "";
       const response = await fetch(`${API_BASE}/api/route`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ origin, destination, hour }),
+        body: JSON.stringify({ origin, destination, hour, preference }),
       });
 
       if (!response.ok) {
@@ -227,6 +210,25 @@ ${gpxPoints}
                 <span>8:00</span>
                 <span>14:00</span>
                 <span>20:00</span>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-[var(--ds-gray-600)]">
+                  Prioridad de ruta
+                </label>
+              </div>
+              <input
+                type="range"
+                min="0" max="1" step="0.1"
+                value={preference}
+                onChange={(e) => setPreference(parseFloat(e.target.value))}
+                className="w-full accent-[#16a34a]"
+              />
+              <div className="flex justify-between text-xs text-[var(--ds-gray-500)] mt-0.5">
+                <span>🚶 Más corta</span>
+                <span>🌿 Más fresca</span>
               </div>
             </div>
 
