@@ -243,7 +243,7 @@ def startup_event():
         data["shade_score"] = float(data.get("shade_score", 0.0) or 0.0)
         stored_comfort = data.get("comfort_weight", "")
         if stored_comfort in ("", None):
-            data["comfort_weight"] = data["length"] * (1.0 + (1.0 - data["shade_score"]) * 0.8)
+            data["comfort_weight"] = data["length"] / (data["shade_score"] + 0.001)
         else:
             data["comfort_weight"] = float(stored_comfort)
     
@@ -290,7 +290,7 @@ def calculate_route(req: RouteRequest):
             if app_state.shadow_dict and (u, v, d.get("key", 0)) in app_state.shadow_dict:
                 b_shade = float(app_state.shadow_dict[(u, v, d.get("key", 0))].get(hour_col, 0.0))
             combined_shade = max(t_shade, b_shade)
-            return float(d.get("length", 1.0)) * (1.0 + (1.0 - combined_shade) * 0.8)
+            return float(d.get("length", 1.0)) / (combined_shade + 0.001)
 
         shortest_route = nx.shortest_path(graph, origin_node, destination_node, weight="length")
         comfort_route = nx.shortest_path(graph, origin_node, destination_node, weight=get_dynamic_weight)
