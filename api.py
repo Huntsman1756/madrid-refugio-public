@@ -105,22 +105,26 @@ def fetch_aemet_data():
         datos = resp_datos.json()
         
         # Extraer info relevante buscando la hora más cercana a la actual
+        # Ajustamos por zona horaria: Railway suele estar en UTC, Madrid es UTC+2 en verano
+        # Para simplificar y ser exactos, mostramos la hora del periodo que AEMET nos da
         prediccion = datos[0]["prediccion"]["dia"][0]
-        hora_actual = datetime.now().hour
+        # Obtenemos la hora actual en Madrid (UTC+2 aproximado para Abril)
+        hora_madrid = (datetime.utcnow().hour + 2) % 24
         
         # Filtrar temperatura por periodo más cercano
         temp_list = prediccion.get("temperatura", [])
         if temp_list:
-            # El periodo suele venir como '01', '02'... o rangos. Intentamos matchear la hora.
-            best_t = min(temp_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_actual))
+            best_t = min(temp_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_madrid))
             temp_actual = best_t.get("value")
+            forecast_hour = best_t.get("periodo")
         else:
             temp_actual = "N/A"
+            forecast_hour = "--"
 
         # Filtrar estado del cielo
         cielo_list = prediccion.get("estadoCielo", [])
         if cielo_list:
-            best_c = min(cielo_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_actual))
+            best_c = min(cielo_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_madrid))
             cielo_desc = best_c.get("descripcion")
         else:
             cielo_desc = "Despejado"
@@ -129,7 +133,7 @@ def fetch_aemet_data():
             "municipio": "Madrid",
             "temperatura": temp_actual,
             "estado_cielo": cielo_desc,
-            "timestamp": datetime.now().strftime("%H:%M"),
+            "timestamp": f"{forecast_hour}:00",
             "fuente": "AEMET (OpenData)"
         }
         
@@ -167,8 +171,11 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = No
             b_shade = 0.0
             if shadow_dict and (u, v, key) in shadow_dict:
                 b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
+            
             combined_shade = max(t_shade, b_shade)
-            shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
+            res_bonus = float(data.get("resource_bonus", 1.0))
+            shadow_factor = (1.0 - (combined_shade * 0.8 * pref)) * (1.0 + (res_bonus - 1.0) * pref)
+            
             w = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
             if w < min_w:
                 min_w = w
@@ -208,8 +215,11 @@ def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None
             b_shade = 0.0
             if shadow_dict and (u, v, key) in shadow_dict:
                 b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
+            
             combined_shade = max(t_shade, b_shade)
-            shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
+            res_bonus = float(data.get("resource_bonus", 1.0))
+            shadow_factor = (1.0 - (combined_shade * 0.8 * pref)) * (1.0 + (res_bonus - 1.0) * pref)
+            
             w = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
             if w < min_w:
                 min_w = w
@@ -370,21 +380,41 @@ def startup_event():
         raise e
 
     ensure_edge_geometry(graph)
+    
+    app_state.refugios_utm = gpd.read_file(REFUGIOS_PATH).to_crs("EPSG:25830")
+    app_state.fuentes_utm = gpd.read_file(FUENTES_PATH).to_crs("EPSG:25830")
+
+    # --- Pre-calculate Resource Proximity Bonus ---
+    # We want the Eco-Route to prefer edges near fountains/shelters
+    print("Calculando proximidad a recursos para el grafo...")
+    # Buffer resources once
+    fuentes_buffer = app_state.fuentes_utm.geometry.union_all().buffer(50.0) # 50m for fountains
+    refugios_buffer = app_state.refugios_utm.geometry.union_all().buffer(150.0) # 150m for shelters
+
     for u, v, key, data in graph.edges(keys=True, data=True):
         data["key"] = key
         data["length"] = float(data.get("length", 0.0) or 0.0)
         data["shade_score"] = float(data.get("shade_score", 0.0) or 0.0)
+        
+        # Calculate resource bonus (discount factor)
+        # Default bonus is 1.0 (no discount)
+        bonus = 1.0
+        geom = data["geometry"]
+        if fuentes_buffer.intersects(geom):
+            bonus -= 0.05 # 5% discount for fountains
+        if refugios_buffer.intersects(geom):
+            bonus -= 0.10 # 10% discount for shelters
+        data["resource_bonus"] = max(0.8, bonus) # Max 20% total discount
+
         stored_comfort = data.get("comfort_weight", "")
         if stored_comfort in ("", None):
             shade = float(data.get("shade_score", 0.0))
-            shadow_factor = 1.0 - (shade * 0.8)
+            shadow_factor = (1.0 - (shade * 0.8)) * data["resource_bonus"]
             data["comfort_weight"] = data["length"] * max(shadow_factor, 0.1)
         else:
             data["comfort_weight"] = float(stored_comfort)
     
     app_state.graph = graph
-    app_state.refugios_utm = gpd.read_file(REFUGIOS_PATH).to_crs("EPSG:25830")
-    app_state.fuentes_utm = gpd.read_file(FUENTES_PATH).to_crs("EPSG:25830")
     
     if SHADOW_MATRIX_PATH.exists():
         print("Cargando matriz de sombras dinámica...")
@@ -431,7 +461,11 @@ def calculate_route(req: RouteRequest):
                     b_shade = float(app_state.shadow_dict[(u, v, key)].get(hour_col, 0.0))
                 
                 combined_shade = max(t_shade, b_shade)
-                shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
+                res_bonus = float(data.get("resource_bonus", 1.0))
+                
+                # El factor de sombra se escala por la preferencia del usuario
+                # Aplicamos el bonus de recursos solo si la preferencia es > 0
+                shadow_factor = (1.0 - (combined_shade * 0.8 * pref)) * (1.0 + (res_bonus - 1.0) * pref)
                 edge_weight = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
                 weights.append(edge_weight)
             
