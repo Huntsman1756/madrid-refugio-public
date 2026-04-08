@@ -109,7 +109,7 @@ ${gpxPoints}
       alert("Primero debes calcular una ruta.");
       return;
     }
-    const text = `Ruta Eco-Refugio (${hour}:00)\n📍 Origen: ${origin}\n📍 Destino: ${destination}\n🌳 Sombra ganada: +${(metrics.comfort.building_shade + metrics.comfort.tree_shade).toFixed(0)}m\n💧 Fuentes en ruta: ${metrics.comfort.fuentes}\n¡Calculado con el motor de Madrid Refugio!`;
+    const text = `Ruta Eco-Refugio (${hour}:00)\n📍 Origen: ${origin}\n📍 Destino: ${destination}\n🌳 Sombra ganada: +${(metrics.comfort.building_shade + metrics.comfort.tree_shade).toFixed(0)}m\n¡Calculado con el motor de Madrid Refugio!`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -345,16 +345,6 @@ ${gpxPoints}
                       <td className="px-4 py-3">Sombra proyectada</td>
                       <td className="px-4 py-3 font-mono">{(metrics.shortest.tree_shade + metrics.shortest.building_shade).toFixed(0)} m</td>
                       <td className="px-4 py-3 font-mono text-[#16a34a] font-semibold">{(metrics.comfort.tree_shade + metrics.comfort.building_shade).toFixed(0)} m</td>
-                    </tr>
-                    <tr>
-                      <td className="px-4 py-3">Fuentes (Agua)</td>
-                      <td className="px-4 py-3 font-mono">{metrics.shortest.fuentes}</td>
-                      <td className="px-4 py-3 font-mono text-[#0ea5e9] font-semibold">{metrics.comfort.fuentes}</td>
-                    </tr>
-                    <tr>
-                      <td className="px-4 py-3">Refugios &lt;200m</td>
-                      <td className="px-4 py-3 font-mono">{metrics.shortest.refugios}</td>
-                      <td className="px-4 py-3 font-mono text-[#0a72ef] font-semibold">{metrics.comfort.refugios}</td>
                     </tr>
                   </tbody>
                 </table>
