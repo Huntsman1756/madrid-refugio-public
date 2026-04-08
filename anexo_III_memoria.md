@@ -4,7 +4,7 @@
 
 **Madrid Refugio** no es solo un mapa; es un **motor de simulación climática urbana** diseñado para proteger a la población más vulnerable de la capital —los más de 430.000 ciudadanos mayores de 65 años— frente al fenómeno de la isla de calor y los episodios de calor extremo.
 
-A diferencia de soluciones estáticas que simplemente muestran "islas de calor" históricas, nuestra plataforma ofrece una **operatividad real** mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una **Aplicación Web Progresiva (Next.js + FastAPI)** de acceso público y conectada al momento, diseñada con altas métricas de usabilidad para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda interactuar con el entorno.
+A diferencia de soluciones estáticas que simplemente muestran "islas de calor" históricas, nuestra plataforma ofrece una **operatividad real** mediante el cálculo de rutas de confort térmico en tiempo real. Aunque la interfaz es accesible para cualquier ciudadano, Madrid Refugio está diseñado primordialmente como una **herramienta de apoyo a la decisión para gestores municipales y servicios sociales**, permitiendo identificar dónde es más urgente desplegar nueva infraestructura de protección climática basándose en el comportamiento real de la sombra y la densidad demográfica.
 ## 2. Innovación Tecnológica: Motor de Sombra Dinámica Proyectada
 
 La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cálculo de **Sombra Dinámica Proyectada por Edificación**. Mientras que otras propuestas se limitan a mapas de calor estáticos o históricos, nosotros hemos implementado:

@@ -26,7 +26,7 @@ export default function MetodologiaPage() {
         <section className="mb-12">
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">1. Introducción y Propuesta de Valor</h2>
           <p className="text-[var(--ds-gray-600)] mb-4">
-            <strong>Madrid Refugio</strong> no es solo un mapa; es un <strong>motor de simulación climática urbana</strong> diseñado para proteger a la población más vulnerable de la capital —los más de 430.000 ciudadanos mayores de 65 años— frente al fenómeno de la isla de calor y los episodios de calor extremo.
+            <strong>Madrid Refugio</strong> no es solo un mapa; es un <strong>motor de simulación climática urbana</strong> diseñado para proteger a la población más vulnerable de la capital frente al fenómeno de la isla de calor. Aunque la interfaz es accesible, el sistema está concebido como una <strong>herramienta de apoyo a la decisión para gestores municipales y servicios sociales</strong>.
           </p>
           <p className="text-[var(--ds-gray-600)]">
             A diferencia de soluciones estáticas que simplemente muestran &quot;islas de calor&quot; históricas, nuestra plataforma ofrece una <strong>operatividad real</strong> mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una <strong>Aplicación Web Progresiva (Next.js + FastAPI)</strong> de acceso público, diseñada para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda planificar su exposición térmica.

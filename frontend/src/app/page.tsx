@@ -48,6 +48,7 @@ export default function Home() {
   const [selectedBarrio, setSelectedBarrio] = useState<string | null>(null);
   const [barrioStats, setBarrioStats] = useState<any>(null);
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lon: number } | null>(null);
+  const [viewMode, setViewMode] = useState<'vulnerability' | 'shelter_deficit'>('vulnerability');
   const [fontScale, setFontScale] = useState(1);
   const [clickStamp, setClickStamp] = useState(Date.now());
 
@@ -241,9 +242,26 @@ export default function Home() {
         </div>
 
         {/* Map and Detail Section */}
-        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6">
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de Vulnerabilidad Territorial</h2>
-          <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
+        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de Vulnerabilidad Territorial</h2>
+            <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
+          </div>
+          
+          <div className="flex bg-[var(--ds-gray-50)] p-1 rounded-lg border border-[var(--ds-gray-100)] shadow-sm">
+            <button 
+              onClick={() => setViewMode('vulnerability')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'vulnerability' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
+            >
+              Vulnerabilidad General
+            </button>
+            <button 
+              onClick={() => setViewMode('shelter_deficit')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'shelter_deficit' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
+            >
+              Déficit de Refugios
+            </button>
+          </div>
         </div>
         <div className="grid md:grid-cols-3 gap-8 mb-24">
           <div className="md:col-span-2 h-[500px] md:h-[750px]">
@@ -254,6 +272,7 @@ export default function Home() {
               onBarrioSelect={handleBarrioSelect}
               routeResult={null}
               flyTarget={flyTarget}
+              viewMode={viewMode}
             />
           </div>
           

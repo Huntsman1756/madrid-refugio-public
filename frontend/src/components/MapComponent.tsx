@@ -24,6 +24,7 @@ interface MapComponentProps {
   onBarrioSelect: (barrioName: string) => void;
   routeResult?: any;
   flyTarget?: { lat: number; lon: number } | null;
+  viewMode?: 'vulnerability' | 'shelter_deficit';
 }
 
 // ── Inner controllers (must live inside MapContainer) ──────────────────────
@@ -99,7 +100,7 @@ const shelterIcon = L.divIcon({
 });
 
 const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapComponent(
-  { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget },
+  { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget, viewMode = 'vulnerability' },
   ref
 ) {
   const mapRef = useRef<L.Map | null>(null);
@@ -113,10 +114,21 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
   const getPriorityColor = (d: number) =>
     d > 0.8 ? '#a50026' : d > 0.6 ? '#f46d43' : d > 0.4 ? '#fee08b' : '#1a9850';
 
-  const style = (feature: any) => ({
-    fillColor: getPriorityColor(feature.properties.priority_score_norm || 0),
-    weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.7,
-  });
+  const getShelterDeficitColor = (count: number) =>
+    count === 0 ? '#7f1d1d' : count === 1 ? '#ef4444' : count === 2 ? '#fb923c' : '#22c55e';
+
+  const style = (feature: any) => {
+    if (viewMode === 'shelter_deficit') {
+      return {
+        fillColor: getShelterDeficitColor(feature.properties.refugios_400m || 0),
+        weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.7,
+      };
+    }
+    return {
+      fillColor: getPriorityColor(feature.properties.priority_score_norm || 0),
+      weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.7,
+    };
+  };
 
   const onEachFeature = (feature: any, layer: any) => {
     layer.on({
@@ -128,11 +140,16 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       click: () => onBarrioSelect(feature.properties.NOMBRE),
     });
     if (feature.properties) {
-      layer.bindTooltip(
-        `<strong>${feature.properties.NOMBRE}</strong><br>` +
-        `Índice: ${feature.properties.priority_score_norm?.toFixed(3) ?? 'N/A'}<br>` +
-        `Mayores 65+: ${feature.properties.pop_65plus ?? 'N/A'}`
-      );
+      const refugios = feature.properties.refugios_400m ?? 0;
+      const tooltipContent = viewMode === 'shelter_deficit'
+        ? `<strong>${feature.properties.NOMBRE}</strong><br>` +
+          `Refugios a 400m: ${refugios}<br>` +
+          `Estado: ${refugios === 0 ? 'CRÍTICO' : refugios === 1 ? 'Insuficiente' : 'Cubierto'}`
+        : `<strong>${feature.properties.NOMBRE}</strong><br>` +
+          `Índice: ${feature.properties.priority_score_norm?.toFixed(3) ?? 'N/A'}<br>` +
+          `Mayores 65+: ${feature.properties.pop_65plus ?? 'N/A'}`;
+      
+      layer.bindTooltip(tooltipContent);
     }
   };
 
@@ -224,6 +241,32 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
           />
         )}
       </MapContainer>
+
+      {/* Map legend for vulnerability/shelter deficit */}
+      {!routeResult && (
+        <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-2 z-[1000] shadow-sm max-w-[180px]">
+          <p className="font-bold text-[var(--ds-black)] mb-1">
+            {viewMode === 'shelter_deficit' ? 'Déficit de Refugios' : 'Vulnerabilidad'}
+          </p>
+          <div className="space-y-1">
+            {viewMode === 'shelter_deficit' ? (
+              <>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#7f1d1d'}} /><span>0 refugios (Crítico)</span></div>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#ef4444'}} /><span>1 refugio (Bajo)</span></div>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#fb923c'}} /><span>2 refugios (Medio)</span></div>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#22c55e'}} /><span>3+ refugios (Cubierto)</span></div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#a50026'}} /><span>Máxima prioridad</span></div>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#f46d43'}} /><span>Prioridad alta</span></div>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#fee08b'}} /><span>Prioridad media</span></div>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#1a9850'}} /><span>Baja prioridad</span></div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Map legend for routes */}
       {routeResult && (
