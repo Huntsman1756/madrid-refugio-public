@@ -268,7 +268,7 @@ ${gpxPoints}
             )}
 
             <p className="text-xs text-[var(--ds-gray-500)] text-center mb-3">
-              En el corredor de demo (14:00): ruta estándar ~1.748 m · ruta confort ~1.791 m · sombra acumulada ×4,4
+              En el corredor de demo (14:00): ruta estándar ~1,7 km · ruta confort ~1,8 km · sombra acumulada ×4
             </p>
 
             <div className="flex gap-3">
