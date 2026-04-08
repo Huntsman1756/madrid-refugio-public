@@ -83,6 +83,21 @@ const destIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
+// Custom markers for fountains and shelters
+const fountainIcon = L.divIcon({
+  html: `<div style="background-color: #0ea5e9; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 12px;">💧</div>`,
+  className: '',
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
+
+const shelterIcon = L.divIcon({
+  html: `<div style="background-color: #f97316; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 12px;">🏠</div>`,
+  className: '',
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
+
 const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapComponent(
   { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget },
   ref
@@ -148,23 +163,42 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
             <Polyline
               positions={routeResult.shortest_coords}
               color="#9ca3af"
-              weight={5}
-              opacity={0.9}
-              dashArray="12 6"
+              weight={4}
+              opacity={0.6}
+              dashArray="8 12"
             />
-            {/* Comfort (Eco-Refugio) route — green solid, renders on top */}
+            {/* Comfort (Eco-Refugio) route — emerald solid, renders on top */}
             <Polyline
               positions={routeResult.comfort_coords}
-              color="#16a34a"
+              color="#10b981"
               weight={7}
-              opacity={0.95}
+              opacity={0.9}
+            />
+            {/* Inner line for Emerald route to give it a "path" feel */}
+            <Polyline
+              positions={routeResult.comfort_coords}
+              color="#ecfdf5"
+              weight={2}
+              opacity={0.8}
             />
             <Marker position={routeResult.origin_latlon} icon={originIcon}>
-              <Popup>📍 Origen</Popup>
+              <Popup>📍 Origen: {routeResult.origin || 'Inicio'}</Popup>
             </Marker>
             <Marker position={routeResult.destination_latlon} icon={destIcon}>
-              <Popup>🏁 Destino</Popup>
+              <Popup>🏁 Destino: {routeResult.destination || 'Fin'}</Popup>
             </Marker>
+
+            {/* Nearby resources markers */}
+            {routeResult.metrics?.comfort?.fuentes_pts?.map((pos: [number, number], idx: number) => (
+              <Marker key={`fountain-${idx}`} position={pos} icon={fountainIcon}>
+                <Popup>💧 Fuente de agua potable</Popup>
+              </Marker>
+            ))}
+            {routeResult.metrics?.comfort?.refugios_pts?.map((pos: [number, number], idx: number) => (
+              <Marker key={`shelter-${idx}`} position={pos} icon={shelterIcon}>
+                <Popup>🏠 Refugio climático</Popup>
+              </Marker>
+            ))}
           </>
         )}
 
@@ -195,12 +229,12 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       {routeResult && (
         <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-1 z-[1000] shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-6 h-1 bg-[#16a34a] rounded" />
-            <span className="text-[var(--ds-black)] font-medium">Ruta Eco-Refugio</span>
+            <span className="inline-block w-6 h-1.5 bg-[#10b981] rounded-full" />
+            <span className="text-[var(--ds-black)] font-semibold">Ruta Eco-Refugio</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-block w-6 h-1 bg-[#9ca3af] rounded" style={{ borderTop: '2px dashed #9ca3af', background: 'none' }} />
-            <span className="text-[var(--ds-gray-600)]">Ruta Estándar</span>
+            <span className="inline-block w-6 h-0.5 bg-[#9ca3af] border-t border-dashed border-[#9ca3af]" />
+            <span className="text-[var(--ds-gray-500)]">Ruta Estándar</span>
           </div>
         </div>
       )}

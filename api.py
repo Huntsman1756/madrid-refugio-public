@@ -136,6 +136,17 @@ def count_points_near_route(points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFram
     route_buffer = route_gdf.geometry.union_all().buffer(buffer_m)
     return int(points[points.geometry.within(route_buffer)].shape[0])
 
+def get_points_near_route(points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFrame, buffer_m: float) -> List[Tuple[float, float]]:
+    if route_gdf.empty:
+        return []
+    route_buffer = route_gdf.geometry.union_all().buffer(buffer_m)
+    nearby = points[points.geometry.within(route_buffer)]
+    if nearby.empty:
+        return []
+    # Convert to WGS84 for the frontend
+    nearby_wgs84 = nearby.to_crs("EPSG:4326")
+    return [(float(geom.y), float(geom.x)) for geom in nearby_wgs84.geometry]
+
 def point_in_madrid(lat: float, lon: float) -> bool:
     return (
         MADRID_BBOX["lat_min"] <= lat <= MADRID_BBOX["lat_max"]
@@ -319,10 +330,10 @@ def calculate_route(req: RouteRequest):
         shortest_gdf = route_edges_gdf(graph, shortest_route)
         comfort_gdf = route_edges_gdf(graph, comfort_route)
 
-        shortest_fuentes = count_points_near_route(fuentes_utm, shortest_gdf, buffer_m=75.0)
-        comfort_fuentes = count_points_near_route(fuentes_utm, comfort_gdf, buffer_m=75.0)
-        shortest_refugios = count_points_near_route(refugios_utm, shortest_gdf, buffer_m=200.0)
-        comfort_refugios = count_points_near_route(refugios_utm, comfort_gdf, buffer_m=200.0)
+        shortest_fuentes_pts = get_points_near_route(fuentes_utm, shortest_gdf, buffer_m=75.0)
+        comfort_fuentes_pts = get_points_near_route(fuentes_utm, comfort_gdf, buffer_m=75.0)
+        shortest_refugios_pts = get_points_near_route(refugios_utm, shortest_gdf, buffer_m=200.0)
+        comfort_refugios_pts = get_points_near_route(refugios_utm, comfort_gdf, buffer_m=200.0)
 
         return {
             "origin_latlon": origin_latlon,
@@ -334,15 +345,19 @@ def calculate_route(req: RouteRequest):
                     "length": shortest_length,
                     "tree_shade": shortest_t_shade,
                     "building_shade": shortest_b_shade,
-                    "fuentes": shortest_fuentes,
-                    "refugios": shortest_refugios
+                    "fuentes": len(shortest_fuentes_pts),
+                    "fuentes_pts": shortest_fuentes_pts,
+                    "refugios": len(shortest_refugios_pts),
+                    "refugios_pts": shortest_refugios_pts
                 },
                 "comfort": {
                     "length": comfort_length,
                     "tree_shade": comfort_t_shade,
                     "building_shade": comfort_b_shade,
-                    "fuentes": comfort_fuentes,
-                    "refugios": comfort_refugios
+                    "fuentes": len(comfort_fuentes_pts),
+                    "fuentes_pts": comfort_fuentes_pts,
+                    "refugios": len(comfort_refugios_pts),
+                    "refugios_pts": comfort_refugios_pts
                 }
             }
         }
