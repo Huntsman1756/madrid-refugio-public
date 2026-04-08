@@ -54,7 +54,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     setLoading(true);
     setError(null);
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const API_BASE = "";
       const response = await fetch(`${API_BASE}/api/route`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
