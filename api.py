@@ -77,16 +77,29 @@ def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
                 ]
             )
 
-def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int]) -> gpd.GeoDataFrame:
+def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None, shadow_dict: dict = None, pref: float = 0.0) -> gpd.GeoDataFrame:
     rows = []
     for u, v in zip(route[:-1], route[1:]):
         edge_data_dict = graph.get_edge_data(u, v)
         if not edge_data_dict:
             continue
-        key, edge_data = min(
-            edge_data_dict.items(),
-            key=lambda item: float(item[1].get("length", float("inf"))),
-        )
+        
+        # Encontrar la arista que minimiza el peso (Dijkstra's choice)
+        best_key = None
+        min_w = float('inf')
+        for key, data in edge_data_dict.items():
+            t_shade = float(data.get("shade_score", 0.0))
+            b_shade = 0.0
+            if shadow_dict and (u, v, key) in shadow_dict:
+                b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
+            combined_shade = max(t_shade, b_shade)
+            shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
+            w = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
+            if w < min_w:
+                min_w = w
+                best_key = key
+        
+        edge_data = edge_data_dict[best_key]
         geom = edge_data.get("geometry")
         if geom is None:
             point_u = (graph.nodes[u]["x"], graph.nodes[u]["y"])
@@ -96,7 +109,7 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int]) -> gpd.GeoDataFram
             {
                 "u": u,
                 "v": v,
-                "key": key,
+                "key": best_key,
                 "length": float(edge_data.get("length", 0.0)),
                 "shade_score": float(edge_data.get("shade_score", 0.0)),
                 "geometry": geom,
@@ -104,7 +117,7 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int]) -> gpd.GeoDataFram
         )
     return gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:25830")
 
-def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None, shadow_dict: dict = None) -> tuple[float, float, float]:
+def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None, shadow_dict: dict = None, pref: float = 0.0) -> tuple[float, float, float]:
     total_length = 0.0
     total_t_shade = 0.0
     total_b_shade = 0.0
@@ -112,17 +125,29 @@ def route_metrics(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None
         edge_data_dict = graph.get_edge_data(u, v)
         if not edge_data_dict:
             continue
-        key, edge_data = min(
-            edge_data_dict.items(),
-            key=lambda item: float(item[1].get("length", float("inf"))),
-        )
+        
+        best_key = None
+        min_w = float('inf')
+        for key, data in edge_data_dict.items():
+            t_shade = float(data.get("shade_score", 0.0))
+            b_shade = 0.0
+            if shadow_dict and (u, v, key) in shadow_dict:
+                b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
+            combined_shade = max(t_shade, b_shade)
+            shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
+            w = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
+            if w < min_w:
+                min_w = w
+                best_key = key
+        
+        edge_data = edge_data_dict[best_key]
         edge_length = float(edge_data.get("length", 0.0))
         edge_t_shade = float(edge_data.get("shade_score", 0.0))
         edge_b_shade = 0.0
         
         if hour_col and shadow_dict:
-            if (u, v, key) in shadow_dict:
-                edge_b_shade = float(shadow_dict[(u, v, key)].get(hour_col, 0.0))
+            if (u, v, best_key) in shadow_dict:
+                edge_b_shade = float(shadow_dict[(u, v, best_key)].get(hour_col, 0.0))
         
         total_length += edge_length
         total_t_shade += edge_t_shade * edge_length
@@ -300,23 +325,20 @@ def calculate_route(req: RouteRequest):
         pref = max(0.0, min(1.0, req.preference))
 
         def get_dynamic_weight(u, v, d):
-            t_shade = float(d.get("shade_score", 0.0))
-            b_shade = 0.0
-            edge_dict = graph.get_edge_data(u, v)
-            if edge_dict:
-                key, _ = min(edge_dict.items(), key=lambda item: float(item[1].get("length", float("inf"))))
-            else:
-                key = 0
-
-            if app_state.shadow_dict and (u, v, key) in app_state.shadow_dict:
-                b_shade = float(app_state.shadow_dict[(u, v, key)].get(hour_col, 0.0))
+            # En MultiDiGraph, d es un diccionario de aristas {key: attr_dict}
+            weights = []
+            for key, data in d.items():
+                t_shade = float(data.get("shade_score", 0.0))
+                b_shade = 0.0
+                if app_state.shadow_dict and (u, v, key) in app_state.shadow_dict:
+                    b_shade = float(app_state.shadow_dict[(u, v, key)].get(hour_col, 0.0))
+                
+                combined_shade = max(t_shade, b_shade)
+                shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
+                edge_weight = float(data.get("length", 1.0)) * max(shadow_factor, 0.1)
+                weights.append(edge_weight)
             
-            combined_shade = max(t_shade, b_shade)
-            # El factor de sombra se escala por la preferencia del usuario
-            # Si pref=0, shadow_factor es siempre 1.0 (coste = distancia pura)
-            # Si pref=1, shadow_factor baja hasta 0.2 (max descuento por sombra)
-            shadow_factor = 1.0 - (combined_shade * 0.8 * pref)
-            return float(d.get("length", 1.0)) * max(shadow_factor, 0.1)
+            return min(weights) if weights else 1.0e6
 
         shortest_route = nx.shortest_path(graph, origin_node, destination_node, weight="length")
         comfort_route = nx.shortest_path(graph, origin_node, destination_node, weight=get_dynamic_weight)
@@ -324,11 +346,11 @@ def calculate_route(req: RouteRequest):
         if shortest_route is None or comfort_route is None:
             raise ValueError("No se ha podido calcular una ruta válida entre estos puntos.")
 
-        shortest_length, shortest_t_shade, shortest_b_shade = route_metrics(graph, shortest_route, hour_col, app_state.shadow_dict)
-        comfort_length, comfort_t_shade, comfort_b_shade = route_metrics(graph, comfort_route, hour_col, app_state.shadow_dict)
+        shortest_length, shortest_t_shade, shortest_b_shade = route_metrics(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
+        comfort_length, comfort_t_shade, comfort_b_shade = route_metrics(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
         
-        shortest_gdf = route_edges_gdf(graph, shortest_route)
-        comfort_gdf = route_edges_gdf(graph, comfort_route)
+        shortest_gdf = route_edges_gdf(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
+        comfort_gdf = route_edges_gdf(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
 
         shortest_fuentes_pts = get_points_near_route(fuentes_utm, shortest_gdf, buffer_m=75.0)
         comfort_fuentes_pts = get_points_near_route(fuentes_utm, comfort_gdf, buffer_m=75.0)
