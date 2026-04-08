@@ -33,6 +33,3 @@ frontend/.env.local
 frontend/.env.*.local
 frontend/dist/
 frontend/build/
-
-data/processed/*.graphml
-data/processed/*.parquet
