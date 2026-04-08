@@ -50,17 +50,17 @@ export default function MetodologiaPage() {
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Matriz de Intersección Calle-Sombra</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 282.438 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
+              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#16a34a]">
-              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Optimización de Confort Térmico</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">El grafo urbano utiliza un peso combinado (<code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">comfort_weight</code>) que penaliza la insolación directa, permitiendo desvíos inteligentes hacia calles en sombra que multiplican la protección frente al estrés térmico.</p>
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Integración Meteorológica en Tiempo Real</h4>
+              <p className="text-sm text-[var(--ds-gray-600)]">Conexión directa con la API OpenData de AEMET para obtener temperatura y estado del cielo actual en Madrid, permitiendo al sistema validar dinámicamente las alertas por calor extremo.</p>
             </Card>
           </div>
           <div className="mt-8">
             <h3 className="text-lg font-semibold text-[var(--ds-black)] mb-3">Simulación temporal de sombras</h3>
             <p className="text-[var(--ds-gray-600)] mb-4">
-              La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). No se consultan APIs meteorológicas externas: el sistema es completamente determinista y reproducible, lo que garantiza su funcionamiento offline y sin coste operativo.
+              La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). No se consultan APIs meteorológicas externas para la geometría de sombras: el sistema es completamente determinista y reproducible.
             </p>
             <p className="text-[var(--ds-gray-600)]">
               Los pesos de sombra se precomputan para 13 franjas horarias (08:00 a 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecución, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
@@ -82,10 +82,10 @@ export default function MetodologiaPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
-                <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de Alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">646.281 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Arbolado Viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados para sombra biológica.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de Alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Arbolado Viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados integrados como factor de sombra biológica base.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">3</td><td className="px-4 py-3 font-medium">Padrón Municipal (2026)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Población por barrio segregada por edad (&gt;65 años).</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Calidad del Aire</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Series históricas de NO₂ interpoladas mediante IDW.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Calidad del Aire (AEMET)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Integración de predicciones horarias en tiempo real y series históricas de NO₂.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">5</td><td className="px-4 py-3 font-medium">Fuentes de Agua Potable</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Red de hidrantes integrada en el algoritmo de proximidad.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">6</td><td className="px-4 py-3 font-medium">Equipamientos Municipales</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Bibliotecas y centros deportivos como &quot;refugios sustitutos&quot;.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">7</td><td className="px-4 py-3 font-medium">Límites Administrativos</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Geometría oficial de barrios y distritos.</td></tr>

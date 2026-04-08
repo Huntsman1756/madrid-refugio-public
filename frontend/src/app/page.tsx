@@ -208,7 +208,7 @@ export default function Home() {
             </div>
             <h3 className="card-title text-[var(--ds-black)]">Clima</h3>
             <p className="text-[var(--ds-gray-600)] mb-1">Optimización de la sombra urbana como activo de salud pública precalculado. Infraestructura Verde.</p>
-            <span className="text-sm font-semibold text-[#de1d8d] mt-auto">646.281 polígonos LiDAR procesados</span>
+            <span className="text-sm font-semibold text-[#de1d8d] mt-auto">662.173 polígonos LiDAR procesados</span>
           </Card>
           <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
             <div className="w-10 h-10 rounded-full bg-[#fef2f2] flex items-center justify-center text-[#ff5b4f] mb-2 shadow-[var(--shadow-border)]">
@@ -486,7 +486,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
           {[
-            { icon: Building2, label: "Alturas de Edificación", detail: "646.281 polígonos LiDAR", color: "#0a72ef" },
+            { icon: Building2, label: "Alturas de Edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef" },
             { icon: TreePine, label: "Arbolado Viario", detail: "661.192 ejemplares", color: "#16a34a" },
             { icon: Users, label: "Padrón Municipal", detail: "Enero 2026", color: "#de1d8d" },
             { icon: Wind, label: "Calidad del Aire", detail: "NO₂ horario por estación", color: "#f97316" },

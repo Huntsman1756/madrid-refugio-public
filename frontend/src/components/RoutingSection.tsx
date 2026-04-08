@@ -362,7 +362,7 @@ ${gpxPoints}
                 </table>
               </div>
               <p className="mt-3 text-[10px] text-[var(--ds-gray-400)] italic px-1">
-                * Estimación basada en velocidad media de 5 km/h. Sombra proyectada incluye edificación y arbolado viario.
+                * Estimación basada en velocidad media de 5 km/h. Sombra proyectada incluye edificación (LiDAR) y 661.192 ejemplares de arbolado viario.
               </p>
             </div>
           )}
