@@ -342,6 +342,10 @@ app.add_middleware(
 def health_check():
     return {"status": "ok"}
 
+@app.get("/api/weather")
+def get_weather():
+    return fetch_aemet_data()
+
 @app.on_event("startup")
 def startup_event():
     print(f"\n--- Madrid Refugio: Iniciando Backend ---")
