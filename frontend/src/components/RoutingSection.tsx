@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { AlertTriangle, Download, Navigation, Share2 } from "lucide-react";
+
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { AlertTriangle, Share2, Download, Play, Pause, FastForward } from "lucide-react";
 
-// Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-[var(--ds-gray-50)] rounded-xl flex items-center justify-center text-[var(--ds-gray-500)] text-sm animate-pulse">
+    <div className="flex h-full w-full items-center justify-center rounded-xl bg-[var(--ds-gray-50)] text-sm text-[var(--ds-gray-500)]">
       Cargando mapa...
     </div>
   ),
@@ -21,11 +21,38 @@ interface RoutingSectionProps {
 }
 
 type ScenarioId = "carabanchel" | "villaverde";
+type Step = 1 | 2;
+type Priority = "directa" | "equilibrada" | "protegida";
+
+type RouteApiResult = {
+  comfort_coords: number[][];
+  metrics: {
+    shortest: {
+      length: number;
+      total_shade: number;
+      fuentes: number;
+      refugios: number;
+    };
+    comfort: {
+      length: number;
+      total_shade: number;
+      fuentes: number;
+      refugios: number;
+    };
+    human: {
+      sun_time_saved_min: number;
+      extra_effort_min: number;
+    };
+  };
+};
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 const SCENARIOS: Record<
   ScenarioId,
   {
     label: string;
+    tag: string;
     origin: string;
     destination: string;
     shortestLength: number;
@@ -36,17 +63,19 @@ const SCENARIOS: Record<
   }
 > = {
   carabanchel: {
-    label: "Plaza Elíptica → Gómez Ulla",
+    label: "Plaza Eliptica -> Gomez Ulla",
+    tag: "Demo base",
     origin: "Plaza Eliptica, Madrid",
     destination: "Hospital Central de la Defensa Gomez Ulla, Madrid",
     shortestLength: 4276.4,
     comfortLength: 4676.9,
     sunSavedMin: 15.3,
     extraEffortMin: 4.8,
-    context: "Corredor de demo por defecto: 15 min menos al sol a cambio de 5 min de rodeo.",
+    context: "Caso de uso sanitario realista: 15 min menos al sol a cambio de 5 min de rodeo.",
   },
   villaverde: {
-    label: "Villaverde Alto → Ciudad de los Ángeles",
+    label: "Villaverde Alto -> Ciudad de los Angeles",
+    tag: "Zona critica",
     origin: "Villaverde Alto, Madrid",
     destination: "Ciudad de los Angeles, Madrid",
     shortestLength: 3070,
@@ -54,83 +83,184 @@ const SCENARIOS: Record<
     sunSavedMin: 3.4,
     extraEffortMin: 1.4,
     context:
-      "En zonas con déficit de arbolado e infraestructura verde, el sistema optimiza lo disponible pero evidencia la necesidad de más inversión.",
+      "En zonas con deficit de arbolado e infraestructura verde, el sistema optimiza lo disponible pero evidencia la necesidad de mas inversion.",
   },
 };
 
+const HOUR_OPTIONS = [
+  { value: 10, label: "10:00", note: "Manana" },
+  { value: 14, label: "14:00", note: "Mas calor" },
+  { value: 18, label: "18:00", note: "Tarde" },
+];
+
+const PRIORITY_OPTIONS: { key: Priority; label: string; description: string; preference: number }[] = [
+  { key: "directa", label: "Mas directa", description: "Recorta distancia", preference: 0.2 },
+  { key: "equilibrada", label: "Equilibrada", description: "Balancea distancia y sombra", preference: 0.5 },
+  { key: "protegida", label: "Mas protegida", description: "Prioriza la sombra", preference: 0.8 },
+];
+
+function StepIndicator({ current }: { current: Step }) {
+  const steps = [
+    { step: 1 as Step, label: "Origen y destino" },
+    { step: 2 as Step, label: "Hora y ruta" },
+  ];
+
+  return (
+    <div className="mb-6 flex items-center gap-3" aria-label="Progreso del formulario">
+      {steps.map((item, index) => {
+        const isActive = current === item.step;
+        const isDone = current > item.step;
+        return (
+          <div key={item.step} className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div
+                className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${
+                  isActive
+                    ? "bg-[var(--ds-black)] text-white"
+                    : isDone
+                      ? "bg-[#dcfce7] text-[#166534]"
+                      : "bg-[var(--ds-gray-100)] text-[var(--ds-gray-500)]"
+                }`}
+              >
+                {isDone ? "✓" : item.step}
+              </div>
+              <span
+                className={`text-sm ${
+                  isActive || isDone ? "text-[var(--ds-black)]" : "text-[var(--ds-gray-500)]"
+                }`}
+              >
+                {item.label}
+              </span>
+            </div>
+            {index < steps.length - 1 ? <div className="h-px w-8 bg-[var(--ds-gray-200)]" /> : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MetricCard({
+  value,
+  unit,
+  label,
+  tone = "neutral",
+}: {
+  value: string;
+  unit: string;
+  label: string;
+  tone?: "neutral" | "positive";
+}) {
+  const tones =
+    tone === "positive"
+      ? "border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]"
+      : "border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] text-[var(--ds-black)]";
+
+  return (
+    <div className={`rounded-2xl border p-4 text-center ${tones}`}>
+      <div className="text-3xl font-bold tabular-nums">
+        {value}
+        <span className="ml-1 text-base font-medium">{unit}</span>
+      </div>
+      <p className="mt-1 text-sm leading-tight">{label}</p>
+    </div>
+  );
+}
+
+function mapErrorMessage(detail: string | null): string {
+  if (!detail) {
+    return "No se ha podido calcular ahora mismo. Intentalo de nuevo en unos segundos.";
+  }
+
+  const normalized = detail.toLowerCase();
+  if (normalized.includes("geocodificar")) {
+    return "No hemos encontrado esa direccion. Prueba con una calle y numero o usa uno de los escenarios de demo.";
+  }
+  if (normalized.includes("fuera de madrid")) {
+    return "La direccion debe estar en Madrid. Prueba con una direccion mas concreta dentro del corredor disponible.";
+  }
+  if (normalized.includes("area de routing activa") || normalized.includes("corredor")) {
+    return "La ruta sale fuera del corredor disponible. Usa uno de los escenarios de demo o direcciones dentro de la zona activa.";
+  }
+  return "No se ha podido calcular ahora mismo. Intentalo de nuevo en unos segundos.";
+}
+
+function kmLabel(meters: number): string {
+  return (meters / 1000).toFixed(1);
+}
+
 export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
+  const [step, setStep] = useState<Step>(1);
   const [scenarioId, setScenarioId] = useState<ScenarioId>("carabanchel");
   const [origin, setOrigin] = useState(SCENARIOS.carabanchel.origin);
   const [destination, setDestination] = useState(SCENARIOS.carabanchel.destination);
   const [hour, setHour] = useState(14);
-  const [preference, setPreference] = useState(1.0);
+  const [priority, setPriority] = useState<Priority>("equilibrada");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [metrics, setMetrics] = useState<any>(null);
-  const [routeResult, setRouteResult] = useState<any>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const selectedScenario = SCENARIOS[scenarioId];
+  const [routeResult, setRouteResult] = useState<RouteApiResult | null>(null);
 
-  // Time slider automation
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setHour(prev => prev >= 20 ? 8 : prev + 1);
-      }, 2000); // Wait 2s for backend to calculate
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
+  const scenario = SCENARIOS[scenarioId];
+  const priorityOption = PRIORITY_OPTIONS.find((option) => option.key === priority) ?? PRIORITY_OPTIONS[1];
+  const metrics = routeResult?.metrics;
+  const shortestLength = metrics?.shortest.length ?? scenario.shortestLength;
+  const comfortLength = metrics?.comfort.length ?? scenario.comfortLength;
+  const sunSavedMin = metrics?.human.sun_time_saved_min ?? scenario.sunSavedMin;
+  const extraEffortMin = metrics?.human.extra_effort_min ?? scenario.extraEffortMin;
+  const canProceed = origin.trim().length > 3 && destination.trim().length > 3;
 
-  // Auto-calculate route when hour changes during playback
-  useEffect(() => {
-    if (isPlaying) {
-      handleCalculate();
-    }
-  }, [hour, isPlaying]);
+  const summary = useMemo(
+    () =>
+      `En el escenario actual: ruta rapida ~${kmLabel(shortestLength)} km · ruta protegida ~${kmLabel(
+        comfortLength,
+      )} km · ${Math.round(sunSavedMin)} min menos al sol · ${Math.round(extraEffortMin)} min de rodeo`,
+    [comfortLength, extraEffortMin, shortestLength, sunSavedMin],
+  );
 
-  const isHeatHour = hour >= 12 && hour <= 17;
-  const fallbackShortestLength = selectedScenario.shortestLength;
-  const fallbackComfortLength = selectedScenario.comfortLength;
-  const fallbackSunSavedMin = selectedScenario.sunSavedMin;
-  const fallbackExtraEffortMin = selectedScenario.extraEffortMin;
-  const shortestLengthMeters = metrics?.shortest?.length ?? fallbackShortestLength;
-  const comfortLengthMeters = metrics?.comfort?.length ?? fallbackComfortLength;
-  const sunSavedMin = metrics?.human?.sun_time_saved_min ?? fallbackSunSavedMin;
-  const extraEffortMin = metrics?.human?.extra_effort_min ?? fallbackExtraEffortMin;
-
-  const applyScenario = (nextScenarioId: ScenarioId) => {
-    const scenario = SCENARIOS[nextScenarioId];
+  const selectScenario = (nextScenarioId: ScenarioId) => {
+    const nextScenario = SCENARIOS[nextScenarioId];
     setScenarioId(nextScenarioId);
-    setOrigin(scenario.origin);
-    setDestination(scenario.destination);
-    setMetrics(null);
+    setOrigin(nextScenario.origin);
+    setDestination(nextScenario.destination);
     setRouteResult(null);
     setError(null);
   };
 
-  const handleCalculate = async () => {
+  const goToStep2 = () => {
+    if (!canProceed) {
+      setError("Completa origen y destino para continuar.");
+      return;
+    }
+    setError(null);
+    setStep(2);
+  };
+
+  const calculate = async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const API_BASE = "";
       const response = await fetch(`${API_BASE}/api/route`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ origin, destination, hour, preference }),
+        body: JSON.stringify({
+          origin,
+          destination,
+          hour,
+          preference: priorityOption.preference,
+        }),
       });
 
+      const body = await response.json().catch(() => null);
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.detail || "Error calculando la ruta");
+        throw new Error(mapErrorMessage(body?.detail ?? null));
       }
 
-      const data = await response.json();
-      setMetrics(data.metrics);
-      setRouteResult(data);       // ← owned locally, so the map rerenders instantly
-      onRouteCalculated?.(data);  // ← also notify parent if needed
-    } catch (err: any) {
-      setError(err.message);
+      setRouteResult(body);
+      onRouteCalculated?.(body);
+    } catch (err) {
+      setRouteResult(null);
+      setError(err instanceof Error ? err.message : mapErrorMessage(null));
     } finally {
       setLoading(false);
     }
@@ -138,16 +268,17 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
 
   const handleDownloadGPX = () => {
     if (!routeResult?.comfort_coords) {
-      alert("Primero debes calcular una ruta para descargar el GPX.");
+      setError("Primero calcula una ruta para descargar el GPX.");
       return;
     }
+
     const gpxPoints = routeResult.comfort_coords
-      .map((c: number[]) => `    <trkpt lat="${c[0]}" lon="${c[1]}"></trkpt>`)
+      .map((coord) => `    <trkpt lat="${coord[0]}" lon="${coord[1]}"></trkpt>`)
       .join("\n");
     const gpxData = `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Madrid Refugio">
   <trk>
-    <name>Ruta Climática Eco-Refugio</name>
+    <name>Ruta climatica Madrid Refugio</name>
     <trkseg>
 ${gpxPoints}
     </trkseg>
@@ -163,41 +294,50 @@ ${gpxPoints}
   };
 
   const handleShareRoute = async () => {
-    if (!routeResult || !metrics) {
-      alert("Primero debes calcular una ruta.");
+    if (!metrics) {
+      setError("Primero calcula una ruta para compartir el resultado.");
       return;
     }
-    const text = `Ruta Eco-Refugio (${hour}:00)\nOrigen: ${origin}\nDestino: ${destination}\nSombra acumulada en ruta refugio: ${metrics.comfort.total_shade.toFixed(0)} m\nCalculado con el motor de Madrid Refugio.`;
+
+    const text = `Madrid Refugio\n${origin} -> ${destination}\n${Math.round(
+      sunSavedMin,
+    )} min menos al sol · ${Math.round(extraEffortMin)} min de rodeo`;
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Mi Ruta Climática - Madrid Refugio",
-          text: text,
+          title: "Ruta mas fresca - Madrid Refugio",
+          text,
           url: window.location.href,
         });
-      } catch (err) {
-        console.log("Error compartiendo", err);
+      } catch {
+        return;
       }
-    } else {
-      navigator.clipboard.writeText(text);
-      alert("¡Resumen de ruta copiado al portapapeles!");
+      return;
     }
+
+    await navigator.clipboard.writeText(text);
+    setError("Resumen copiado al portapapeles.");
   };
 
   return (
     <div className="mb-24">
       <div className="mb-8 border-b border-[var(--ds-gray-100)] pb-6">
-        <h2 className="sub-heading-large text-[var(--ds-black)]">Navegador de Rutas Climáticas</h2>
-        <p className="text-[var(--ds-gray-600)] mt-2">Planifica tu trayecto priorizando la sombra y la proximidad a fuentes y refugios climáticos.</p>
-        <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#fffbeb] border border-[#fde68a] text-xs text-[#92400e]">
+        <h2 className="sub-heading-large text-[var(--ds-black)]">Navegador de rutas climaticas</h2>
+        <p className="mt-2 text-[var(--ds-gray-600)]">
+          Planifica tu trayecto con pasos claros, botones grandes y una comparativa centrada en tiempo menos al sol.
+        </p>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-[#fde68a] bg-[#fffbeb] px-3 py-1.5 text-xs text-[#92400e]">
           <span>⚡</span>
-          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Tetuán, Chamberí, Fuencarral, Moncloa-Aravaca, Centro, Arganzuela, Retiro, Salamanca, Carabanchel, Usera, Latina, Puente de Vallecas y Villaverde</strong>. Origen y destino deben estar en esa zona.</span>
+          <span>
+            <strong>Demo:</strong> corredor activo en Tetuan, Chamberi, Fuencarral, Moncloa-Aravaca, Centro,
+            Arganzuela, Retiro, Salamanca, Carabanchel, Usera, Latina, Puente de Vallecas y Villaverde.
+          </span>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-5 gap-8 items-start">
-        {/* Map panel — always visible, updates reactively with routeResult */}
-        <div className="md:col-span-2 h-[520px] sticky top-24">
+      <div className="grid items-start gap-8 md:grid-cols-5">
+        <div className="sticky top-24 h-[520px] md:col-span-2">
           <MapComponent
             mergedData={null}
             refugios={null}
@@ -207,248 +347,280 @@ ${gpxPoints}
           />
         </div>
 
-        {/* Form panel */}
-        <div className="md:col-span-3 flex flex-col">
-          <h3 className="card-title text-[var(--ds-black)] mb-4">Del origen al destino, con confort</h3>
-          <p className="text-[var(--ds-gray-600)] mb-4">
-            Selecciona tu ubicación inicial y final para obtener una comparativa inmediata validada por datos abiertos:
-          </p>
-          <ul className="space-y-2 mb-6 text-[var(--ds-gray-600)] text-sm">
-            <li className="flex items-start gap-2">
-              <span className="mt-1.5 w-2 h-2 rounded-full bg-[var(--ds-gray-400)] flex-shrink-0" />
-              <span><strong>Ruta Estándar:</strong> El trayecto más corto posible (basado en distancia pura).</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1.5 w-2 h-2 rounded-full bg-[#16a34a] flex-shrink-0" />
-              <span><strong>Ruta Eco-Refugio:</strong> Recalcula los pesos priorizando calles arboladas y centros de hidratación.</span>
-            </li>
-          </ul>
+        <div className="flex flex-col md:col-span-3">
+          <StepIndicator current={step} />
 
-          <Card level={2} className="p-6 border border-[var(--ds-gray-100)]">
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-[var(--ds-gray-600)] mb-2">
-                Escenario de demostración
-              </label>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {(Object.entries(SCENARIOS) as [ScenarioId, (typeof SCENARIOS)[ScenarioId]][]).map(
-                  ([id, scenario]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => applyScenario(id)}
-                      className={`rounded-xl border px-4 py-3 text-left transition-colors ${
-                        scenarioId === id
-                          ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white"
-                          : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"
-                      }`}
-                    >
-                      <span className="block text-sm font-semibold">{scenario.label}</span>
-                    </button>
-                  ),
-                )}
-              </div>
-              <p className="mt-3 text-xs text-[var(--ds-gray-500)]">
-                {selectedScenario.context}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="flex justify-between text-sm font-medium text-[var(--ds-gray-600)] mb-1">
-                  Origen
-                  <button
-                    onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(pos => {
-                          setOrigin(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
-                        });
-                      }
-                    }}
-                    className="text-xs text-[#0a72ef] hover:underline flex items-center gap-1"
-                    title="Usar mi ubicación actual"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-                    Ubícame
-                  </button>
-                </label>
-                <input
-                  type="text"
-                  value={origin}
-                  onChange={(e) => setOrigin(e.target.value)}
-                  className="w-full px-3 py-2 border border-[var(--ds-gray-100)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ds-focus-color)] text-[var(--ds-black)] shadow-sm text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--ds-gray-600)] mb-1">Destino</label>
-                <input
-                  type="text"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  className="w-full px-3 py-2 border border-[var(--ds-gray-100)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ds-focus-color)] text-[var(--ds-black)] shadow-sm text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium text-[var(--ds-gray-600)]">
-                  Contexto térmico (Hora: {hour}:00)
-                </label>
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className={`flex items-center gap-1 text-xs px-2 py-1 rounded-md transition-colors ${isPlaying ? 'bg-[#fef2f2] text-red-600' : 'bg-[var(--ds-gray-100)] text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-200)]'}`}
-                >
-                  {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                  {isPlaying ? "Detener Animación" : "Simulación Temporal"}
-                </button>
-              </div>
-              <input
-                type="range"
-                min="8" max="20"
-                value={hour}
-                onChange={(e) => setHour(parseInt(e.target.value))}
-                className="w-full accent-[var(--ds-black)]"
-              />
-              <div className="flex justify-between text-xs text-[var(--ds-gray-500)] mt-0.5">
-                <span>8:00</span>
-                <span>14:00</span>
-                <span>20:00</span>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium text-[var(--ds-gray-600)]">
-                  Prioridad de ruta
-                </label>
-              </div>
-              <input
-                type="range"
-                min="0" max="1" step="0.1"
-                value={preference}
-                onChange={(e) => setPreference(parseFloat(e.target.value))}
-                className="w-full accent-[#16a34a]"
-              />
-              <div className="flex justify-between text-xs text-[var(--ds-gray-500)] mt-0.5">
-                <span>🚶 Más corta</span>
-                <span>🌿 Más fresca</span>
-              </div>
-            </div>
-
-            {isHeatHour ? (
-              <div className="mb-4">
-                <div className="p-3 bg-[#fef2f2] text-[#991b1b] rounded-md border border-[#fecaca] flex items-start gap-2 text-sm">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <p><strong>Aviso:</strong> Tramo de máxima insolación. La ruta más fresca es crítica para evitar golpes de calor.</p>
+          <Card level={2} className="border border-[var(--ds-gray-100)] p-6">
+            {step === 1 ? (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="card-title text-[var(--ds-black)]">Paso 1. Origen y destino</h3>
+                  <p className="mt-2 text-sm text-[var(--ds-gray-600)]">
+                    Puedes escribir tus direcciones o empezar con uno de los escenarios de demostracion.
+                  </p>
                 </div>
-                <p className="mt-1 text-[10px] text-[#991b1b]/70 italic text-right px-1">
-                  Simulación: condiciones de ola de calor (15 jul · {hour}:00h)
-                </p>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">
+                    Escenario de demostracion
+                  </label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {(Object.entries(SCENARIOS) as [ScenarioId, (typeof SCENARIOS)[ScenarioId]][]).map(
+                      ([id, item]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => selectScenario(id)}
+                          className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                            scenarioId === id
+                              ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white"
+                              : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"
+                          }`}
+                        >
+                          <span className="block text-xs uppercase tracking-wide opacity-70">{item.tag}</span>
+                          <span className="mt-1 block text-base font-semibold">{item.label}</span>
+                        </button>
+                      ),
+                    )}
+                  </div>
+                  <p className="mt-3 text-sm text-[var(--ds-gray-500)]">{scenario.context}</p>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-2 flex items-center justify-between text-sm font-medium text-[var(--ds-gray-600)]">
+                      <span>Desde donde sales</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!navigator.geolocation) return;
+                          navigator.geolocation.getCurrentPosition((pos) => {
+                            setOrigin(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
+                            setRouteResult(null);
+                            setError(null);
+                          });
+                        }}
+                        className="text-xs text-[#0a72ef] hover:underline"
+                      >
+                        Ubicame
+                      </button>
+                    </label>
+                    <input
+                      type="text"
+                      value={origin}
+                      onChange={(e) => {
+                        setOrigin(e.target.value);
+                        setRouteResult(null);
+                        setError(null);
+                      }}
+                      className="min-h-14 w-full rounded-xl border border-[var(--ds-gray-100)] px-4 text-base text-[var(--ds-black)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ds-focus-color)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">A donde vas</label>
+                    <input
+                      type="text"
+                      value={destination}
+                      onChange={(e) => {
+                        setDestination(e.target.value);
+                        setRouteResult(null);
+                        setError(null);
+                      }}
+                      className="min-h-14 w-full rounded-xl border border-[var(--ds-gray-100)] px-4 text-base text-[var(--ds-black)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ds-focus-color)]"
+                    />
+                  </div>
+                </div>
+
+                {error ? (
+                  <div className="rounded-xl border border-[#fecaca] bg-[#fef2f2] p-4 text-sm text-[#991b1b]">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <p>{error}</p>
+                    </div>
+                  </div>
+                ) : null}
+
+                <Button variant="primary" className="min-h-14 w-full text-base" onClick={goToStep2}>
+                  Continuar al paso 2
+                </Button>
               </div>
             ) : (
-              <div className="mb-4">
-                <div className="p-3 bg-[#f0fdf4] text-[#166534] rounded-md border border-[#bbf7d0] text-sm">
-                  Tramo de insolación moderada: la ruta óptima sigue priorizando sombra por confort térmico.
+              <div className="space-y-6">
+                <div>
+                  <h3 className="card-title text-[var(--ds-black)]">Paso 2. Hora y tipo de ruta</h3>
+                  <p className="mt-2 text-sm text-[var(--ds-gray-600)]">
+                    Elige una hora facil de entender y la prioridad de la ruta. Despues calcula la opcion mas protegida.
+                  </p>
                 </div>
-                <p className="mt-1 text-[10px] text-[#166534]/70 italic text-right px-1">
-                  Simulación: 15 jul · {hour}:00h
-                </p>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">Hora del trayecto</label>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {HOUR_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setHour(option.value)}
+                        className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                          hour === option.value
+                            ? "border-[#16a34a] bg-[#f0fdf4] text-[#166534]"
+                            : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-black)]"
+                        }`}
+                      >
+                        <span className="block text-lg font-semibold">{option.label}</span>
+                        <span className="block text-sm opacity-75">{option.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">Tipo de ruta</label>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {PRIORITY_OPTIONS.map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setPriority(option.key)}
+                        className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                          priority === option.key
+                            ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white"
+                            : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-black)]"
+                        }`}
+                      >
+                        <span className="block text-base font-semibold">{option.label}</span>
+                        <span className="mt-1 block text-sm opacity-75">{option.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] p-4 text-sm text-[var(--ds-gray-600)]">
+                  <p className="font-medium text-[var(--ds-black)]">Resumen del escenario</p>
+                  <p className="mt-1">{summary}</p>
+                </div>
+
+                {error ? (
+                  <div className="rounded-xl border border-[#fecaca] bg-[#fef2f2] p-4 text-sm text-[#991b1b]">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <p>{error}</p>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button variant="secondary" className="min-h-14 sm:w-40" onClick={() => setStep(1)}>
+                    Volver
+                  </Button>
+                  <Button
+                    variant="primary"
+                    className="min-h-14 flex-1 text-base"
+                    onClick={calculate}
+                    disabled={loading}
+                  >
+                    {loading ? "Calculando..." : "Calcular la ruta mas fresca"}
+                  </Button>
+                </div>
               </div>
             )}
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200">
-                ⚠ {error}
-              </div>
-            )}
-
-            <p className="text-xs text-[var(--ds-gray-500)] text-center mb-3">
-              En el corredor de demo (14:00): ruta estandar ~{(shortestLengthMeters / 1000).toFixed(1)} km | ruta confort ~{(comfortLengthMeters / 1000).toFixed(1)} km | {Math.round(sunSavedMin)} min menos al sol | {Math.round(extraEffortMin)} min de rodeo
-            </p>
-
-            <div className="flex gap-3">
-              <Button
-                variant="primary"
-                className="flex-1 relative"
-                onClick={handleCalculate}
-                disabled={loading}
-              >
-                {loading && (
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                )}
-                {loading ? "Calculando..." : "Calcular ruta más fresca"}
-              </Button>
-              {routeResult && (
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setRouteResult(null);
-                    setMetrics(null);
-                    setError(null);
-                  }}
-                  className="px-4"
-                  title="Limpiar mapa"
-                >
-                  Limpiar
-                </Button>
-              )}
-            </div>
           </Card>
 
-          {metrics && (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <MetricCard
+              value={`${Math.round(sunSavedMin)}`}
+              unit="min"
+              label="menos al sol directo"
+              tone="positive"
+            />
+            <MetricCard value={`${Math.round(extraEffortMin)}`} unit="min" label="de rodeo adicional" />
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <MetricCard value={kmLabel(shortestLength)} unit="km" label="ruta rapida" />
+            <MetricCard value={kmLabel(comfortLength)} unit="km" label="ruta mas protegida" tone="positive" />
+          </div>
+
+          {metrics ? (
             <div className="mt-6">
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="font-semibold text-[var(--ds-black)] text-lg">Impacto del Confort Térmico</h4>
+              <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h4 className="text-lg font-semibold text-[var(--ds-black)]">Detalle comparativo</h4>
                 <div className="flex gap-2">
-                  <Button variant="secondary" onClick={handleDownloadGPX} className="text-sm h-10 py-2 flex items-center justify-center gap-2">
-                    <Download className="w-4 h-4" /> Exportar GPX
+                  <Button
+                    variant="secondary"
+                    onClick={handleShareRoute}
+                    className="flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    Compartir
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={handleDownloadGPX}
+                    className="flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Download className="h-4 w-4" />
+                    Exportar GPX
                   </Button>
                 </div>
               </div>
 
-              {/* Human Metrics Highlights */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <Card level={1} className="p-4 bg-orange-50 border-orange-100 flex flex-col items-center text-center">
-                  <span className="text-[10px] uppercase tracking-wider text-orange-600 font-bold mb-1">Protección Activa</span>
-                  <span className="text-2xl font-bold text-orange-700">~{routeResult.metrics?.human?.sun_time_saved_min ?? 0} min</span>
-                  <span className="text-xs text-orange-600 font-medium leading-tight">menos de exposición al sol directo</span>
-                </Card>
-                <Card level={1} className="p-4 bg-blue-50 border-blue-100 flex flex-col items-center text-center">
-                  <span className="text-[10px] uppercase tracking-wider text-blue-600 font-bold mb-1">Esfuerzo Adicional</span>
-                  <span className="text-2xl font-bold text-blue-700">+{routeResult.metrics?.human?.extra_effort_min ?? 0} min</span>
-                  <span className="text-xs text-blue-600 font-medium leading-tight">de caminata total vs. ruta rápida</span>
-                </Card>
-              </div>
-
-              <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-[var(--ds-gray-50)] text-[var(--ds-gray-500)] border-b border-[var(--ds-gray-100)]">
+              <div className="overflow-hidden rounded-2xl border border-[var(--ds-gray-100)]">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] text-[var(--ds-gray-500)]">
                     <tr>
-                      <th className="px-4 py-3 font-medium">Métrica</th>
-                      <th className="px-4 py-3 font-medium text-center">Ruta Rápida</th>
-                      <th className="px-4 py-3 font-medium text-[#16a34a] text-center">Ruta Refugio</th>
+                      <th className="px-4 py-3 font-medium">Comparativa</th>
+                      <th className="px-4 py-3 text-center font-medium">Ruta rapida</th>
+                      <th className="px-4 py-3 text-center font-medium text-[#16a34a]">Ruta protegida</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
                     <tr>
-                      <td className="px-4 py-3 font-medium text-[var(--ds-gray-600)]">Distancia total</td>
-                      <td className="px-4 py-3 font-mono text-center">{metrics.shortest.length.toFixed(0)} m</td>
-                      <td className="px-4 py-3 font-mono font-bold text-center text-[#16a34a]">{metrics.comfort.length.toFixed(0)} m</td>
+                      <td className="px-4 py-3 text-[var(--ds-gray-600)]">Distancia total</td>
+                      <td className="px-4 py-3 text-center font-mono">{metrics.shortest.length.toFixed(0)} m</td>
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                        {metrics.comfort.length.toFixed(0)} m
+                      </td>
                     </tr>
                     <tr>
-                      <td className="px-4 py-3 font-medium text-[var(--ds-gray-600)]">Sombra acumulada</td>
-                      <td className="px-4 py-3 font-mono text-center">{metrics.shortest.total_shade.toFixed(0)} m</td>
-                      <td className="px-4 py-3 font-mono font-bold text-center text-[#16a34a]">{metrics.comfort.total_shade.toFixed(0)} m</td>
+                      <td className="px-4 py-3 text-[var(--ds-gray-600)]">Sombra acumulada</td>
+                      <td className="px-4 py-3 text-center font-mono">
+                        {metrics.shortest.total_shade.toFixed(0)} m
+                      </td>
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                        {metrics.comfort.total_shade.toFixed(0)} m
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 text-[var(--ds-gray-600)]">Fuentes cercanas</td>
+                      <td className="px-4 py-3 text-center font-mono">{metrics.shortest.fuentes}</td>
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                        {metrics.comfort.fuentes}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 text-[var(--ds-gray-600)]">Refugios cercanos</td>
+                      <td className="px-4 py-3 text-center font-mono">{metrics.shortest.refugios}</td>
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                        {metrics.comfort.refugios}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <p className="mt-3 text-[10px] text-[var(--ds-gray-400)] italic px-1">
-                * Estimación basada en velocidad media de 5 km/h. Sombra proyectada incluye edificación (LiDAR) y 661.192 ejemplares de arbolado viario.
-              </p>
+            </div>
+          ) : (
+            <div className="mt-6 rounded-2xl border border-[var(--ds-gray-100)] bg-white p-5 text-sm text-[var(--ds-gray-600)]">
+              <div className="flex items-start gap-3">
+                <Navigation className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--ds-gray-500)]" />
+                <div>
+                  <p className="font-medium text-[var(--ds-black)]">Todavia no has calculado una ruta</p>
+                  <p className="mt-1">
+                    Completa los dos pasos y te mostraremos una comparativa sencilla: cuanto tiempo evitas al sol,
+                    cuanto rodeo anades y que recursos de apoyo quedan cerca.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
