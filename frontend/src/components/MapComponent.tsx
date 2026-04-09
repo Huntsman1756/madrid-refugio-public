@@ -246,7 +246,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       {!routeResult && (
         <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-2 z-[1000] shadow-sm max-w-[180px]">
           <p className="font-bold text-[var(--ds-black)] mb-1">
-            {viewMode === 'shelter_deficit' ? 'Déficit de Refugios' : 'Vulnerabilidad'}
+            {viewMode === 'shelter_deficit' ? 'Déficit de refugios' : 'Vulnerabilidad'}
           </p>
           <div className="space-y-1">
             {viewMode === 'shelter_deficit' ? (
@@ -273,11 +273,11 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
         <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-1 z-[1000] shadow-sm">
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-1.5 bg-[#10b981] rounded-full" />
-            <span className="text-[var(--ds-black)] font-semibold">Ruta Eco-Refugio</span>
+            <span className="text-[var(--ds-black)] font-semibold">Ruta eco-refugio</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-0.5 bg-[#9ca3af] border-t border-dashed border-[#9ca3af]" />
-            <span className="text-[var(--ds-gray-500)]">Ruta Estándar</span>
+            <span className="text-[var(--ds-gray-500)]">Ruta estándar</span>
           </div>
         </div>
       )}

@@ -5,7 +5,7 @@ export default function ProjectInfoSection() {
   return (
     <div className="mb-24">
       <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6">
-        <h2 className="sub-heading-large text-[var(--ds-black)]">3. Memoria del Proyecto y Datos Abiertos</h2>
+        <h2 className="sub-heading-large text-[var(--ds-black)]">3. Memoria del proyecto y datos abiertos</h2>
         <p className="text-[var(--ds-gray-600)] mt-2">Transparencia metodológica y fuentes de datos del concurso.</p>
       </div>
 
@@ -27,7 +27,7 @@ export default function ProjectInfoSection() {
                 <MapIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="block font-semibold text-[var(--ds-black)] mb-1">Déficit de Refugios</span>
+                <span className="block font-semibold text-[var(--ds-black)] mb-1">Déficit de refugios</span>
                 <span className="block text-sm text-[var(--ds-gray-600)]">84 barrios (64.1%) no tienen ningún refugio a menos de 300m. 62 barrios a menos de 400m.</span>
               </div>
             </Card>
