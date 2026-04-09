@@ -244,14 +244,14 @@ export default function Home() {
         </div>
 
         {/* Map and Detail Section */}
-        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 grid gap-5 md:grid-cols-[minmax(0,1fr)_360px] md:items-end">
           <div>
             <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de Vulnerabilidad Territorial</h2>
             <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
           </div>
           
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex bg-[var(--ds-gray-50)] p-1 rounded-lg border border-[var(--ds-gray-100)] shadow-sm">
+          <div className="rounded-2xl border border-[var(--ds-gray-100)] bg-white p-3 shadow-sm">
+            <div className="flex rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] p-1">
               <button 
                 onClick={() => setViewMode('vulnerability')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'vulnerability' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
@@ -265,7 +265,7 @@ export default function Home() {
                 Déficit de Refugios
               </button>
             </div>
-            <p className="text-[10px] sm:text-xs text-[var(--ds-gray-500)] italic text-right max-w-[300px]">
+            <p className="mt-3 text-[11px] sm:text-xs text-[var(--ds-gray-500)] leading-relaxed">
               {viewMode === 'vulnerability' 
                 ? "Índice compuesto: temperatura superficial + % mayores de 65 + cobertura de arbolado. Rojo intenso = intervención urgente."
                 : "Barrios donde la distancia media al refugio más cercano supera 500m. A mayor déficit, mayor riesgo para población vulnerable."}
