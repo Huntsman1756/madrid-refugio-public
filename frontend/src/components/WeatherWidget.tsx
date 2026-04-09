@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Sun, Thermometer, AlertCircle, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertCircle, RefreshCw, Thermometer } from "lucide-react";
 
 interface WeatherData {
   municipio: string;
-  temperatura: number;
+  temperatura: number | string;
   estado_cielo: string;
   timestamp: string;
   fuente: string;
@@ -19,12 +19,12 @@ export function WeatherWidget() {
   const fetchWeather = async () => {
     setLoading(true);
     try {
-      // Usamos el proxy de Vercel (URL vacía ataca al mismo dominio)
       const response = await fetch("/api/weather");
       const data = await response.json();
       setWeather(data);
     } catch (err) {
       console.error("Error fetching weather:", err);
+      setWeather(null);
     } finally {
       setLoading(false);
     }
@@ -32,53 +32,39 @@ export function WeatherWidget() {
 
   useEffect(() => {
     fetchWeather();
-    // Refresh cada 15 min
     const interval = setInterval(fetchWeather, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading && !weather) {
-    return (
-      <div className="inline-flex min-h-[36px] min-w-[180px] items-center justify-center gap-2 rounded-full border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] px-3 py-1 text-xs text-[var(--ds-gray-500)]">
-        <RefreshCw className="w-3 h-3 animate-spin" />
-        Consultando AEMET...
-      </div>
-    );
-  }
+  const hasWeather = !!weather && !weather.error;
+  const temperature = hasWeather ? Number(weather.temperatura) : null;
+  const isHot = temperature !== null && temperature >= 30;
+  const toneClasses = isHot
+    ? "border-orange-200 bg-orange-50 text-orange-800"
+    : "border-[#fecaca] bg-[#fef2f2] text-[#991b1b]";
 
-  if (weather?.error || !weather) {
-    return (
-      <div className="inline-flex min-h-[36px] min-w-[180px] items-center justify-center gap-2 rounded-full border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] px-3 py-1 text-xs text-[var(--ds-gray-500)]">
-        <Thermometer className="w-3 h-3" />
-        AEMET no disponible
-      </div>
-    );
-  }
-
-  const isHot = weather.temperatura >= 30;
+  const statusText =
+    loading && !weather
+      ? "Consultando AEMET..."
+      : hasWeather
+        ? `Madrid ahora: ${temperature} °C, ${weather.estado_cielo} (AEMET ${weather.timestamp})`
+        : "Contexto AEMET no disponible";
 
   return (
-    <div className={`inline-flex items-center gap-3 px-4 py-1.5 rounded-full border shadow-sm transition-all fade-in-up active
-      ${isHot ? 'bg-orange-50 border-orange-200 text-orange-800' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
-      <div className="flex items-center gap-1.5 font-medium text-xs sm:text-sm">
-        <Thermometer className={`w-4 h-4 ${isHot ? 'text-orange-500' : 'text-blue-500'}`} />
-        <span>{weather.temperatura}°C</span>
-      </div>
-      <div className="h-3 w-px bg-current opacity-20"></div>
-      <div className="flex items-center gap-1.5 text-xs font-medium">
-        <Sun className="w-3.5 h-3.5 opacity-70" />
-        <span className="hidden sm:inline capitalize">{weather.estado_cielo}</span>
-        <span className="opacity-60 text-[10px] ml-1">{weather.timestamp}</span>
-      </div>
-      {isHot && (
-        <>
-          <div className="h-3 w-px bg-current opacity-20"></div>
-          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-orange-600">
-            <AlertCircle className="w-3 h-3" />
-            <span className="hidden xs:inline">Riesgo Térmico</span>
-          </div>
-        </>
+    <div
+      className={`inline-flex min-h-[36px] items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium shadow-sm transition-all fade-in-up active sm:text-sm ${toneClasses}`}
+    >
+      {loading && !weather ? (
+        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+      ) : hasWeather ? (
+        <Thermometer className={`h-4 w-4 ${isHot ? "text-orange-500" : "text-red-500"}`} />
+      ) : (
+        <AlertCircle className="h-4 w-4" />
       )}
+      <span className="flex h-2 w-2 rounded-full bg-red-500" />
+      <span className="font-semibold">Alerta por ola de calor extrema</span>
+      <span className="opacity-50">·</span>
+      <span className="font-normal">{statusText}</span>
     </div>
   );
 }

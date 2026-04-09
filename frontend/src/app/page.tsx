@@ -172,10 +172,6 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4 fade-in-up">
             <WeatherWidget />
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-sm font-medium shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-              Alerta por ola de calor extrema
-            </div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] shadow-[var(--shadow-border)] text-[var(--ds-gray-600)] text-sm font-medium">
               Madrid 2026 Data Open
             </div>
