@@ -50,6 +50,11 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   }, [hour, isPlaying]);
 
   const isHeatHour = hour >= 12 && hour <= 17;
+  const fallbackShortestShade = 1967.8;
+  const fallbackComfortShade = 3357.5;
+  const shortestShadeMeters = metrics?.shortest?.total_shade ?? fallbackShortestShade;
+  const comfortShadeMeters = metrics?.comfort?.total_shade ?? fallbackComfortShade;
+  const shadeRatio = shortestShadeMeters > 0 ? comfortShadeMeters / shortestShadeMeters : 1;
 
   const handleCalculate = async () => {
     setLoading(true);
@@ -109,7 +114,7 @@ ${gpxPoints}
       alert("Primero debes calcular una ruta.");
       return;
     }
-    const text = `Ruta Eco-Refugio (${hour}:00)\n📍 Origen: ${origin}\n📍 Destino: ${destination}\n🌳 Sombra ganada: +${(metrics.comfort.building_shade + metrics.comfort.tree_shade).toFixed(0)}m\n¡Calculado con el motor de Madrid Refugio!`;
+    const text = `Ruta Eco-Refugio (${hour}:00)\nOrigen: ${origin}\nDestino: ${destination}\nSombra acumulada en ruta refugio: ${metrics.comfort.total_shade.toFixed(0)} m\nCalculado con el motor de Madrid Refugio.`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -278,7 +283,7 @@ ${gpxPoints}
             )}
 
             <p className="text-xs text-[var(--ds-gray-500)] text-center mb-3">
-              En el corredor de demo (14:00): ruta estándar ~4,8 km · ruta confort ~5,3 km · sombra acumulada ×10
+              En el corredor de demo (14:00): ruta estandar ~{(shortestShadeMeters / 1000).toFixed(1)} km | ruta confort ~{(comfortShadeMeters / 1000).toFixed(1)} km | sombra acumulada x{shadeRatio.toFixed(1)}
             </p>
 
             <div className="flex gap-3">
@@ -354,9 +359,9 @@ ${gpxPoints}
                       <td className="px-4 py-3 font-mono font-bold text-center text-[#16a34a]">{metrics.comfort.length.toFixed(0)} m</td>
                     </tr>
                     <tr>
-                      <td className="px-4 py-3 font-medium text-[var(--ds-gray-600)]">Sombra proyectada</td>
-                      <td className="px-4 py-3 font-mono text-center">{(metrics.shortest.tree_shade + metrics.shortest.building_shade).toFixed(0)} m</td>
-                      <td className="px-4 py-3 font-mono font-bold text-center text-[#16a34a]">{(metrics.comfort.tree_shade + metrics.comfort.building_shade).toFixed(0)} m</td>
+                      <td className="px-4 py-3 font-medium text-[var(--ds-gray-600)]">Sombra acumulada</td>
+                      <td className="px-4 py-3 font-mono text-center">{metrics.shortest.total_shade.toFixed(0)} m</td>
+                      <td className="px-4 py-3 font-mono font-bold text-center text-[#16a34a]">{metrics.comfort.total_shade.toFixed(0)} m</td>
                     </tr>
                   </tbody>
                 </table>
