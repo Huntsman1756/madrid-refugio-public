@@ -21,8 +21,8 @@ interface RoutingSectionProps {
 }
 
 export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
-  const [origin, setOrigin] = useState("Puerta del Sol, Madrid");
-  const [destination, setDestination] = useState("Matadero Madrid");
+  const [origin, setOrigin] = useState("Plaza Eliptica, Madrid");
+  const [destination, setDestination] = useState("Hospital Central de la Defensa Gomez Ulla, Madrid");
   const [hour, setHour] = useState(14);
   const [preference, setPreference] = useState(1.0);
   const [loading, setLoading] = useState(false);
@@ -50,11 +50,14 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   }, [hour, isPlaying]);
 
   const isHeatHour = hour >= 12 && hour <= 17;
-  const fallbackShortestShade = 1967.8;
-  const fallbackComfortShade = 3357.5;
-  const shortestShadeMeters = metrics?.shortest?.total_shade ?? fallbackShortestShade;
-  const comfortShadeMeters = metrics?.comfort?.total_shade ?? fallbackComfortShade;
-  const shadeRatio = shortestShadeMeters > 0 ? comfortShadeMeters / shortestShadeMeters : 1;
+  const fallbackShortestLength = 4276.4;
+  const fallbackComfortLength = 4676.9;
+  const fallbackSunSavedMin = 15.3;
+  const fallbackExtraEffortMin = 4.8;
+  const shortestLengthMeters = metrics?.shortest?.length ?? fallbackShortestLength;
+  const comfortLengthMeters = metrics?.comfort?.length ?? fallbackComfortLength;
+  const sunSavedMin = metrics?.human?.sun_time_saved_min ?? fallbackSunSavedMin;
+  const extraEffortMin = metrics?.human?.extra_effort_min ?? fallbackExtraEffortMin;
 
   const handleCalculate = async () => {
     setLoading(true);
@@ -283,7 +286,7 @@ ${gpxPoints}
             )}
 
             <p className="text-xs text-[var(--ds-gray-500)] text-center mb-3">
-              En el corredor de demo (14:00): ruta estandar ~{(shortestShadeMeters / 1000).toFixed(1)} km | ruta confort ~{(comfortShadeMeters / 1000).toFixed(1)} km | sombra acumulada x{shadeRatio.toFixed(1)}
+              En el corredor de demo (14:00): ruta estandar ~{(shortestLengthMeters / 1000).toFixed(1)} km | ruta confort ~{(comfortLengthMeters / 1000).toFixed(1)} km | {Math.round(sunSavedMin)} min menos al sol | {Math.round(extraEffortMin)} min de rodeo
             </p>
 
             <div className="flex gap-3">
