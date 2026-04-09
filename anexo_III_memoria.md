@@ -6,7 +6,7 @@
 
 - **Aplicación pública:** [https://madrid-refugio.vercel.app/](https://madrid-refugio.vercel.app/)
 - **Repositorio público:** [https://github.com/Huntsman1756/madrid-refugio](https://github.com/Huntsman1756/madrid-refugio)
-- **Artefactos de datos y release estable:** [https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4)
+- **Artefactos de datos y release estable:** [https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.3](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.3)
 
 **Madrid Refugio** es un motor de simulación climática urbana diseñado para proteger a la población más vulnerable de la capital frente a la isla de calor y los episodios de calor extremo. El sistema se orienta sobre todo a los más de 430.000 mayores de 65 años que viven en Madrid.
 
@@ -17,7 +17,7 @@ Madrid Refugio calcula **sombra dinámica proyectada por edificación** y la com
 
 - **Modelo de alturas de edificación:** Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).
 - **Proyección geométrica solar:** Integración de las bibliotecas `pvlib` y `pybdshadow` para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar).
-- **Matriz de intersección calle-sombra:** Generación offline de una matriz de 514.760 aristas × 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
+- **Matriz de intersección calle-sombra:** Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
 - **Optimización de confort térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que suma sombra de edificación y arbolado con tope, permitiendo desvíos inteligentes hacia calles con mayor confort térmico.
 
 ### Simulación temporal de sombras
@@ -67,13 +67,13 @@ Madrid Refugio responde a una necesidad municipal concreta:
 
 - **Más de 430.000 mayores de 65 años** viven en Madrid y son el grupo más expuesto a la mortalidad asociada al calor extremo.
 - **64,1 % de los barrios** no cuentan con un refugio climático operativo a menos de 300 metros caminables.
-- El motor calcula rutas sobre **514.760 aristas** y combina **662.173 polígonos LiDAR** con **661.192 árboles** para estimar confort térmico calle a calle en los **21 distritos** de Madrid.
+- El motor calcula rutas sobre **320.844 aristas** y combina **662.173 polígonos LiDAR** con **661.192 árboles** para estimar confort térmico calle a calle en el corredor ya validado.
 - El resultado no es solo informativo: permite priorizar inversión en sombra, equipamientos y refugios donde el déficit es medible y territorialmente comparable.
 
 ## 5. Escalabilidad y arquitectura
 
 La arquitectura modular (frontend, backend y motor algorítmico) permite replicar el sistema en otros consistorios con datasets equivalentes.
-Con la cobertura ya extendida a *Madrid completo*, el siguiente salto técnico es sustituir los grafos en memoria (NetworkX) por nodos espaciales en base de datos (**PostgreSQL + PostGIS con `pgRouting`**), manteniendo el pre-cálculo masivo en Parquet.
+El siguiente salto técnico es extender la cobertura a *Madrid completo* con un grafo conectado a escala ciudad y, después, sustituir los grafos en memoria (NetworkX) por nodos espaciales en base de datos (**PostgreSQL + PostGIS con `pgRouting`**), manteniendo el pre-cálculo masivo en Parquet.
 
 ## 6. Conclusión
 
