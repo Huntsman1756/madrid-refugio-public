@@ -12,11 +12,11 @@ La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cá
 - **Modelo de Alturas de Edificación:** Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).
 - **Proyección Geométrica Solar:** Integración de las bibliotecas `pvlib` y `pybdshadow` para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar).
 - **Matriz de Intersección Calle-Sombra:** Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
-- **Optimización de Confort Térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que penaliza la insolación directa, permitiendo desvíos inteligentes hacia calles en sombra que multiplican la protección frente al estrés térmico.
+- **Optimización de Confort Térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que suma sombra de edificación y arbolado con tope, permitiendo desvíos inteligentes hacia calles con mayor confort térmico.
 
 ### Simulación temporal de sombras
 
-La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). No se consultan APIs meteorológicas externas: el sistema es completamente determinista y reproducible, lo que garantiza su funcionamiento offline y sin coste operativo.
+La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). El cálculo de rutas es completamente determinista y no depende de datos externos. El widget meteorológico consulta AEMET OpenData en tiempo real para mostrar contexto térmico actual, con caché de 15 minutos.
 
 Los pesos de sombra se precomputan para 13 franjas horarias (08:00 a 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecución, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
 
@@ -26,7 +26,7 @@ Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:
 1. **Modelo de Alturas de Edificación (2024):** Geoportal del Ayuntamiento de Madrid. 662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.
 2. **Inventario de Arbolado Viario:** 661.192 ejemplares geolocalizados para sombra biológica.
 3. **Padrón Municipal (Enero 2026):** Población por barrio segregada por edad (>65 años).
-4. **Calidad del Aire Horaria:** Series históricas de NO2 interpoladas mediante IDW (Inverse Distance Weighting).
+4. **Meteorología y Calidad del Aire:** Widget de contexto con AEMET OpenData en tiempo real (temperatura y estado del cielo) y series históricas de NO2 para análisis territorial.
 5. **Fuentes de Agua Potable:** Red de hidrantes públicos integrada en el algoritmo de proximidad.
 6. **Equipamientos Municipales:** Bibliotecas y centros deportivos mapeados como "refugios sustitutos".
 7. **Límites de Barrios y Distritos:** Geometría administrativa oficial.

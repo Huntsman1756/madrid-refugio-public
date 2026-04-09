@@ -10,10 +10,10 @@ A diferencia de soluciones estáticas que simplemente muestran "islas de calor" 
 
 La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cálculo de **Sombra Dinámica Proyectada por Edificación**. Mientras que otras propuestas se limitan a mapas de calor estáticos o históricos, nosotros hemos implementado:
 
-- **Modelo de Alturas de Edificación:** Procesamiento de 448.997 polígonos del Geoportal de Madrid con atributos de altura real (Z).
+- **Modelo de Alturas de Edificación:** Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).
 - **Proyección Geométrica Solar:** Integración de la biblioteca `pvlib` y `pybdshadow` para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar en episodios de ola de calor en Madrid).
 - **Matriz de Intersección Calle-Sombra:** Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
-- **Optimización de Confort Térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que penaliza la insolación directa, permitiendo desvíos inteligentes hacia calles en sombra que multiplican la protección frente al estrés térmico.
+- **Optimización de Confort Térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que suma sombra de edificación y arbolado con tope, permitiendo desvíos inteligentes hacia calles con mayor confort térmico.
 
 ## 3. Reutilización de Datos Abiertos
 
@@ -21,7 +21,7 @@ Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:
 1. **Modelo de Alturas de Edificación (2024):** Geoportal del Ayuntamiento de Madrid. 662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.
 2. **Inventario de Arbolado Viario:** 661.192 ejemplares geolocalizados para sombra biológica.
 3. **Padrón Municipal (Enero 2026):** Población por barrio segregada por edad (>65 años).
-4. **Calidad del Aire Horaria:** Series históricas de NO2 interpoladas mediante IDW (Inverse Distance Weighting).
+4. **Meteorología y Calidad del Aire:** Widget de contexto con AEMET OpenData en tiempo real (temperatura y estado del cielo) y series históricas de NO2 para análisis territorial.
 5. **Fuentes de Agua Potable:** Red de hidrantes públicos integrada en el algoritmo de proximidad.
 6. **Equipamientos Municipales:** Bibliotecas y centros deportivos mapeados como "refugios sustitutos".
 7. **Límites de Barrios y Distritos:** Geometría administrativa oficial.
@@ -35,12 +35,12 @@ Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:
 
 ## 5. Datos precomputados
 
-Los archivos grandes no están en el repositorio (gestionados vía Git LFS).
+Los archivos grandes no están en el repositorio y se publican como artefactos de release.
 
 | Archivo | Descripción | Fuente |
 |---|---|---|
-| `madrid_shadow_graph.graphml.gz` | Grafo de calles con pesos de sombra (13 distritos de Madrid) | [Release v1.2](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.2) |
-| `shadow_matrix.parquet` | Matriz de sombra precomputada por hora | [Release v1.2](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.2) |
+| `madrid_shadow_graph.graphml` | Grafo de calles con sombra de edificación y arbolado integrada | [Release v1.3](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.3) |
+| `shadow_matrix.parquet` | Matriz de sombra precomputada por hora para edificación | [Release v1.3](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.3) |
 
 Colócalos en `data/processed/` antes de lanzar `uvicorn`.
 

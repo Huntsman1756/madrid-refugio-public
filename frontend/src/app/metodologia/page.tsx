@@ -42,7 +42,7 @@ export default function MetodologiaPage() {
           <div className="space-y-4">
             <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Modelo de Alturas de Edificación</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">Procesamiento de 448.997 polígonos del Geoportal de Madrid con atributos de altura real (Z).</p>
+              <p className="text-sm text-[var(--ds-gray-600)]">Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#de1d8d]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Proyección Geométrica Solar</h4>
@@ -54,13 +54,13 @@ export default function MetodologiaPage() {
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#16a34a]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Integración Meteorológica en Tiempo Real</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">Conexión directa con la API OpenData de AEMET para obtener temperatura y estado del cielo actual en Madrid, permitiendo al sistema validar dinámicamente las alertas por calor extremo.</p>
+              <p className="text-sm text-[var(--ds-gray-600)]">Widget de contexto conectado con AEMET OpenData para mostrar temperatura y estado del cielo actual en Madrid, con caché de 15 minutos y sin afectar al cálculo de rutas.</p>
             </Card>
           </div>
           <div className="mt-8">
             <h3 className="text-lg font-semibold text-[var(--ds-black)] mb-3">Simulación temporal de sombras</h3>
             <p className="text-[var(--ds-gray-600)] mb-4">
-              La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). No se consultan APIs meteorológicas externas para la geometría de sombras: el sistema es completamente determinista y reproducible.
+              La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). El cálculo de rutas es completamente determinista y no depende de datos externos. El widget meteorológico consulta AEMET OpenData en tiempo real para mostrar contexto térmico actual, con caché de 15 minutos.
             </p>
             <p className="text-[var(--ds-gray-600)]">
               Los pesos de sombra se precomputan para 13 franjas horarias (08:00 a 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecución, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
@@ -85,7 +85,7 @@ export default function MetodologiaPage() {
                 <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de Alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Arbolado Viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados integrados como factor de sombra biológica base.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">3</td><td className="px-4 py-3 font-medium">Padrón Municipal (2026)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Población por barrio segregada por edad (&gt;65 años).</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Calidad del Aire (AEMET)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Integración de predicciones horarias en tiempo real y series históricas de NO₂.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Meteorología y Calidad del Aire</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Widget de contexto con AEMET OpenData en tiempo real y series históricas de NO₂ para análisis territorial.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">5</td><td className="px-4 py-3 font-medium">Fuentes de Agua Potable</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Red de hidrantes integrada en el algoritmo de proximidad.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">6</td><td className="px-4 py-3 font-medium">Equipamientos Municipales</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Bibliotecas y centros deportivos como &quot;refugios sustitutos&quot;.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">7</td><td className="px-4 py-3 font-medium">Límites Administrativos</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Geometría oficial de barrios y distritos.</td></tr>
