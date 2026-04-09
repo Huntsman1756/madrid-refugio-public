@@ -56,6 +56,7 @@ OUTPUT_GRAPH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
 OUTPUT_MATRIX = PROCESSED_DIR / "shadow_matrix.parquet"
 OUTPUT_SUMMARY = PROCESSED_DIR / "shadow_summary.json"
 TREES_PATH = Path(os.getenv("TREES_PATH", BASE_DIR / "data" / "raw" / "arbolado_detalle.xlsx"))
+DISTRICTS_GEOJSON_PATH = BASE_DIR / "frontend" / "public" / "data" / "barrios_merged.geojson"
 
 
 def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
@@ -82,7 +83,16 @@ def download_multi_district_graph(distritos_list) -> nx.MultiDiGraph:
             graphs.append(g)
             print(f"    ✓ {len(g.nodes)} nodos, {len(g.edges)} aristas")
         except Exception as e:
-            print(f"    ✗ Error: {e}")
+            print(f"    ✗ graph_from_place falló: {e}")
+            fallback_polygon = get_district_polygon(distrito)
+            if fallback_polygon is None:
+                continue
+            try:
+                g = ox.graph_from_polygon(fallback_polygon, network_type="walk", simplify=True)
+                graphs.append(g)
+                print(f"    ✓ Fallback local: {len(g.nodes)} nodos, {len(g.edges)} aristas")
+            except Exception as polygon_error:
+                print(f"    ✗ graph_from_polygon falló: {polygon_error}")
     
     if not graphs:
         raise RuntimeError("No se pudo descargar ningún grafo.")
@@ -95,6 +105,48 @@ def download_multi_district_graph(distritos_list) -> nx.MultiDiGraph:
     
     print(f"  ✓ Grafo fusionado: {len(merged.nodes)} nodos, {len(merged.edges)} aristas")
     return merged
+
+
+def normalize_district_name(raw_name: str) -> str:
+    """Normalize district names so local GeoJSON lookups tolerate accents and punctuation."""
+    replacements = str.maketrans({
+        "á": "a",
+        "é": "e",
+        "í": "i",
+        "ó": "o",
+        "ú": "u",
+        "Á": "a",
+        "É": "e",
+        "Í": "i",
+        "Ó": "o",
+        "Ú": "u",
+    })
+    normalized = raw_name.translate(replacements).lower()
+    normalized = normalized.replace(", madrid, spain", "")
+    normalized = normalized.replace(", madrid", "")
+    normalized = normalized.replace("-", " ")
+    normalized = " ".join(normalized.split())
+    return normalized
+
+
+def get_district_polygon(distrito: str):
+    """Load the district polygon from the local merged barrios GeoJSON as a fallback."""
+    if not DISTRICTS_GEOJSON_PATH.exists():
+        print(f"    ✗ No existe fallback local de distritos: {DISTRICTS_GEOJSON_PATH}")
+        return None
+
+    district_name = normalize_district_name(distrito)
+    district_shapes = gpd.read_file(DISTRICTS_GEOJSON_PATH)[["NOMDIS", "geometry"]].copy()
+    district_shapes["district_lookup"] = district_shapes["NOMDIS"].map(normalize_district_name)
+    selected = district_shapes[district_shapes["district_lookup"] == district_name]
+
+    if selected.empty:
+        print(f"    ✗ No se encontró polígono local para {distrito}")
+        return None
+
+    polygon = selected.to_crs("EPSG:4326").geometry.union_all()
+    print(f"    ↳ Usando fallback local por polígono para {distrito}")
+    return polygon
 
 
 def calculate_shadow_fractions(shadows: gpd.GeoDataFrame, graph: nx.MultiDiGraph) -> dict:
@@ -283,12 +335,12 @@ def main(distritos_list=None, merge=False, trees_path: str | Path | None = None)
     # 4.3 Merge Summary
     if merge and OUTPUT_SUMMARY.exists():
         print("  [Merge] Actualizando resumen...")
-        with open(OUTPUT_SUMMARY, "r") as f:
+        with open(OUTPUT_SUMMARY, "r", encoding="utf-8") as f:
             old_summary = json.load(f)
-        merged_distritos = list(set(old_summary.get("distritos", []) + distritos_list))
+        merged_distritos = sorted(set(old_summary.get("distritos", []) + distritos_list))
         total_buildings = old_summary.get("num_buildings_used", 0) + len(edificios)
     else:
-        merged_distritos = distritos_list
+        merged_distritos = sorted(distritos_list)
         total_buildings = len(edificios)
         
     summary = {
@@ -297,6 +349,7 @@ def main(distritos_list=None, merge=False, trees_path: str | Path | None = None)
         "hours": [f"h{h:02d}" for h in HOURS],
         "num_nodes": num_nodes,
         "num_edges": num_edges,
+        "total_edges": num_edges,
         "num_buildings_used": total_buildings,
         "num_trees_used": tree_stats["trees_in_area"],
         "edges_with_tree_shade": tree_stats["edges_with_tree_shade"],
@@ -305,7 +358,7 @@ def main(distritos_list=None, merge=False, trees_path: str | Path | None = None)
         "matrix_file_mb": round(matrix_size_mb, 1),
         "processing_time_minutes": round((time.time() - t0) / 60, 1),
     }
-    with open(OUTPUT_SUMMARY, "w") as f:
+    with open(OUTPUT_SUMMARY, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
     
     elapsed = time.time() - t0

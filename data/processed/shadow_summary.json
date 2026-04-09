@@ -1,19 +1,27 @@
 {
   "reference_date": "2025-07-15",
   "distritos": [
-    "Tetu·n, Madrid, Spain",
-    "Puente de Vallecas, Madrid, Spain",
-    "Moncloa-Aravaca, Madrid, Spain",
     "Arganzuela, Madrid, Spain",
-    "Villaverde, Madrid, Spain",
-    "Fuencarral-El Pardo, Madrid, Spain",
+    "Barajas, Madrid, Spain",
     "Carabanchel, Madrid, Spain",
-    "Retiro, Madrid, Spain",
-    "Usera, Madrid, Spain",
-    "Latina, Madrid, Spain",
     "Centro, Madrid, Spain",
+    "Chamartin, Madrid, Spain",
+    "Chamber√≠, Madrid, Spain",
+    "Ciudad Lineal, Madrid, Spain",
+    "Fuencarral-El Pardo, Madrid, Spain",
+    "Hortaleza, Madrid, Spain",
+    "Latina, Madrid, Spain",
+    "Moncloa-Aravaca, Madrid, Spain",
+    "Moratalaz, Madrid, Spain",
+    "Puente de Vallecas, Madrid, Spain",
+    "Retiro, Madrid, Spain",
     "Salamanca, Madrid, Spain",
-    "ChamberÌ, Madrid, Spain"
+    "San Blas-Canillejas, Madrid, Spain",
+    "Tetu√°n, Madrid, Spain",
+    "Usera, Madrid, Spain",
+    "Vic√°lvaro, Madrid, Spain",
+    "Villa de Vallecas, Madrid, Spain",
+    "Villaverde, Madrid, Spain"
   ],
   "hours": [
     "h08",
@@ -30,10 +38,14 @@
     "h19",
     "h20"
   ],
-  "num_nodes": 106544,
-  "num_edges": 320844,
-  "num_buildings_used": 662173,
-  "graph_file_mb": 159.3,
-  "matrix_file_mb": 8.4,
-  "processing_time_minutes": 17.8
+  "num_nodes": 171989,
+  "num_edges": 514760,
+  "num_buildings_used": 984623,
+  "num_trees_used": 40099,
+  "edges_with_tree_shade": 8546,
+  "tree_influence_radius_m": 10.0,
+  "graph_file_mb": 304.2,
+  "matrix_file_mb": 12.9,
+  "processing_time_minutes": 24.8,
+  "total_edges": 514760
 }
