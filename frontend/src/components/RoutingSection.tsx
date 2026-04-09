@@ -20,9 +20,48 @@ interface RoutingSectionProps {
   onRouteCalculated?: (result: any) => void;
 }
 
+type ScenarioId = "carabanchel" | "villaverde";
+
+const SCENARIOS: Record<
+  ScenarioId,
+  {
+    label: string;
+    origin: string;
+    destination: string;
+    shortestLength: number;
+    comfortLength: number;
+    sunSavedMin: number;
+    extraEffortMin: number;
+    context: string;
+  }
+> = {
+  carabanchel: {
+    label: "Plaza Elíptica → Gómez Ulla",
+    origin: "Plaza Eliptica, Madrid",
+    destination: "Hospital Central de la Defensa Gomez Ulla, Madrid",
+    shortestLength: 4276.4,
+    comfortLength: 4676.9,
+    sunSavedMin: 15.3,
+    extraEffortMin: 4.8,
+    context: "Corredor de demo por defecto: 15 min menos al sol a cambio de 5 min de rodeo.",
+  },
+  villaverde: {
+    label: "Villaverde Alto → Ciudad de los Ángeles",
+    origin: "Villaverde Alto, Madrid",
+    destination: "Ciudad de los Angeles, Madrid",
+    shortestLength: 3070,
+    comfortLength: 3190,
+    sunSavedMin: 3.4,
+    extraEffortMin: 1.4,
+    context:
+      "En zonas con déficit de arbolado e infraestructura verde, el sistema optimiza lo disponible pero evidencia la necesidad de más inversión.",
+  },
+};
+
 export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
-  const [origin, setOrigin] = useState("Plaza Eliptica, Madrid");
-  const [destination, setDestination] = useState("Hospital Central de la Defensa Gomez Ulla, Madrid");
+  const [scenarioId, setScenarioId] = useState<ScenarioId>("carabanchel");
+  const [origin, setOrigin] = useState(SCENARIOS.carabanchel.origin);
+  const [destination, setDestination] = useState(SCENARIOS.carabanchel.destination);
   const [hour, setHour] = useState(14);
   const [preference, setPreference] = useState(1.0);
   const [loading, setLoading] = useState(false);
@@ -30,6 +69,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [metrics, setMetrics] = useState<any>(null);
   const [routeResult, setRouteResult] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const selectedScenario = SCENARIOS[scenarioId];
 
   // Time slider automation
   useEffect(() => {
@@ -50,14 +90,24 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   }, [hour, isPlaying]);
 
   const isHeatHour = hour >= 12 && hour <= 17;
-  const fallbackShortestLength = 4276.4;
-  const fallbackComfortLength = 4676.9;
-  const fallbackSunSavedMin = 15.3;
-  const fallbackExtraEffortMin = 4.8;
+  const fallbackShortestLength = selectedScenario.shortestLength;
+  const fallbackComfortLength = selectedScenario.comfortLength;
+  const fallbackSunSavedMin = selectedScenario.sunSavedMin;
+  const fallbackExtraEffortMin = selectedScenario.extraEffortMin;
   const shortestLengthMeters = metrics?.shortest?.length ?? fallbackShortestLength;
   const comfortLengthMeters = metrics?.comfort?.length ?? fallbackComfortLength;
   const sunSavedMin = metrics?.human?.sun_time_saved_min ?? fallbackSunSavedMin;
   const extraEffortMin = metrics?.human?.extra_effort_min ?? fallbackExtraEffortMin;
+
+  const applyScenario = (nextScenarioId: ScenarioId) => {
+    const scenario = SCENARIOS[nextScenarioId];
+    setScenarioId(nextScenarioId);
+    setOrigin(scenario.origin);
+    setDestination(scenario.destination);
+    setMetrics(null);
+    setRouteResult(null);
+    setError(null);
+  };
 
   const handleCalculate = async () => {
     setLoading(true);
@@ -175,6 +225,33 @@ ${gpxPoints}
           </ul>
 
           <Card level={2} className="p-6 border border-[var(--ds-gray-100)]">
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-[var(--ds-gray-600)] mb-2">
+                Escenario de demostración
+              </label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {(Object.entries(SCENARIOS) as [ScenarioId, (typeof SCENARIOS)[ScenarioId]][]).map(
+                  ([id, scenario]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => applyScenario(id)}
+                      className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                        scenarioId === id
+                          ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white"
+                          : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"
+                      }`}
+                    >
+                      <span className="block text-sm font-semibold">{scenario.label}</span>
+                    </button>
+                  ),
+                )}
+              </div>
+              <p className="mt-3 text-xs text-[var(--ds-gray-500)]">
+                {selectedScenario.context}
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="flex justify-between text-sm font-medium text-[var(--ds-gray-600)] mb-1">
