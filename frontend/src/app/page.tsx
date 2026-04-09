@@ -199,7 +199,7 @@ export default function Home() {
               <Activity className="w-5 h-5" />
             </div>
             <h3 className="card-title text-[var(--ds-black)]">Salud</h3>
-            <p className="text-[var(--ds-gray-600)] mb-1">Reducción del estrés térmico en el grupo de mayor mortalidad (Mayores 65+). Protección Activa.</p>
+            <p className="text-[var(--ds-gray-600)] mb-1">Reducción del estrés térmico en el grupo de mayor mortalidad (mayores de 65). Protección activa.</p>
             <span className="text-sm font-semibold text-[#0a72ef] mt-auto">+<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra acumulada en ruta óptima</span>
           </Card>
           <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
@@ -220,21 +220,21 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Diagnóstico Urbano (Insights) */}
+        {/* Diagnóstico urbano (insights) */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico Urbano</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico urbano</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-24 stagger-children">
           <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30 fade-in-up">
-            <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo Sur</span>
+            <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo sur</span>
             <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30 fade-in-up">
-             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de Proximidad</span>
+             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de proximidad</span>
              <p className="text-sm text-[var(--ds-black)] font-medium"><span className="font-bold">64,1% de los barrios</span> de Madrid no cuentan con un refugio climático operativo a menos de 300 metros caminables.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
-             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas Optimizadas</span>
+             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas optimizadas</span>
              <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">unos metros</span> permite sumar kilometros de sombra acumulada combinando arbolado y proyeccion geometrica de edificios.</p>
           </Card>
         </div>
@@ -246,7 +246,7 @@ export default function Home() {
         {/* Map and Detail Section */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 grid gap-5 md:grid-cols-[minmax(0,1fr)_360px] md:items-end">
           <div>
-            <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de Vulnerabilidad Territorial</h2>
+            <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de vulnerabilidad territorial</h2>
             <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
           </div>
           
@@ -256,13 +256,13 @@ export default function Home() {
                 onClick={() => setViewMode('vulnerability')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'vulnerability' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Vulnerabilidad General
+                Vulnerabilidad general
               </button>
               <button 
                 onClick={() => setViewMode('shelter_deficit')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'shelter_deficit' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Déficit de Refugios
+                Déficit de refugios
               </button>
             </div>
             <p className="mt-3 text-[11px] sm:text-xs text-[var(--ds-gray-500)] leading-relaxed">
@@ -481,7 +481,7 @@ export default function Home() {
 
         {/* Data Sources Section */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de Datos Abiertos</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de datos abiertos</h2>
           <p className="text-[var(--ds-gray-600)] mt-2">Todos los datos provienen del ecosistema abierto del Ayuntamiento de Madrid.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">

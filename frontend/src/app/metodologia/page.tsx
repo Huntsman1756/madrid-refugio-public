@@ -41,19 +41,19 @@ export default function MetodologiaPage() {
           </p>
           <div className="space-y-4">
             <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef]">
-              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Modelo de Alturas de Edificación</h4>
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Modelo de alturas de edificación</h4>
               <p className="text-sm text-[var(--ds-gray-600)]">Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#de1d8d]">
-              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Proyección Geométrica Solar</h4>
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Proyección geométrica solar</h4>
               <p className="text-sm text-[var(--ds-gray-600)]">Integración de las bibliotecas <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pvlib</code> y <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pybdshadow</code> para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar).</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f]">
-              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Matriz de Intersección Calle-Sombra</h4>
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Matriz de intersección calle-sombra</h4>
               <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#16a34a]">
-              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Integración Meteorológica en Tiempo Real</h4>
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Integración meteorológica en tiempo real</h4>
               <p className="text-sm text-[var(--ds-gray-600)]">Widget de contexto conectado con AEMET OpenData para mostrar temperatura y estado del cielo actual en Madrid, con caché de 15 minutos y sin afectar al cálculo de rutas.</p>
             </Card>
           </div>
@@ -68,9 +68,9 @@ export default function MetodologiaPage() {
           </div>
         </section>
 
-        {/* 3. Reutilización de Datos Abiertos */}
+        {/* 3. Reutilización de datos abiertos */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Reutilización de Datos Abiertos</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Reutilización de datos abiertos</h2>
           <p className="text-[var(--ds-gray-600)] mb-6">Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:</p>
           <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden">
             <table className="w-full text-sm text-left">
@@ -82,7 +82,7 @@ export default function MetodologiaPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
-                <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de Alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Arbolado Viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados integrados como factor de sombra biológica base.</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">3</td><td className="px-4 py-3 font-medium">Padrón Municipal (2026)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Población por barrio segregada por edad (&gt;65 años).</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Meteorología y Calidad del Aire</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Widget de contexto con AEMET OpenData en tiempo real y series históricas de NO₂ para análisis territorial.</td></tr>
@@ -100,9 +100,9 @@ export default function MetodologiaPage() {
           </div>
         </section>
 
-        {/* 4. Impacto Social */}
+        {/* 4. Impacto social */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">4. Impacto Social y Justicia Térmica</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">4. Impacto social y justicia térmica</h2>
           <p className="text-[var(--ds-gray-600)]">
             El análisis territorial ha revelado realidades críticas: <strong>Villaverde y Aluche</strong> emergen como zonas de máxima prioridad por su combinación de población envejecida y déficit de infraestructura de refugio. Madrid Refugio proporciona a los planificadores urbanos una hoja de ruta basada en datos para la creación de la red oficial de refugios climáticos.
           </p>
@@ -110,7 +110,7 @@ export default function MetodologiaPage() {
 
         {/* 5. Escalabilidad */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Escalabilidad y Arquitectura</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Escalabilidad y arquitectura</h2>
           <p className="text-[var(--ds-gray-600)] mb-4">
             Madrid Refugio nace con vocación de producto estable y exportable. La arquitectura modular (Frontend, Backend y Motor Algorítmico) está diseñada para ser replicable por otros consistorios que deseen implementar sistemas similares de protección climática.
           </p>
