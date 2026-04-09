@@ -138,10 +138,10 @@ ${gpxPoints}
     <div className="mb-24">
       <div className="mb-8 border-b border-[var(--ds-gray-100)] pb-6">
         <h2 className="sub-heading-large text-[var(--ds-black)]">Navegador de Rutas Climáticas</h2>
-        <p className="text-[var(--ds-gray-600)] mt-2">Planifica tu trayecto priorizando la sombra y la proximidad a fuentes y refugios.</p>
+        <p className="text-[var(--ds-gray-600)] mt-2">Planifica tu trayecto priorizando la sombra y la proximidad a fuentes y refugios climáticos.</p>
         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#fffbeb] border border-[#fde68a] text-xs text-[#92400e]">
           <span>⚡</span>
-          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Tetuán, Chamberí, Fuencarral, Moncloa-Aravaca, Centro, Arganzuela, Retiro, Salamanca, Carabanchel, Usera, Latina y Puente de Vallecas</strong>. Origen y destino deben estar en esa zona.</span>
+          <span><strong>Demo:</strong> Grafo de sombras activo en corredor <strong>Tetuán, Chamberí, Fuencarral, Moncloa-Aravaca, Centro, Arganzuela, Retiro, Salamanca, Carabanchel, Usera, Latina, Puente de Vallecas y Villaverde</strong>. Origen y destino deben estar en esa zona.</span>
         </div>
       </div>
 
