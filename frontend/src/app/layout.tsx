@@ -15,24 +15,35 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Madrid Refugio | Motor de Simulación Climática Urbana",
-  description: "Herramienta de datos abiertos que calcula rutas de confort térmico en tiempo real cruzando sombras de edificios, arbolado y demografía para proteger a los mayores de 65 años del calor extremo en Madrid.",
-  keywords: ["refugios climáticos Madrid", "estrés térmico mayores", "datos abiertos Madrid 2026", "sombra urbana", "rutas frescas madrid", "isla de calor", "confort térmico"],
+  title: "Madrid Refugio | Motor de simulación climática urbana",
+  description:
+    "Herramienta de datos abiertos que calcula rutas de confort térmico en tiempo real cruzando sombras de edificios, arbolado y demografía para proteger a los mayores de 65 años del calor extremo en Madrid.",
+  keywords: [
+    "refugios climáticos Madrid",
+    "estrés térmico mayores",
+    "datos abiertos Madrid 2026",
+    "sombra urbana",
+    "rutas frescas madrid",
+    "isla de calor",
+    "confort térmico",
+  ],
   authors: [{ name: "Proyecto Concurso Datos Abiertos Madrid 2026" }],
   icons: {
     icon: "/favicon.svg",
   },
   openGraph: {
-    title: "Madrid Refugio | Motor de Simulación Climática Urbana",
-    description: "Protegiendo a 430.000 mayores del calor extremo con rutas de sombra calculadas en tiempo real. 662.173 polígonos LiDAR · 661.000 árboles · 13 franjas horarias.",
+    title: "Madrid Refugio | Motor de simulación climática urbana",
+    description:
+      "Protegiendo a 430.000 mayores del calor extremo con rutas de sombra calculadas en tiempo real. 662.173 polígonos LiDAR · 661.192 árboles · 13 franjas horarias.",
     type: "website",
     locale: "es_ES",
     siteName: "Madrid Refugio",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Madrid Refugio | Motor de Simulación Climática Urbana",
-    description: "Rutas de confort térmico en tiempo real para Madrid. Datos abiertos al servicio de la salud pública.",
+    title: "Madrid Refugio | Motor de simulación climática urbana",
+    description:
+      "Rutas de confort térmico en tiempo real para Madrid. Datos abiertos al servicio de la salud pública.",
   },
 };
 

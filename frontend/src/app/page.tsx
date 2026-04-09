@@ -177,14 +177,14 @@ export default function Home() {
             </div>
           </div>
           <h1 className="display-hero text-[var(--ds-black)]">
-            Protegiendo a la población mayor del <span className="gradient-text">calor extremo</span>
+            Protegiendo a la población mayor del <span className="text-[#b42318]">calor extremo</span>
           </h1>
           <p className="body-large text-[var(--ds-gray-600)]">
             Madrid Refugio es un motor dinámico de sombras que cruza la altura de los edificios (LiDAR) y la posición del sol con la densidad demográfica. Identificamos la ruta de mayor confort térmico calle a calle.
           </p>
           <div className="flex items-center gap-4 pt-4">
             <Button variant="primary" className="h-12 px-6 text-base" onClick={() => document.getElementById("routing")?.scrollIntoView({behavior: "smooth"})}>Explorar Mapa <ArrowRight className="w-4 h-4 ml-2" /></Button>
-            <Link href="/metodologia"><Button variant="secondary" className="h-12 px-6 text-base">Leer Metodología</Button></Link>
+            <Link href="/metodologia"><Button variant="secondary" className="h-12 px-6 text-base">Leer metodología</Button></Link>
           </div>
         </div>
 
