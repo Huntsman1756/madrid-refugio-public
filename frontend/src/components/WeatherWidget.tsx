@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cloud, Sun, CloudRain, Thermometer, AlertCircle, RefreshCw } from "lucide-react";
+import { Sun, Thermometer, AlertCircle, RefreshCw } from "lucide-react";
 
 interface WeatherData {
   municipio: string;
@@ -39,7 +39,7 @@ export function WeatherWidget() {
 
   if (loading && !weather) {
     return (
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)] text-[var(--ds-gray-500)] text-xs animate-pulse">
+      <div className="inline-flex min-h-[36px] min-w-[180px] items-center justify-center gap-2 rounded-full border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] px-3 py-1 text-xs text-[var(--ds-gray-500)]">
         <RefreshCw className="w-3 h-3 animate-spin" />
         Consultando AEMET...
       </div>
@@ -47,7 +47,12 @@ export function WeatherWidget() {
   }
 
   if (weather?.error || !weather) {
-    return null; // Silencioso si hay error o no hay key configurada
+    return (
+      <div className="inline-flex min-h-[36px] min-w-[180px] items-center justify-center gap-2 rounded-full border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] px-3 py-1 text-xs text-[var(--ds-gray-500)]">
+        <Thermometer className="w-3 h-3" />
+        AEMET no disponible
+      </div>
+    );
   }
 
   const isHot = weather.temperatura >= 30;
