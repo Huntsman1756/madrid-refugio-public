@@ -32,6 +32,7 @@ generate_shadows = SourceFileLoader("shadow_engine", "06b_shadow_engine.py").loa
 tree_integrator = SourceFileLoader("tree_integrator", "06e_integrate_trees.py").load_module()
 
 warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="geopandas.array")
 
 DISTRITOS = [
     "Arganzuela, Madrid, Spain",
@@ -121,7 +122,9 @@ def get_processing_areas(distritos_list, districts_path: Path = DISTRICTS_GEOJSO
     if selected.empty:
         raise RuntimeError("No se encontraron areas de procesamiento para los distritos solicitados.")
 
-    return selected.sort_values("NOMDIS").reset_index(drop=True)
+    dissolved = selected.dissolve(by="NOMDIS", as_index=False)
+    dissolved["district_lookup"] = dissolved["NOMDIS"].map(normalize_district_name)
+    return dissolved.sort_values("NOMDIS").reset_index(drop=True)
 
 
 def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
@@ -178,8 +181,31 @@ def calculate_shadow_fractions(shadows: gpd.GeoDataFrame, graph: nx.MultiDiGraph
             shadow_fractions[(u, v, key)] = 0.0
         return shadow_fractions
 
-    valid_shadows = shadows.geometry.buffer(0)
-    shadow_union = unary_union(valid_shadows)
+    valid_shadows = shadows.geometry.copy()
+    valid_shadows = valid_shadows[valid_shadows.notna()]
+    valid_shadows = valid_shadows.buffer(0)
+    valid_shadows = valid_shadows[~valid_shadows.is_empty]
+
+    try:
+        shadow_union = unary_union(valid_shadows)
+    except Exception as exc:
+        print(f"    [WARN] unary_union failed ({exc.__class__.__name__}). Repairing shadow geometries individually.")
+        repaired_geometries = []
+        for geom in valid_shadows:
+            try:
+                repaired = geom.buffer(0)
+                if repaired.is_empty:
+                    continue
+                repaired_geometries.append(repaired)
+            except Exception:
+                continue
+
+        if not repaired_geometries:
+            for u, v, key in graph.edges(keys=True):
+                shadow_fractions[(u, v, key)] = 0.0
+            return shadow_fractions
+
+        shadow_union = unary_union(repaired_geometries)
 
     total_edges = len(graph.edges)
     for i, (u, v, key, data) in enumerate(graph.edges(keys=True, data=True)):
