@@ -211,7 +211,7 @@ export default function Home() {
               <MapIcon className="w-5 h-5" />
             </div>
             <h3 className="card-title text-[var(--ds-black)]">Equidad</h3>
-            <p className="text-[var(--ds-gray-600)] mb-1">Intervención prioritaria en barrios con déficit de refugios y alta contaminación. Justicia Térmica.</p>
+            <p className="text-[var(--ds-gray-600)] mb-1">Intervención prioritaria en barrios con déficit de refugios y alta contaminación. Acceso equitativo a rutas con sombra.</p>
             <span className="text-sm font-semibold text-[#ff5b4f] mt-auto">64,1% de barrios sin refugio a &lt;300 m</span>
           </Card>
         </div>

@@ -25,6 +25,7 @@ interface MapComponentProps {
   routeResult?: any;
   flyTarget?: { lat: number; lon: number } | null;
   viewMode?: 'vulnerability' | 'shelter_deficit';
+  showLegend?: boolean;
 }
 
 // ── Inner controllers (must live inside MapContainer) ──────────────────────
@@ -100,7 +101,7 @@ const shelterIcon = L.divIcon({
 });
 
 const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapComponent(
-  { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget, viewMode = 'vulnerability' },
+  { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget, viewMode = 'vulnerability', showLegend = true },
   ref
 ) {
   const mapRef = useRef<L.Map | null>(null);
@@ -243,7 +244,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       </MapContainer>
 
       {/* Map legend for vulnerability/shelter deficit */}
-      {!routeResult && (
+      {!routeResult && showLegend && (
         <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-2 z-[1000] shadow-sm max-w-[180px]">
           <p className="font-bold text-[var(--ds-black)] mb-1">
             {viewMode === 'shelter_deficit' ? 'Déficit de refugios' : 'Vulnerabilidad'}
