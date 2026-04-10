@@ -104,6 +104,95 @@ app_state = AppState()
 AEMET_API_KEY = os.getenv("AEMET_API_KEY")
 MADRID_MUNICIPIO_ID = "28079"
 
+
+def select_current_aemet_snapshot(prediccion_dias: list[dict], now: datetime) -> tuple[dict, str]:
+    """Pick the latest available hourly temperature slot, falling back to the nearest future slot."""
+    past_candidates: list[tuple[float, dict, str]] = []
+    future_candidates: list[tuple[float, dict, str]] = []
+
+    for day in prediccion_dias:
+        day_str = day.get("fecha")
+        if not day_str:
+            continue
+        try:
+            day_date = datetime.fromisoformat(day_str).date()
+        except Exception:
+            continue
+
+        for temp_entry in day.get("temperatura", []):
+            period = temp_entry.get("periodo")
+            if period is None or not str(period).isdigit():
+                continue
+            hour = int(period)
+            if hour < 0 or hour > 23:
+                continue
+            candidate_dt = now.replace(
+                year=day_date.year,
+                month=day_date.month,
+                day=day_date.day,
+                hour=hour,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            delta_seconds = (candidate_dt - now).total_seconds()
+            candidate = (abs(delta_seconds), temp_entry, f"{hour:02d}:00")
+            if delta_seconds <= 0:
+                past_candidates.append(candidate)
+            else:
+                future_candidates.append(candidate)
+
+    if not past_candidates and not future_candidates:
+        raise ValueError("AEMET no devuelve tramos horarios válidos.")
+
+    pool = past_candidates or future_candidates
+    _, best_temp, timestamp = min(pool, key=lambda item: item[0])
+    return best_temp, timestamp
+
+
+def select_current_sky_state(prediccion_dias: list[dict], now: datetime) -> str:
+    past_candidates: list[tuple[float, str]] = []
+    future_candidates: list[tuple[float, str]] = []
+
+    for day in prediccion_dias:
+        day_str = day.get("fecha")
+        if not day_str:
+            continue
+        try:
+            day_date = datetime.fromisoformat(day_str).date()
+        except Exception:
+            continue
+
+        for sky_entry in day.get("estadoCielo", []):
+            period = sky_entry.get("periodo")
+            if period is None or not str(period).isdigit():
+                continue
+            hour = int(period)
+            if hour < 0 or hour > 23:
+                continue
+            candidate_dt = now.replace(
+                year=day_date.year,
+                month=day_date.month,
+                day=day_date.day,
+                hour=hour,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            delta_seconds = (candidate_dt - now).total_seconds()
+            candidate = (abs(delta_seconds), sky_entry.get("descripcion") or "Despejado")
+            if delta_seconds <= 0:
+                past_candidates.append(candidate)
+            else:
+                future_candidates.append(candidate)
+
+    if not past_candidates and not future_candidates:
+        return "Despejado"
+
+    pool = past_candidates or future_candidates
+    _, sky_desc = min(pool, key=lambda item: item[0])
+    return sky_desc
+
 def fetch_aemet_data():
     """Implementa el patrón de doble fetch de AEMET OpenData"""
     if not AEMET_API_KEY:
@@ -127,39 +216,23 @@ def fetch_aemet_data():
         resp_datos = requests.get(url_datos, timeout=10)
         datos = resp_datos.json()
         
-        # Extraer info relevante buscando la hora más cercana a la actual
-        # Ajustamos por zona horaria de forma robusta
-        prediccion = datos[0]["prediccion"]["dia"][0]
+        # Extraer info relevante buscando la hora mas cercana a la actual
         try:
             from zoneinfo import ZoneInfo
-            hora_madrid = datetime.now(ZoneInfo("Europe/Madrid")).hour
+            now_madrid = datetime.now(ZoneInfo("Europe/Madrid"))
         except Exception:
-            # Fallback si zoneinfo no está disponible o falla
-            hora_madrid = (datetime.utcnow().hour + 2) % 24
-        
-        # Filtrar temperatura por periodo más cercano
-        temp_list = prediccion.get("temperatura", [])
-        if temp_list:
-            best_t = min(temp_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_madrid))
-            temp_actual = best_t.get("value")
-            forecast_hour = best_t.get("periodo")
-        else:
-            temp_actual = "N/A"
-            forecast_hour = "--"
+            now_madrid = datetime.utcnow()
 
-        # Filtrar estado del cielo
-        cielo_list = prediccion.get("estadoCielo", [])
-        if cielo_list:
-            best_c = min(cielo_list, key=lambda h: abs(int(h.get("periodo", "0")) - hora_madrid))
-            cielo_desc = best_c.get("descripcion")
-        else:
-            cielo_desc = "Despejado"
+        prediccion_dias = datos[0]["prediccion"]["dia"]
+        best_temp, forecast_timestamp = select_current_aemet_snapshot(prediccion_dias, now_madrid)
+        temp_actual = best_temp.get("value", "N/A")
+        cielo_desc = select_current_sky_state(prediccion_dias, now_madrid)
         
         result = {
             "municipio": "Madrid",
             "temperatura": temp_actual,
             "estado_cielo": cielo_desc,
-            "timestamp": f"{forecast_hour}:00",
+            "timestamp": forecast_timestamp,
             "fuente": "AEMET (OpenData)"
         }
         
