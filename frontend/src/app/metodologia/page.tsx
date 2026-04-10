@@ -171,7 +171,7 @@ export default function MetodologiaPage() {
         </section>
 
         <section className="mb-12">
-          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">4. Impacto social y justicia termica</h2>
+          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">4. Impacto social y acceso equitativo a rutas con sombra</h2>
           <div className="space-y-4 text-[var(--ds-gray-600)]">
             <p>
               El analisis territorial senala barrios con una combinacion especialmente critica de edad, calor y deficit
