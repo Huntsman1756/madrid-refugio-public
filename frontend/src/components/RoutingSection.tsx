@@ -182,10 +182,10 @@ function mapErrorMessage(detail: string | null): string {
     return "No hemos encontrado esa direccion. Prueba con una calle y numero o usa uno de los escenarios de demo.";
   }
   if (normalized.includes("fuera de madrid")) {
-    return "La direccion debe estar en Madrid. Prueba con una direccion mas concreta dentro del corredor disponible.";
+    return "La direccion debe estar en Madrid. Prueba con una direccion mas concreta dentro del municipio.";
   }
   if (normalized.includes("area de routing activa") || normalized.includes("corredor")) {
-    return "La ruta sale fuera del corredor disponible. Usa uno de los escenarios de demo o direcciones dentro de la zona activa.";
+    return "No hemos podido conectar ese punto con la red peatonal. Prueba con una direccion mas concreta dentro de Madrid.";
   }
   return "No se ha podido calcular ahora mismo. Intentalo de nuevo en unos segundos.";
 }
@@ -338,8 +338,7 @@ ${gpxPoints}
         <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-[#fde68a] bg-[#fffbeb] px-3 py-1.5 text-xs text-[#92400e]">
           <span>⚡</span>
           <span>
-            <strong>Demo:</strong> corredor activo en Tetuan, Chamberi, Fuencarral, Moncloa-Aravaca, Centro,
-            Arganzuela, Retiro, Salamanca, Carabanchel, Usera, Latina, Puente de Vallecas y Villaverde.
+            <strong>Demo:</strong> cobertura operativa en los 21 distritos de Madrid.
           </span>
         </div>
       </div>

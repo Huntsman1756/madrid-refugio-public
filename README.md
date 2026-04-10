@@ -6,7 +6,7 @@
 
 Su uso directo esta pensado para cuidadores, familiares y personal municipal que planifican desplazamientos o priorizan intervenciones en apoyo de personas mayores. El beneficiario final es la poblacion mayor de 65 anos mas expuesta al calor.
 
-A diferencia de los mapas estaticos de isla de calor, Madrid Refugio calcula rutas de confort termico en tiempo real sobre 320.844 aristas y 13 franjas horarias.
+A diferencia de los mapas estaticos de isla de calor, Madrid Refugio calcula rutas de confort termico en tiempo real sobre 520.128 aristas y 13 franjas horarias.
 
 ## 2. Innovacion tecnologica: motor de sombra dinamica proyectada
 
@@ -14,7 +14,7 @@ Madrid Refugio calcula **sombra dinamica proyectada por edificacion** y la combi
 
 - **Modelo de alturas de edificacion:** Procesamiento de 662.173 poligonos del Geoportal de Madrid con atributos de altura real (Z).
 - **Proyeccion geometrica solar:** Integracion de la biblioteca `pvlib` y `pybdshadow` para el calculo dinamico de la posicion solar (azimut y elevacion) basada en coordenadas geograficas y fecha de referencia (15 de julio, fecha representativa de maxima incidencia solar en episodios de ola de calor en Madrid).
-- **Matriz de interseccion calle-sombra:** Generacion offline de una matriz de 320.844 aristas x 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos segun la hora seleccionada por el usuario.
+- **Matriz de interseccion calle-sombra:** Generacion offline de una matriz de 520.128 aristas x 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos segun la hora seleccionada por el usuario.
 - **Optimizacion de confort termico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que suma sombra de edificacion y arbolado con tope, permitiendo desvios inteligentes hacia calles con mayor confort termico.
 
 ## 3. Reutilizacion de datos abiertos
@@ -41,8 +41,8 @@ Los archivos grandes no estan en el repositorio y se publican como artefactos de
 
 | Archivo | Descripcion | Fuente |
 |---|---|---|
-| `madrid_shadow_graph.graphml` | Grafo de calles con sombra de edificacion y arbolado integrada | [Release v1.3](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.3) |
-| `shadow_matrix.parquet` | Matriz de sombra precomputada por hora para edificacion | [Release v1.3](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.3) |
+| `madrid_shadow_graph.graphml` | Grafo de calles con sombra de edificacion y arbolado integrada | [Release v1.4](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4) |
+| `shadow_matrix.parquet` | Matriz de sombra precomputada por hora para edificacion | [Release v1.4](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4) |
 
 Colocalos en `data/processed/` antes de lanzar `uvicorn`.
 

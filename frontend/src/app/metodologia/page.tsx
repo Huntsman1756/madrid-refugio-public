@@ -113,7 +113,7 @@ export default function MetodologiaPage() {
             <Card level={1} className="border-l-4 border-l-[#ff5b4f] p-5">
               <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Matriz calle-sombra</h3>
               <p className="text-sm text-[var(--ds-gray-600)]">
-                Generacion offline de una matriz de <strong>320.844 aristas x 13 franjas horarias</strong> para ajustar
+                Generacion offline de una matriz de <strong>520.128 aristas x 13 franjas horarias</strong> para ajustar
                 pesos en microsegundos segun la hora elegida.
               </p>
             </Card>
@@ -194,10 +194,9 @@ export default function MetodologiaPage() {
               sistema en otros municipios con datasets equivalentes.
             </p>
             <p>
-              La version operativa actual trabaja sobre el corredor ya validado. El siguiente salto tecnico es extender
-              la cobertura a <em>Madrid completo</em> con un grafo urbano conectado a escala ciudad y, despues, migrar
-              el routing a <strong>PostgreSQL + PostGIS con pgRouting</strong> para manejar millones de aristas con el
-              mismo esquema de precomputacion en Parquet.
+              La version operativa actual ya cubre los <em>21 distritos de Madrid</em>. El siguiente salto tecnico es
+              migrar el routing a <strong>PostgreSQL + PostGIS con pgRouting</strong> para manejar millones de aristas
+              con el mismo esquema de precomputacion en Parquet y reducir tiempos de carga en produccion.
             </p>
           </div>
         </section>
