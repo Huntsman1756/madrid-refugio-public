@@ -344,6 +344,7 @@ ${gpxPoints}
             fuentes={null}
             onBarrioSelect={() => {}}
             routeResult={routeResult}
+            showLegend={false}
           />
         </div>
 
