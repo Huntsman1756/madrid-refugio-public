@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { AlertTriangle, Download, Navigation, Share2 } from "lucide-react";
+import { AlertTriangle, Download, LoaderCircle, Navigation, Share2 } from "lucide-react";
 
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
@@ -26,6 +26,11 @@ type Priority = "directa" | "equilibrada" | "protegida";
 
 type RouteApiResult = {
   comfort_coords: number[][];
+  shortest_coords?: number[][];
+  origin_latlon?: [number, number];
+  destination_latlon?: [number, number];
+  origin?: string;
+  destination?: string;
   metrics: {
     shortest: {
       length: number;
@@ -153,7 +158,7 @@ function MetricCard({
 }) {
   const tones =
     tone === "positive"
-      ? "border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]"
+      ? "border-[#86efac] bg-[#dcfce7] text-[#14532d]"
       : "border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] text-[var(--ds-black)]";
 
   return (
@@ -197,6 +202,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [hour, setHour] = useState(14);
   const [priority, setPriority] = useState<Priority>("equilibrada");
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [routeResult, setRouteResult] = useState<RouteApiResult | null>(null);
 
@@ -208,6 +214,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const sunSavedMin = metrics?.human.sun_time_saved_min ?? scenario.sunSavedMin;
   const extraEffortMin = metrics?.human.extra_effort_min ?? scenario.extraEffortMin;
   const canProceed = origin.trim().length > 3 && destination.trim().length > 3;
+  const visibleRouteResult = error ? null : routeResult;
 
   const summary = useMemo(
     () =>
@@ -237,6 +244,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
 
   const calculate = async () => {
     setLoading(true);
+    setRouteResult(null);
     setError(null);
 
     try {
@@ -343,7 +351,8 @@ ${gpxPoints}
             refugios={null}
             fuentes={null}
             onBarrioSelect={() => {}}
-            routeResult={routeResult}
+            routeResult={visibleRouteResult}
+            showLegend={false}
           />
         </div>
 
@@ -393,16 +402,33 @@ ${gpxPoints}
                       <button
                         type="button"
                         onClick={() => {
-                          if (!navigator.geolocation) return;
-                          navigator.geolocation.getCurrentPosition((pos) => {
-                            setOrigin(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
-                            setRouteResult(null);
-                            setError(null);
-                          });
+                          if (!navigator.geolocation) {
+                            setError("Tu navegador no permite usar la ubicacion actual.");
+                            return;
+                          }
+
+                          setLocating(true);
+                          setRouteResult(null);
+                          setError(null);
+
+                          navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                              setOrigin(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
+                              setRouteResult(null);
+                              setError(null);
+                              setLocating(false);
+                            },
+                            () => {
+                              setError("No hemos podido obtener tu ubicacion actual. Revisa los permisos del navegador.");
+                              setLocating(false);
+                            },
+                          );
                         }}
-                        className="text-xs text-[#0a72ef] hover:underline"
+                        disabled={locating}
+                        className="inline-flex items-center gap-1 text-xs text-[#0a72ef] hover:underline disabled:cursor-wait disabled:no-underline disabled:opacity-70"
                       >
-                        Ubicame
+                        {locating ? <LoaderCircle className="h-3 w-3 animate-spin" /> : null}
+                        {locating ? "Ubicando..." : "Ubicame"}
                       </button>
                     </label>
                     <input
@@ -571,14 +597,14 @@ ${gpxPoints}
                     <tr>
                       <th className="px-4 py-3 font-medium">Comparativa</th>
                       <th className="px-4 py-3 text-center font-medium">Ruta rapida</th>
-                      <th className="px-4 py-3 text-center font-medium text-[#16a34a]">Ruta protegida</th>
+                      <th className="px-4 py-3 text-center font-medium text-[#166534]">Ruta protegida</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
                     <tr>
                       <td className="px-4 py-3 text-[var(--ds-gray-600)]">Distancia total</td>
                       <td className="px-4 py-3 text-center font-mono">{metrics.shortest.length.toFixed(0)} m</td>
-                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#166534]">
                         {metrics.comfort.length.toFixed(0)} m
                       </td>
                     </tr>
@@ -587,21 +613,21 @@ ${gpxPoints}
                       <td className="px-4 py-3 text-center font-mono">
                         {metrics.shortest.total_shade.toFixed(0)} m
                       </td>
-                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#166534]">
                         {metrics.comfort.total_shade.toFixed(0)} m
                       </td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3 text-[var(--ds-gray-600)]">Fuentes cercanas</td>
                       <td className="px-4 py-3 text-center font-mono">{metrics.shortest.fuentes}</td>
-                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#166534]">
                         {metrics.comfort.fuentes}
                       </td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3 text-[var(--ds-gray-600)]">Refugios cercanos</td>
                       <td className="px-4 py-3 text-center font-mono">{metrics.shortest.refugios}</td>
-                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#16a34a]">
+                      <td className="px-4 py-3 text-center font-mono font-semibold text-[#166534]">
                         {metrics.comfort.refugios}
                       </td>
                     </tr>
