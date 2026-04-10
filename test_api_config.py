@@ -99,27 +99,27 @@ class ApiConfigTests(unittest.TestCase):
                     asset_path,
                     min_size_bytes=1_000_000,
                     marker_path=marker_path,
-                    expected_tag="v1.3",
+                    expected_tag="v1.4",
                 )
             )
 
-            marker_path.write_text("v1.2", encoding="utf-8")
+            marker_path.write_text("v1.3", encoding="utf-8")
             self.assertTrue(
                 api.should_refresh_release_asset(
                     asset_path,
                     min_size_bytes=1_000_000,
                     marker_path=marker_path,
-                    expected_tag="v1.3",
+                    expected_tag="v1.4",
                 )
             )
 
-            marker_path.write_text("v1.3", encoding="utf-8")
+            marker_path.write_text("v1.4", encoding="utf-8")
             self.assertFalse(
                 api.should_refresh_release_asset(
                     asset_path,
                     min_size_bytes=1_000_000,
                     marker_path=marker_path,
-                    expected_tag="v1.3",
+                    expected_tag="v1.4",
                 )
             )
 

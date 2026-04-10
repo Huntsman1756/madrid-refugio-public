@@ -43,7 +43,7 @@ REFUGIOS_PATH = APP_PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = APP_PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
 GITHUB_REPO = "Huntsman1756/madrid-refugio"
-RELEASE_TAG = "v1.3"
+RELEASE_TAG = "v1.4"
 RELEASE_BASE_URL = f"https://github.com/{GITHUB_REPO}/releases/download/{RELEASE_TAG}"
 GRAPH_RELEASE_URL = f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml"
 SHADOW_MATRIX_RELEASE_URL = f"{RELEASE_BASE_URL}/shadow_matrix.parquet"
@@ -472,7 +472,7 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
     # Threshold rationale: the active graph covers ~1 km² around Bravo Murillo / Tetuán.
     # 500 m allows addresses at the edges of the corridor without rejecting them,
     # while still blocking addresses in different districts (which would produce fake routes).
-    MAX_SNAP_METRES = 500  # documented decision: 500 m for a ~1 km² demo graph
+    MAX_SNAP_METRES = 500
 
     node_id = ox.distance.nearest_nodes(graph, point_graph.x, point_graph.y)
     node_data = graph.nodes[node_id]
@@ -487,7 +487,7 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
             f"La dirección está a {snap_distance:.0f} m del área de routing activa "
             f"(máximo permitido: {MAX_SNAP_METRES} m). "
             f"El punto más cercano del grafo está en ({ref_lat:.5f}, {ref_lon:.5f}). "
-            "Usa una dirección en el corredor Estrecho / Valdeacederas / Plaza de Castilla."
+            "Usa una dirección más específica dentro de Madrid."
         )
 
     return node_id
