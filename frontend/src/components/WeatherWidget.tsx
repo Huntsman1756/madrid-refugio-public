@@ -38,16 +38,27 @@ export function WeatherWidget() {
 
   const hasWeather = !!weather && !weather.error;
   const temperature = hasWeather ? Number(weather.temperatura) : null;
-  const isHot = temperature !== null && temperature >= 30;
-  const toneClasses = isHot
+  const isHeatWarning = temperature !== null && temperature >= 35;
+  const isWarm = temperature !== null && temperature >= 30;
+
+  const toneClasses = isHeatWarning
     ? "border-orange-200 bg-orange-50 text-orange-800"
-    : "border-[#fecaca] bg-[#fef2f2] text-[#991b1b]";
+    : "border-slate-200 bg-white text-slate-700";
+
+  const leadText =
+    loading && !weather
+      ? "Consultando AEMET"
+      : isHeatWarning
+        ? "Alerta por calor extremo"
+        : isWarm
+          ? "Calor intenso"
+          : "Madrid ahora";
 
   const statusText =
     loading && !weather
-      ? "Consultando AEMET..."
+      ? ""
       : hasWeather
-        ? `Madrid ahora: ${temperature} °C, ${weather.estado_cielo} (AEMET ${weather.timestamp})`
+        ? `${temperature} °C, ${weather.estado_cielo} (AEMET ${weather.timestamp})`
         : "Contexto AEMET no disponible";
 
   return (
@@ -57,14 +68,20 @@ export function WeatherWidget() {
       {loading && !weather ? (
         <RefreshCw className="h-3.5 w-3.5 animate-spin" />
       ) : hasWeather ? (
-        <Thermometer className={`h-4 w-4 ${isHot ? "text-orange-500" : "text-red-500"}`} />
+        <Thermometer className={`h-4 w-4 ${isHeatWarning ? "text-orange-500" : "text-slate-500"}`} />
       ) : (
         <AlertCircle className="h-4 w-4" />
       )}
-      <span className="flex h-2 w-2 rounded-full bg-red-500" />
-      <span className="font-semibold">Alerta por ola de calor extrema</span>
-      <span className="opacity-50">·</span>
-      <span className="font-normal">{statusText}</span>
+      {(isHeatWarning || isWarm) && (
+        <span className={`flex h-2 w-2 rounded-full ${isHeatWarning ? "bg-red-500" : "bg-orange-400"}`} />
+      )}
+      <span className="font-semibold">{leadText}</span>
+      {statusText && (
+        <>
+          <span className="opacity-50">·</span>
+          <span className="font-normal">{statusText}</span>
+        </>
+      )}
     </div>
   );
 }

@@ -1,18 +1,14 @@
 """
-Precompute Shadow Graph — Madrid Refugio
-=========================================
-Genera un grafo peatonal ampliado para múltiples distritos de Madrid,
-calcula la matriz de sombras de edificios para 13 franjas horarias,
-y guarda todo listo para producción.
-
-Uso:
-    python precompute_shadow_graph.py
-
-Tiempo estimado: 1-2 horas para 4 distritos.
+Precompute Shadow Graph - Madrid Refugio
+=======================================
+Construye un grafo peatonal conectado a partir del poligono disuelto de
+los distritos solicitados, calcula la matriz de sombras por lotes
+territoriales y guarda los artefactos listos para produccion.
 """
 
 import sys
-sys.stdout.reconfigure(encoding='utf-8')
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 import argparse
 import json
@@ -27,28 +23,43 @@ import networkx as nx
 import numpy as np
 import osmnx as ox
 import pandas as pd
-from shapely.geometry import box, LineString, Point
+from shapely.geometry import LineString, box
 from shapely.ops import unary_union
 
-# Reutilizar el motor de sombras existente
 from importlib.machinery import SourceFileLoader
+
 generate_shadows = SourceFileLoader("shadow_engine", "06b_shadow_engine.py").load_module().generate_shadows
 tree_integrator = SourceFileLoader("tree_integrator", "06e_integrate_trees.py").load_module()
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# ─── CONFIGURACIÓN ─────────────────────────────────────────
 DISTRITOS = [
-    "Tetuán, Madrid, Spain",
-    "Chamberí, Madrid, Spain",
+    "Arganzuela, Madrid, Spain",
+    "Barajas, Madrid, Spain",
+    "Carabanchel, Madrid, Spain",
+    "Centro, Madrid, Spain",
+    "Chamartin, Madrid, Spain",
+    "Chamberi, Madrid, Spain",
+    "Ciudad Lineal, Madrid, Spain",
     "Fuencarral-El Pardo, Madrid, Spain",
+    "Hortaleza, Madrid, Spain",
+    "Latina, Madrid, Spain",
+    "Moncloa-Aravaca, Madrid, Spain",
+    "Moratalaz, Madrid, Spain",
+    "Puente de Vallecas, Madrid, Spain",
+    "Retiro, Madrid, Spain",
+    "Salamanca, Madrid, Spain",
+    "San Blas-Canillejas, Madrid, Spain",
+    "Tetuan, Madrid, Spain",
+    "Usera, Madrid, Spain",
+    "Vicalvaro, Madrid, Spain",
+    "Villa de Vallecas, Madrid, Spain",
+    "Villaverde, Madrid, Spain",
 ]
 
-# Fecha de referencia: pico de ola de calor
 REFERENCE_DATE = datetime(2025, 7, 15)
-HOURS = list(range(8, 21))  # 08:00 a 20:00
+HOURS = list(range(8, 21))
 
-# Paths
 BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
 EDIFICIOS_PATH = PROCESSED_DIR / "edificios_alturas.geojson"
@@ -59,68 +70,21 @@ TREES_PATH = Path(os.getenv("TREES_PATH", BASE_DIR / "data" / "raw" / "arbolado_
 DISTRICTS_GEOJSON_PATH = BASE_DIR / "frontend" / "public" / "data" / "barrios_merged.geojson"
 
 
-def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
-    """Ensure every edge has a geometry attribute."""
-    for u, v, key, data in graph.edges(keys=True, data=True):
-        if "geometry" not in data or data["geometry"] is None:
-            data["geometry"] = LineString(
-                [(graph.nodes[u]["x"], graph.nodes[u]["y"]),
-                 (graph.nodes[v]["x"], graph.nodes[v]["y"])]
-            )
-
-
-def download_multi_district_graph(distritos_list) -> nx.MultiDiGraph:
-    """Download a walk graph covering multiple districts and merge them."""
-    print(f"\n{'='*60}")
-    print(f"PASO 1: Descargando grafo peatonal para {len(distritos_list)} distritos")
-    print(f"{'='*60}")
-    
-    graphs = []
-    for distrito in distritos_list:
-        print(f"  → Descargando: {distrito}...")
-        try:
-            g = ox.graph_from_place(distrito, network_type="walk", simplify=True)
-            graphs.append(g)
-            print(f"    ✓ {len(g.nodes)} nodos, {len(g.edges)} aristas")
-        except Exception as e:
-            print(f"    ✗ graph_from_place falló: {e}")
-            fallback_polygon = get_district_polygon(distrito)
-            if fallback_polygon is None:
-                continue
-            try:
-                g = ox.graph_from_polygon(fallback_polygon, network_type="walk", simplify=True)
-                graphs.append(g)
-                print(f"    ✓ Fallback local: {len(g.nodes)} nodos, {len(g.edges)} aristas")
-            except Exception as polygon_error:
-                print(f"    ✗ graph_from_polygon falló: {polygon_error}")
-    
-    if not graphs:
-        raise RuntimeError("No se pudo descargar ningún grafo.")
-    
-    # Merge all graphs
-    print(f"\n  Fusionando {len(graphs)} grafos...")
-    merged = graphs[0]
-    for g in graphs[1:]:
-        merged = nx.compose(merged, g)
-    
-    print(f"  ✓ Grafo fusionado: {len(merged.nodes)} nodos, {len(merged.edges)} aristas")
-    return merged
-
-
 def normalize_district_name(raw_name: str) -> str:
-    """Normalize district names so local GeoJSON lookups tolerate accents and punctuation."""
-    replacements = str.maketrans({
-        "á": "a",
-        "é": "e",
-        "í": "i",
-        "ó": "o",
-        "ú": "u",
-        "Á": "a",
-        "É": "e",
-        "Í": "i",
-        "Ó": "o",
-        "Ú": "u",
-    })
+    replacements = str.maketrans(
+        {
+            "á": "a",
+            "é": "e",
+            "í": "i",
+            "ó": "o",
+            "ú": "u",
+            "Á": "a",
+            "É": "e",
+            "Í": "i",
+            "Ó": "o",
+            "Ú": "u",
+        }
+    )
     normalized = raw_name.translate(replacements).lower()
     normalized = normalized.replace(", madrid, spain", "")
     normalized = normalized.replace(", madrid", "")
@@ -129,159 +93,217 @@ def normalize_district_name(raw_name: str) -> str:
     return normalized
 
 
-def get_district_polygon(distrito: str):
-    """Load the district polygon from the local merged barrios GeoJSON as a fallback."""
-    if not DISTRICTS_GEOJSON_PATH.exists():
-        print(f"    ✗ No existe fallback local de distritos: {DISTRICTS_GEOJSON_PATH}")
-        return None
-
-    district_name = normalize_district_name(distrito)
-    district_shapes = gpd.read_file(DISTRICTS_GEOJSON_PATH)[["NOMDIS", "geometry"]].copy()
+def load_district_shapes(districts_path: Path = DISTRICTS_GEOJSON_PATH) -> gpd.GeoDataFrame:
+    district_shapes = gpd.read_file(districts_path)[["NOMDIS", "geometry"]].copy()
     district_shapes["district_lookup"] = district_shapes["NOMDIS"].map(normalize_district_name)
-    selected = district_shapes[district_shapes["district_lookup"] == district_name]
+    return district_shapes
+
+
+def get_area_polygon(distritos_list, districts_path: Path = DISTRICTS_GEOJSON_PATH):
+    if not districts_path.exists():
+        raise FileNotFoundError(f"No existe GeoJSON de distritos: {districts_path}")
+
+    district_shapes = load_district_shapes(districts_path)
+    requested = {normalize_district_name(name) for name in distritos_list}
+    selected = district_shapes[district_shapes["district_lookup"].isin(requested)].copy()
 
     if selected.empty:
-        print(f"    ✗ No se encontró polígono local para {distrito}")
-        return None
+        raise RuntimeError("No se encontraron poligonos locales para los distritos solicitados.")
 
-    polygon = selected.to_crs("EPSG:4326").geometry.union_all()
-    print(f"    ↳ Usando fallback local por polígono para {distrito}")
+    return selected.to_crs("EPSG:4326").geometry.union_all()
+
+
+def get_processing_areas(distritos_list, districts_path: Path = DISTRICTS_GEOJSON_PATH) -> gpd.GeoDataFrame:
+    district_shapes = load_district_shapes(districts_path).to_crs("EPSG:25830")
+    requested = {normalize_district_name(name) for name in distritos_list}
+    selected = district_shapes[district_shapes["district_lookup"].isin(requested)].copy()
+
+    if selected.empty:
+        raise RuntimeError("No se encontraron areas de procesamiento para los distritos solicitados.")
+
+    return selected.sort_values("NOMDIS").reset_index(drop=True)
+
+
+def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
+    for u, v, key, data in graph.edges(keys=True, data=True):
+        if "geometry" not in data or data["geometry"] is None:
+            data["geometry"] = LineString(
+                [(graph.nodes[u]["x"], graph.nodes[u]["y"]), (graph.nodes[v]["x"], graph.nodes[v]["y"])]
+            )
+
+
+def download_graph_for_area(distritos_list, retain_all: bool = False) -> nx.MultiDiGraph:
+    print(f"\n{'=' * 60}")
+    print(f"PASO 1: Descargando grafo peatonal para {len(distritos_list)} distritos")
+    print(f"{'=' * 60}")
+
+    area_polygon = get_area_polygon(distritos_list)
+    print("  -> Usando un unico poligono disuelto para garantizar conectividad inter-distrito")
+    graph = ox.graph_from_polygon(area_polygon, network_type="walk", simplify=True, retain_all=retain_all)
+    print(f"  OK: {len(graph.nodes)} nodos, {len(graph.edges)} aristas")
+    return graph
+
+
+def get_district_polygon(distrito: str):
+    try:
+        polygon = get_area_polygon([distrito])
+    except Exception:
+        return None
+    print(f"    -> Usando fallback local por poligono para {distrito}")
     return polygon
 
 
+def prepare_buildings(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    from shapely.validation import make_valid
+
+    multi_mask = buildings.geometry.geom_type == "MultiPolygon"
+    if multi_mask.any():
+        print(f"  Explotando {multi_mask.sum()} MultiPolygons...")
+        buildings = buildings.explode(index_parts=False).reset_index(drop=True)
+
+    buildings = buildings[buildings.geometry.geom_type == "Polygon"].copy()
+    buildings["geometry"] = buildings.geometry.apply(lambda g: make_valid(g) if g is not None else g)
+    buildings["geometry"] = buildings.geometry.buffer(0)
+    buildings = buildings[buildings.geometry.is_valid & (buildings.geometry.area > 0)]
+    buildings = buildings[buildings.geometry.geom_type == "Polygon"].copy()
+    buildings["geometry"] = buildings.geometry.simplify(1.0)
+    return buildings
+
+
 def calculate_shadow_fractions(shadows: gpd.GeoDataFrame, graph: nx.MultiDiGraph) -> dict:
-    """Calculate what fraction of each edge is in shadow."""
     shadow_fractions = {}
-    
+
     if shadows.empty:
         for u, v, key in graph.edges(keys=True):
             shadow_fractions[(u, v, key)] = 0.0
         return shadow_fractions
 
-    # Union all shadow polygons
     valid_shadows = shadows.geometry.buffer(0)
     shadow_union = unary_union(valid_shadows)
-    
+
     total_edges = len(graph.edges)
     for i, (u, v, key, data) in enumerate(graph.edges(keys=True, data=True)):
         if i % 2000 == 0 and i > 0:
             print(f"    Intersectando arista {i}/{total_edges}...")
-        
+
         if "geometry" in data:
             geom = data["geometry"]
         else:
-            point_u = (graph.nodes[u]['x'], graph.nodes[u]['y'])
-            point_v = (graph.nodes[v]['x'], graph.nodes[v]['y'])
-            geom = LineString([point_u, point_v])
-            
+            geom = LineString([(graph.nodes[u]["x"], graph.nodes[u]["y"]), (graph.nodes[v]["x"], graph.nodes[v]["y"])])
+
         geom_length = geom.length
         if geom_length == 0:
             shadow_fractions[(u, v, key)] = 0.0
             continue
-            
+
         try:
             intersection = geom.intersection(shadow_union)
             shadow_fraction = max(0.0, min(1.0, intersection.length / geom_length))
         except Exception:
             shadow_fraction = 0.0
-            
+
         shadow_fractions[(u, v, key)] = shadow_fraction
-        
+
     return shadow_fractions
 
 
+def calculate_shadow_matrix_by_batches(
+    graph_proj: nx.MultiDiGraph,
+    processing_areas: gpd.GeoDataFrame,
+    buildings_all: gpd.GeoDataFrame,
+) -> dict:
+    print(f"\n{'=' * 60}")
+    print("PASO 3: Calculando matriz de sombras por lotes territoriales")
+    print(f"{'=' * 60}")
+
+    _, edges_df = ox.graph_to_gdfs(graph_proj)
+    matrix_data = {(u, v, key): {f"h{h:02d}": 0.0 for h in HOURS} for u, v, key in graph_proj.edges(keys=True)}
+    processed_edge_keys = set()
+
+    for _, area in processing_areas.iterrows():
+        area_name = area["NOMDIS"]
+        area_buffer = area.geometry.buffer(200)
+        area_edges = edges_df[edges_df.geometry.intersects(area_buffer)]
+        area_buildings = buildings_all[buildings_all.geometry.intersects(area_buffer)].copy()
+
+        if area_edges.empty or area_buildings.empty:
+            print(f"\n  -> {area_name}: lote vacio, se omite")
+            continue
+
+        edge_keys = list(area_edges.index)
+        edge_graph = graph_proj.edge_subgraph(edge_keys).copy()
+        print(f"\n  {'=' * 16} {area_name} {'=' * 16}")
+        print(f"  Aristas del lote: {len(edge_keys)} | Edificios del lote: {len(area_buildings)}")
+
+        for h in HOURS:
+            dt = datetime(REFERENCE_DATE.year, REFERENCE_DATE.month, REFERENCE_DATE.day, h, 0)
+            print(f"\n  === Hora {h:02d}:00 ({area_name}) ===")
+
+            t_h = time.time()
+            shadows = generate_shadows(area_buildings, dt)
+            t_shadow = time.time() - t_h
+            print(f"  Sombras generadas: {len(shadows)} poligonos ({t_shadow:.1f}s)")
+
+            t_h = time.time()
+            fractions = calculate_shadow_fractions(shadows, edge_graph)
+            t_frac = time.time() - t_h
+            print(f"  Intersecciones calculadas ({t_frac:.1f}s)")
+
+            avg_shadow = np.mean(list(fractions.values())) if fractions else 0.0
+            print(f"  Sombra media: {avg_shadow:.1%}")
+
+            for edge_tuple, frac in fractions.items():
+                matrix_data[edge_tuple][f"h{h:02d}"] = frac
+
+        processed_edge_keys.update(edge_keys)
+
+    print(f"\n  OK: aristas procesadas en lotes {len(processed_edge_keys)} / {len(matrix_data)}")
+    return matrix_data
+
+
 def main(distritos_list=None, merge=False, trees_path: str | Path | None = None):
+    if merge:
+        raise ValueError("El modo --merge ya no es compatible con el grafo conectado de ciudad. Ejecuta el precompute completo desde cero.")
+
     if distritos_list is None:
         distritos_list = DISTRITOS
-        
+
     t0 = time.time()
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # ─── PASO 1: Descargar grafo ───
-    merged_graph = download_multi_district_graph(distritos_list)
-    
-    # Project to EPSG:25830 (Madrid UTM)
+
+    graph = download_graph_for_area(distritos_list)
+
     print("\n  Proyectando a EPSG:25830...")
-    graph_proj = ox.project_graph(merged_graph, to_crs="EPSG:25830")
+    graph_proj = ox.project_graph(graph, to_crs="EPSG:25830")
     ensure_edge_geometry(graph_proj)
-    
+
     num_nodes = len(graph_proj.nodes)
     num_edges = len(graph_proj.edges)
-    print(f"  ✓ Grafo proyectado: {num_nodes} nodos, {num_edges} aristas")
-    
-    # ─── PASO 2: Cargar edificios ───
-    print(f"\n{'='*60}")
-    print("PASO 2: Cargando edificios del área de interés")
-    print(f"{'='*60}")
-    
-    nodes_df, edges_df = ox.graph_to_gdfs(graph_proj)
+    print(f"  OK: grafo proyectado con {num_nodes} nodos y {num_edges} aristas")
+
+    print(f"\n{'=' * 60}")
+    print("PASO 2: Cargando edificios del area de interes")
+    print(f"{'=' * 60}")
+
+    _, edges_df = ox.graph_to_gdfs(graph_proj)
     minx, miny, maxx, maxy = edges_df.total_bounds
-    
-    # Buffer 200m around graph bbox
     bbox_geom = box(minx - 200, miny - 200, maxx + 200, maxy + 200)
-    
-    print(f"  Bbox del grafo: ({minx:.0f}, {miny:.0f}) → ({maxx:.0f}, {maxy:.0f})")
-    print(f"  Cargando edificios (esto puede tardar ~1 min)...")
-    
-    edificios = gpd.read_file(EDIFICIOS_PATH, bbox=bbox_geom)
-    
-    if len(edificios) == 0:
+    print(f"  Bbox del grafo: ({minx:.0f}, {miny:.0f}) -> ({maxx:.0f}, {maxy:.0f})")
+    print("  Cargando edificios una sola vez para el area completa...")
+
+    buildings_all = gpd.read_file(EDIFICIOS_PATH, bbox=bbox_geom)
+    if len(buildings_all) == 0:
         raise RuntimeError("No se encontraron edificios en el bbox del grafo.")
-    
-    # Explode MultiPolygons into Polygons (pybdshadow requires simple Polygons)
-    from shapely.geometry import MultiPolygon, Polygon
-    multi_mask = edificios.geometry.geom_type == "MultiPolygon"
-    if multi_mask.any():
-        print(f"  Explotando {multi_mask.sum()} MultiPolygons...")
-        edificios = edificios.explode(index_parts=False).reset_index(drop=True)
-    
-    # Keep only valid Polygons with area > 0
-    edificios = edificios[edificios.geometry.geom_type == "Polygon"].copy()
-    
-    # Fix invalid geometries (unclosed rings, self-intersections)
-    from shapely.validation import make_valid
-    edificios["geometry"] = edificios.geometry.apply(lambda g: make_valid(g) if g is not None else g)
-    edificios["geometry"] = edificios.geometry.buffer(0)
-    edificios = edificios[edificios.geometry.is_valid & (edificios.geometry.area > 0)]
-    # Re-filter after make_valid may produce MultiPolygons
-    edificios = edificios[edificios.geometry.geom_type == "Polygon"].copy()
-    
-    # Simplify geometries for speed
-    edificios["geometry"] = edificios.geometry.simplify(1.0)
-    print(f"  OK: {len(edificios)} edificios (Polygon simples) listos para sombras")
-    
-    # ─── PASO 3: Calcular matriz de sombras ───
-    print(f"\n{'='*60}")
-    print("PASO 3: Calculando matriz de sombras (13 franjas horarias)")
-    print(f"{'='*60}")
-    
-    matrix_data = {(u, v, key): {} for u, v, key in graph_proj.edges(keys=True)}
-    
-    for h in HOURS:
-        dt = datetime(REFERENCE_DATE.year, REFERENCE_DATE.month, REFERENCE_DATE.day, h, 0)
-        print(f"\n  ═══ Hora {h:02d}:00 ═══")
-        
-        t_h = time.time()
-        shadows = generate_shadows(edificios, dt)
-        t_shadow = time.time() - t_h
-        print(f"  Sombras generadas: {len(shadows)} polígonos ({t_shadow:.1f}s)")
-        
-        t_h = time.time()
-        fractions = calculate_shadow_fractions(shadows, graph_proj)
-        t_frac = time.time() - t_h
-        print(f"  Intersecciones calculadas ({t_frac:.1f}s)")
-        
-        avg_shadow = np.mean(list(fractions.values()))
-        print(f"  Sombra media: {avg_shadow:.1%}")
-        
-        for edge_tuple, frac in fractions.items():
-            matrix_data[edge_tuple][f"h{h:02d}"] = frac
-    
-    # ─── PASO 4: Integrar arbolado viario ───
-    print(f"\n{'='*60}")
+    buildings_all = prepare_buildings(buildings_all)
+    print(f"  OK: {len(buildings_all)} edificios listos para sombras")
+
+    processing_areas = get_processing_areas(distritos_list)
+    matrix_data = calculate_shadow_matrix_by_batches(graph_proj, processing_areas, buildings_all)
+
+    print(f"\n{'=' * 60}")
     print("PASO 4: Integrando arbolado viario")
-    print(f"{'='*60}")
-    
+    print(f"{'=' * 60}")
+
     resolved_trees_path = Path(trees_path) if trees_path else TREES_PATH
     trees_gdf = tree_integrator.load_arbolado_fast(resolved_trees_path)
     tree_stats = tree_integrator.annotate_tree_shade(graph_proj, trees_gdf)
@@ -290,67 +312,37 @@ def main(distritos_list=None, merge=False, trees_path: str | Path | None = None)
         f"{tree_stats['edges_with_tree_shade']} aristas con sombra de arbolado, "
         f"{tree_stats['trees_in_area']} arboles en el area"
     )
-    
-    # ─── PASO 5: Guardar resultados ───
-    print(f"\n{'='*60}")
-    print("PASO 5: Guardando resultados")
-    print(f"{'='*60}")
-    
-    # 4.1 Merge Graph if required
-    if merge and OUTPUT_GRAPH.exists():
-        print("  [Merge] Cargando grafo existente para fusionar...")
-        g_existing = ox.load_graphml(OUTPUT_GRAPH)
-        graph_proj = nx.compose(g_existing, graph_proj)
-        num_nodes = len(graph_proj.nodes)
-        num_edges = len(graph_proj.edges)
-        print(f"  [Merge] ✓ Grafo fusionado: {num_nodes} nodos, {num_edges} aristas")
 
-    print(f"  Guardando grafo → {OUTPUT_GRAPH}")
+    print(f"\n{'=' * 60}")
+    print("PASO 5: Guardando resultados")
+    print(f"{'=' * 60}")
+
+    print(f"  Guardando grafo -> {OUTPUT_GRAPH}")
     ox.save_graphml(graph_proj, OUTPUT_GRAPH)
     graph_size_mb = OUTPUT_GRAPH.stat().st_size / (1024 * 1024)
-    print(f"  ✓ Grafo guardado: {graph_size_mb:.1f} MB")
-    
-    # 4.2 Merge Matrix
-    print(f"  Procesando matriz de sombras...")
+    print(f"  OK: grafo guardado ({graph_size_mb:.1f} MB)")
+
+    print("  Procesando matriz de sombras...")
     records = []
     for (u, v, key), hour_data in matrix_data.items():
-        row = {'u': u, 'v': v, 'key': key}
+        row = {"u": u, "v": v, "key": key}
         row.update(hour_data)
         records.append(row)
-    
     df = pd.DataFrame(records)
-    
-    if merge and OUTPUT_MATRIX.exists():
-        print("  [Merge] Combinando matriz de sombras existente...")
-        df_existing = pd.read_parquet(OUTPUT_MATRIX)
-        df = pd.concat([df_existing, df])
-        df = df.drop_duplicates(subset=['u', 'v', 'key'], keep='last').reset_index(drop=True)
-        print(f"  [Merge] ✓ Matriz fusionada: {len(df)} registros totales")
-        
-    print(f"  Guardando matriz → {OUTPUT_MATRIX}")
+
+    print(f"  Guardando matriz -> {OUTPUT_MATRIX}")
     df.to_parquet(OUTPUT_MATRIX, engine="pyarrow")
     matrix_size_mb = OUTPUT_MATRIX.stat().st_size / (1024 * 1024)
-    print(f"  ✓ Matriz guardada: {matrix_size_mb:.1f} MB")
-    
-    # 4.3 Merge Summary
-    if merge and OUTPUT_SUMMARY.exists():
-        print("  [Merge] Actualizando resumen...")
-        with open(OUTPUT_SUMMARY, "r", encoding="utf-8") as f:
-            old_summary = json.load(f)
-        merged_distritos = sorted(set(old_summary.get("distritos", []) + distritos_list))
-        total_buildings = old_summary.get("num_buildings_used", 0) + len(edificios)
-    else:
-        merged_distritos = sorted(distritos_list)
-        total_buildings = len(edificios)
-        
+    print(f"  OK: matriz guardada ({matrix_size_mb:.1f} MB)")
+
     summary = {
         "reference_date": "2025-07-15",
-        "distritos": merged_distritos,
+        "distritos": sorted(distritos_list),
         "hours": [f"h{h:02d}" for h in HOURS],
         "num_nodes": num_nodes,
         "num_edges": num_edges,
         "total_edges": num_edges,
-        "num_buildings_used": total_buildings,
+        "num_buildings_used": len(buildings_all),
         "num_trees_used": tree_stats["trees_in_area"],
         "edges_with_tree_shade": tree_stats["edges_with_tree_shade"],
         "tree_influence_radius_m": tree_stats["influence_radius_m"],
@@ -360,30 +352,28 @@ def main(distritos_list=None, merge=False, trees_path: str | Path | None = None)
     }
     with open(OUTPUT_SUMMARY, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
-    
+
     elapsed = time.time() - t0
-    print(f"\n{'='*60}")
-    print(f"✅ COMPLETADO en {elapsed/60:.1f} minutos")
-    if merge:
-        print(f"   MODO: Merge (Fusión incremental)")
-    print(f"   Grafo:  {OUTPUT_GRAPH} ({graph_size_mb:.1f} MB)")
-    print(f"   Matriz: {OUTPUT_MATRIX} ({matrix_size_mb:.1f} MB)")
-    print(f"   Nodos:  {num_nodes}, Aristas: {num_edges}")
-    print(f"   Edificios nuevos: {len(edificios)} (Total acumulado: {total_buildings})")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print(f"COMPLETADO en {elapsed / 60:.1f} minutos")
+    print(f"  Grafo:  {OUTPUT_GRAPH} ({graph_size_mb:.1f} MB)")
+    print(f"  Matriz: {OUTPUT_MATRIX} ({matrix_size_mb:.1f} MB)")
+    print(f"  Nodos:  {num_nodes}, Aristas: {num_edges}")
+    print(f"  Edificios usados: {len(buildings_all)}")
+    print(f"{'=' * 60}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Precomputar matriz de sombras de Madrid Refugio.")
     parser.add_argument(
-        "--distrito", 
-        type=str, 
-        help="Distrito específico a procesar (ej. 'Centro' o 'Centro, Madrid, Spain'). Si se omite, se usan los distritos por defecto."
+        "--distrito",
+        type=str,
+        help="Distrito especifico a procesar. Si se omite, se usa Madrid completo.",
     )
     parser.add_argument(
-        "--merge", 
-        action="store_true", 
-        help="Fusionar con el grafo y matriz existentes en lugar de sobreescribirlos."
+        "--merge",
+        action="store_true",
+        help="Compatibilidad legacy. El modo merge ya no se usa con el grafo conectado.",
     )
     parser.add_argument(
         "--trees-path",
@@ -391,9 +381,8 @@ if __name__ == "__main__":
         help="Ruta al dataset de arbolado_detalle.xlsx. Si se omite, usa TREES_PATH o data/raw/arbolado_detalle.xlsx.",
     )
     args = parser.parse_args()
-    
+
     if args.distrito:
-        # Asegurarse de que termine en ', Madrid, Spain' para Nominatim/OSMnx
         distrito = args.distrito.strip()
         if ", madrid" not in distrito.lower():
             distrito = f"{distrito}, Madrid, Spain"
