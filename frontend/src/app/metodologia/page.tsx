@@ -76,10 +76,10 @@ export default function MetodologiaPage() {
         <section className="mb-12">
           <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">1. Introduccion y propuesta de valor</h2>
           <p className="mb-4 text-[var(--ds-gray-600)]">
-            <strong>Madrid Refugio</strong> calcula rutas de confort termico para reducir la exposicion al sol directo durante episodios de calor. La interfaz es publica y sencilla, pero el uso principal del sistema es municipal: detectar donde faltan refugios climaticos, sombra e inversion primero.
+            <strong>Madrid Refugio</strong> calcula rutas de confort termico para reducir la exposicion al sol directo durante episodios de calor. Funciona en dos pasos desde cualquier navegador, pero el uso principal del sistema es municipal: detectar donde faltan refugios climaticos, sombra e inversion primero.
           </p>
           <p className="text-[var(--ds-gray-600)]">
-            El proyecto se orienta especialmente a los mas de <strong>430.000 mayores de 65 anos</strong> que viven en Madrid. Frente a los mapas estaticos de isla de calor, aqui se comparan rutas reales y se mide cuanto sol directo se evita a cambio de un rodeo pequeno.
+            El proyecto se orienta especialmente a los mas de <strong>430.000 mayores de 65 anos</strong> que viven en Madrid. Frente a los mapas estaticos de temperatura superficial, aqui se comparan rutas reales y se mide cuanto sol directo se evita a cambio de un rodeo pequeno.
           </p>
         </section>
 
@@ -171,10 +171,7 @@ export default function MetodologiaPage() {
           <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">5. Escalabilidad y arquitectura</h2>
           <div className="space-y-4 text-[var(--ds-gray-600)]">
             <p>
-              La arquitectura modular separa frontend, backend y motor algoritmico. Esa estructura permite replicar el sistema en otros municipios con datasets equivalentes.
-            </p>
-            <p>
-              La version operativa actual ya cubre los <em>21 distritos de Madrid</em>. El siguiente salto tecnico es migrar el routing a <strong>PostgreSQL + PostGIS con pgRouting</strong> para manejar millones de aristas con el mismo esquema de precomputacion en Parquet y reducir tiempos de carga en produccion.
+              La version operativa actual ya cubre los <em>21 distritos de Madrid</em>. El sistema esta disenado para escalar a <strong>PostgreSQL + PostGIS con pgRouting</strong> sin cambios en el esquema de precomputacion en Parquet, manteniendo la misma logica de pesos y franjas horarias en escenarios de mayor escala.
             </p>
           </div>
         </section>
