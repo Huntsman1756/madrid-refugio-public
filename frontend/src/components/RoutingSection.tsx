@@ -576,7 +576,7 @@ ${gpxPoints}
         <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-[#fde68a] bg-[#fffbeb] px-3 py-1.5 text-xs text-[#92400e]">
           <span>⚡</span>
           <span>
-            <strong>Demo:</strong> cobertura operativa en los 21 distritos de Madrid.
+            <strong>Cobertura actual:</strong> operativa en los 21 distritos de Madrid.
           </span>
         </div>
       </div>
