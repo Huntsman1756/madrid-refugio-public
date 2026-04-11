@@ -43,23 +43,27 @@ export function WeatherWidget() {
 
   const toneClasses = isHeatWarning
     ? "border-orange-200 bg-orange-50 text-orange-800"
-    : "border-slate-200 bg-white text-slate-700";
+    : isWarm
+      ? "border-amber-200 bg-amber-50 text-amber-800"
+      : "border-slate-200 bg-white text-slate-700";
 
   const leadText =
     loading && !weather
-      ? "Consultando AEMET"
+      ? "Consultando AEMET..."
       : isHeatWarning
         ? "Alerta por calor extremo"
         : isWarm
           ? "Calor intenso"
-          : "Madrid ahora";
+          : `${weather?.municipio ?? "Madrid"} ahora`;
 
   const statusText =
     loading && !weather
       ? ""
       : hasWeather
-        ? `${temperature} °C, ${weather.estado_cielo} (AEMET ${weather.timestamp})`
+        ? `${temperature} °C, ${weather.estado_cielo}`
         : "Contexto AEMET no disponible";
+
+  const metaText = hasWeather ? `AEMET ${weather.timestamp}` : null;
 
   return (
     <div
@@ -68,7 +72,7 @@ export function WeatherWidget() {
       {loading && !weather ? (
         <RefreshCw className="h-3.5 w-3.5 animate-spin" />
       ) : hasWeather ? (
-        <Thermometer className={`h-4 w-4 ${isHeatWarning ? "text-orange-500" : "text-slate-500"}`} />
+        <Thermometer className={`h-4 w-4 ${isHeatWarning ? "text-orange-500" : isWarm ? "text-amber-500" : "text-slate-500"}`} />
       ) : (
         <AlertCircle className="h-4 w-4" />
       )}
@@ -76,12 +80,8 @@ export function WeatherWidget() {
         <span className={`flex h-2 w-2 rounded-full ${isHeatWarning ? "bg-red-500" : "bg-orange-400"}`} />
       )}
       <span className="font-semibold">{leadText}</span>
-      {statusText && (
-        <>
-          <span className="opacity-50">·</span>
-          <span className="font-normal">{statusText}</span>
-        </>
-      )}
+      {statusText && <span className="font-normal">{statusText}</span>}
+      {metaText && <span className="text-[11px] font-normal opacity-60 sm:text-xs">· {metaText}</span>}
     </div>
   );
 }
