@@ -300,13 +300,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const canProceed = origin.trim().length > 3 && destination.trim().length > 3;
   const visibleRouteResult = error ? null : routeResult;
 
-  const summary = useMemo(
-    () =>
-      `En el escenario actual: ruta rápida ~${kmLabel(shortestLength)} km · ruta protegida ~${kmLabel(
-        comfortLength,
-      )} km · ${Math.round(sunSavedMin)} min menos al sol · ${Math.round(extraEffortMin)} min de rodeo`,
-    [comfortLength, extraEffortMin, shortestLength, sunSavedMin],
-  );
+  const summary = useMemo(() => scenario.context, [scenario.context]);
 
   useEffect(() => {
     return () => {
