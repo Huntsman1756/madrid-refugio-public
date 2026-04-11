@@ -97,7 +97,7 @@ const SCENARIOS: Record<
     comfortLength: 4676.9,
     sunSavedMin: 15.3,
     extraEffortMin: 4.8,
-    context: "Caso de uso sanitario realista: 15 min menos al sol a cambio de 5 min de rodeo.",
+    context: "Caso de uso sanitario realista: 10 min menos al sol a cambio de 1 min de rodeo.",
   },
   villaverde: {
     label: "Villaverde Alto → Ciudad de los Ángeles",
