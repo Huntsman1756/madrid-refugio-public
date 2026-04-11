@@ -70,8 +70,7 @@ type Suggestion = {
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
-const PHOTON_BBOX = "-3.89,40.31,-3.52,40.64";
-const PHOTON_LIMIT = 5;
+const PHOTON_LIMIT = 8;
 const MIN_QUERY_LENGTH = 3;
 const SUGGESTION_BLUR_DELAY_MS = 150;
 
@@ -154,7 +153,7 @@ function buildSuggestionLabel(feature: PhotonFeature): string | null {
 
 async function fetchPhotonSuggestions(query: string, signal: AbortSignal): Promise<Suggestion[]> {
   const response = await fetch(
-    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${PHOTON_BBOX}&limit=${PHOTON_LIMIT}&lang=en`,
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=${PHOTON_LIMIT}&lang=en`,
     { signal },
   );
 
@@ -166,7 +165,11 @@ async function fetchPhotonSuggestions(query: string, signal: AbortSignal): Promi
   const features = Array.isArray(data?.features) ? (data.features as PhotonFeature[]) : [];
 
   return features
-    .filter((feature) => normalizeText(feature.properties?.city) === "madrid")
+    .filter((feature) => {
+      const city = normalizeText(feature.properties?.city);
+      const county = normalizeText(feature.properties?.county);
+      return city === "madrid" || county.includes("madrid");
+    })
     .map((feature) => {
       const label = buildSuggestionLabel(feature);
       return label ? { label, value: label } : null;
@@ -576,7 +579,7 @@ ${gpxPoints}
         <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-[#fde68a] bg-[#fffbeb] px-3 py-1.5 text-xs text-[#92400e]">
           <span>⚡</span>
           <span>
-            <strong>Demo:</strong> cobertura operativa en los 21 distritos de Madrid.
+            <strong>Cobertura actual:</strong> operativa en los 21 distritos de Madrid.
           </span>
         </div>
       </div>

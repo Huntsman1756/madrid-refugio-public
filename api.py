@@ -691,8 +691,16 @@ def calculate_route(req: RouteRequest):
     try:
         origin_latlon = geocode_address(req.origin)
         destination_latlon = geocode_address(req.destination)
-        origin_node = nearest_node(graph, *origin_latlon)
-        destination_node = nearest_node(graph, *destination_latlon)
+        try:
+            origin_node = nearest_node(graph, *origin_latlon)
+            destination_node = nearest_node(graph, *destination_latlon)
+        except (ValueError, nx.NodeNotFound):
+            from fastapi.responses import JSONResponse
+
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "out_of_corridor", "error_code": "out_of_corridor"},
+            )
 
         hour_val = max(8, min(20, req.hour))
         hour_col = f"h{hour_val:02d}"
@@ -717,8 +725,16 @@ def calculate_route(req: RouteRequest):
             
             return min(weights) if weights else 1.0e6
 
-        shortest_route = nx.shortest_path(graph, origin_node, destination_node, weight="length")
-        comfort_route = nx.shortest_path(graph, origin_node, destination_node, weight=get_dynamic_weight)
+        try:
+            shortest_route = nx.shortest_path(graph, origin_node, destination_node, weight="length")
+            comfort_route = nx.shortest_path(graph, origin_node, destination_node, weight=get_dynamic_weight)
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            from fastapi.responses import JSONResponse
+
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "out_of_corridor", "error_code": "out_of_corridor"},
+            )
 
         if shortest_route is None or comfort_route is None:
             raise ValueError("No se ha podido calcular una ruta válida entre estos puntos.")

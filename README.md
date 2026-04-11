@@ -19,14 +19,16 @@ Madrid Refugio calcula **sombra dinamica proyectada por edificacion** y la combi
 
 ## 3. Reutilizacion de datos abiertos
 
-Hemos integrado 7 datasets criticos del ecosistema de datos de Madrid:
-1. **Modelo de alturas de edificacion (2024):** Geoportal del Ayuntamiento de Madrid. 662.173 poligonos con atributo Z (altura real). Base para la simulacion de sombras.
-2. **Inventario de Arbolado Viario:** 661.192 ejemplares geolocalizados para sombra biologica.
-3. **Padron Municipal (Enero 2026):** Poblacion por barrio segregada por edad (>65 anos).
-4. **Meteorologia y Calidad del Aire:** Widget de contexto con AEMET OpenData en tiempo real (temperatura y estado del cielo) y series historicas de NO2 para analisis territorial.
-5. **Fuentes de Agua Potable:** Red de hidrantes publicos integrada en el algoritmo de proximidad.
-6. **Equipamientos Municipales:** Bibliotecas y centros deportivos mapeados como "refugios sustitutos".
-7. **Limites de Barrios y Distritos:** Geometria administrativa oficial.
+Hemos integrado conjuntos de datos del ecosistema de datos de Madrid con sus titulos oficiales en el portal:
+1. **Modelo digital 3D de edificios:** Geoportal del Ayuntamiento de Madrid. 662.173 poligonos con atributo Z (altura real). Base para la simulacion de sombras.
+2. **Arbolado en parques y zonas verdes de Madrid (detalle):** 661.192 ejemplares geolocalizados reutilizados como sombra biologica. El dataset incluye arbolado viario y arbolado en zonas verdes municipales.
+3. **Padron municipal:** Poblacion por barrio, distrito y seccion censal agregada por sexo y edad. Base para identificar mayores de 65 anos.
+4. **Calidad del aire. Datos horarios desde 2001:** Series historicas de NO2 para analisis territorial.
+5. **Fuentes de agua para beber:** Puntos de apoyo hidrico integrados en el algoritmo de proximidad.
+6. **Bibliotecas de Madrid:** Equipamientos reutilizados como refugios climaticos sustitutos.
+7. **Deportes. Centros Deportivos Municipales (Polideportivos):** Equipamientos reutilizados como refugios climaticos sustitutos.
+8. **Barrios municipales de Madrid:** Geometria oficial para agregacion territorial.
+9. **Distritos municipales de Madrid:** Geometria administrativa oficial de los 21 distritos.
 
 ## 4. Estructura del proyecto
 
