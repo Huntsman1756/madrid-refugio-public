@@ -10,47 +10,47 @@ const datasets = [
   {
     name: "Modelo digital 3D de edificios",
     source: "Datos Abiertos Madrid / Geoportal",
-    use: "Base geometrica para proyectar sombras de edificacion y construir la matriz calle-sombra.",
+    use: "Base geométrica para proyectar sombras de edificación y construir la matriz calle-sombra.",
   },
   {
     name: "Arbolado en parques y zonas verdes de Madrid (detalle)",
     source: "Datos Abiertos Madrid",
-    use: "Sombra biologica integrada en el peso de las aristas del grafo a partir del detalle de arbolado viario y zonas verdes.",
+    use: "Sombra biológica integrada en el peso de las aristas del grafo a partir del detalle de arbolado viario y zonas verdes.",
   },
   {
-    name: "Padron municipal",
+    name: "Padrón municipal",
     source: "Datos Abiertos Madrid",
-    use: "Priorizacion territorial de mayores de 65 anos y publico beneficiario.",
+    use: "Priorización territorial de mayores de 65 años y público beneficiario.",
   },
   {
     name: "Calidad del aire. Datos horarios desde 2001",
     source: "Datos Abiertos Madrid",
-    use: "Indicador territorial de exposicion cronica por NO2.",
+    use: "Indicador territorial de exposición crónica por NO2.",
   },
   {
     name: "Fuentes de agua para beber",
     source: "Datos Abiertos Madrid",
-    use: "Puntos de apoyo hidrico cercanos a las rutas.",
+    use: "Puntos de apoyo hídrico cercanos a las rutas.",
   },
   {
     name: "Bibliotecas de Madrid",
     source: "Datos Abiertos Madrid",
-    use: "Refugios climaticos sustitutos.",
+    use: "Refugios climáticos sustitutos.",
   },
   {
     name: "Deportes. Centros Deportivos Municipales (Polideportivos)",
     source: "Datos Abiertos Madrid",
-    use: "Refugios climaticos sustitutos.",
+    use: "Refugios climáticos sustitutos.",
   },
   {
     name: "Barrios municipales de Madrid",
     source: "Datos Abiertos Madrid",
-    use: "Delimitacion territorial y agregacion de indicadores por barrio.",
+    use: "Delimitación territorial y agregación de indicadores por barrio.",
   },
   {
     name: "Distritos municipales de Madrid",
     source: "Datos Abiertos Madrid",
-    use: "Contexto administrativo y navegacion territorial.",
+    use: "Contexto administrativo y navegación territorial.",
   },
 ];
 
@@ -71,62 +71,62 @@ export default function MetodologiaPage() {
       </nav>
 
       <div className="mx-auto max-w-[800px] px-6 py-16 sm:py-24">
-        <h1 className="display-hero mb-8 text-[var(--ds-black)]">Memoria tecnica</h1>
+        <h1 className="display-hero mb-8 text-[var(--ds-black)]">Memoria técnica</h1>
 
         <section className="mb-12">
-          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">1. Introduccion y propuesta de valor</h2>
+          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">1. Introducción y propuesta de valor</h2>
           <p className="mb-4 text-[var(--ds-gray-600)]">
-            <strong>Madrid Refugio</strong> calcula rutas de confort termico para reducir la exposicion al sol directo durante episodios de calor. Funciona en dos pasos desde cualquier navegador, pero el uso principal del sistema es municipal: detectar donde faltan refugios climaticos, sombra e inversion primero.
+            <strong>Madrid Refugio</strong> calcula rutas de confort térmico para reducir la exposición al sol directo durante episodios de calor. Funciona en dos pasos desde cualquier navegador, pero el uso principal del sistema es municipal: detectar dónde faltan refugios climáticos, sombra e inversión primero.
           </p>
           <p className="text-[var(--ds-gray-600)]">
-            El proyecto se orienta especialmente a los mas de <strong>430.000 mayores de 65 anos</strong> que viven en Madrid. Frente a los mapas estaticos de temperatura superficial, aqui se comparan rutas reales y se mide cuanto sol directo se evita a cambio de un rodeo pequeno.
+            El proyecto se orienta especialmente a los más de <strong>430.000 mayores de 65 años</strong> que viven en Madrid. Frente a los mapas estáticos de temperatura superficial, aquí se comparan rutas reales y se mide cuánto sol directo se evita a cambio de un rodeo pequeño.
           </p>
         </section>
 
         <section className="mb-12">
-          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">2. Innovacion tecnologica: motor de sombra dinamica proyectada</h2>
+          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">2. Innovación tecnológica: motor de sombra dinámica proyectada</h2>
           <p className="mb-6 text-[var(--ds-gray-600)]">
-            El sistema calcula sombra proyectada por edificacion y la combina con arbolado viario en el peso de cada tramo del grafo peatonal.
+            El sistema calcula sombra proyectada por edificación y la combina con arbolado viario en el peso de cada tramo del grafo peatonal.
           </p>
           <div className="space-y-4">
             <Card level={1} className="border-l-4 border-l-[#0a72ef] p-5">
-              <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Modelo de alturas de edificacion</h3>
+              <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Modelo de alturas de edificación</h3>
               <p className="text-sm text-[var(--ds-gray-600)]">
-                Procesamiento de <strong>662.173 poligonos</strong> con altura real para proyectar sombra sobre la red peatonal.
+                Procesamiento de <strong>662.173 polígonos</strong> con altura real para proyectar sombra sobre la red peatonal.
               </p>
             </Card>
             <Card level={1} className="border-l-4 border-l-[#de1d8d] p-5">
-              <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Proyeccion geometrica solar</h3>
+              <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Proyección geométrica solar</h3>
               <p className="text-sm text-[var(--ds-gray-600)]">
                 Uso de <code className="rounded bg-[var(--ds-gray-50)] px-1 py-0.5 text-xs">pvlib</code> y{" "}
-                <code className="rounded bg-[var(--ds-gray-50)] px-1 py-0.5 text-xs">pybdshadow</code> para calcular azimut y elevacion solar sobre Madrid en 13 franjas horarias.
+                <code className="rounded bg-[var(--ds-gray-50)] px-1 py-0.5 text-xs">pybdshadow</code> para calcular azimut y elevación solar sobre Madrid en 13 franjas horarias.
               </p>
             </Card>
             <Card level={1} className="border-l-4 border-l-[#ff5b4f] p-5">
               <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Matriz calle-sombra</h3>
               <p className="text-sm text-[var(--ds-gray-600)]">
-                Generacion offline de una matriz de <strong>520.128 aristas x 13 franjas horarias</strong> para ajustar pesos en microsegundos segun la hora elegida.
+                Generación offline de una matriz de <strong>520.128 aristas × 13 franjas horarias</strong> para ajustar pesos en microsegundos según la hora elegida.
               </p>
             </Card>
             <Card level={1} className="border-l-4 border-l-[#16a34a] p-5">
-              <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Confort termico sobre grafo</h3>
+              <h3 className="mb-1 text-sm font-semibold text-[var(--ds-black)]">Confort térmico sobre grafo</h3>
               <p className="text-sm text-[var(--ds-gray-600)]">
-                Cada arista usa un <code className="rounded bg-[var(--ds-gray-50)] px-1 py-0.5 text-xs">comfort_weight</code> que suma sombra de edificacion y arbolado con tope, priorizando calles mas protegidas sin perder conectividad peatonal.
+                Cada arista usa un <code className="rounded bg-[var(--ds-gray-50)] px-1 py-0.5 text-xs">comfort_weight</code> que suma sombra de edificación y arbolado con tope, priorizando calles más protegidas sin perder conectividad peatonal.
               </p>
             </Card>
           </div>
           <div className="mt-8 space-y-4 text-[var(--ds-gray-600)]">
             <p>
-              El calculo de rutas es <strong>determinista</strong> y no depende de datos externos. La hora seleccionada por el usuario activa una franja precomputada y el backend resuelve la ruta con Dijkstra sobre el grafo ponderado.
+              El cálculo de rutas es <strong>determinista</strong> y no depende de datos externos. La hora seleccionada por el usuario activa una franja precomputada y el backend resuelve la ruta con Dijkstra sobre el grafo ponderado.
             </p>
             <p>
-              El widget meteorologico consulta <strong>AEMET OpenData</strong> solo para mostrar contexto termico actual en Madrid, con cache de 15 minutos. No altera la geometria solar ni el resultado del routing.
+              El widget meteorológico consulta <strong>AEMET OpenData</strong> solo para mostrar contexto térmico actual en Madrid, con caché de 15 minutos. No altera la geometría solar ni el resultado del routing.
             </p>
           </div>
         </section>
 
         <section className="mb-12">
-          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">3. Reutilizacion de datos abiertos</h2>
+          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">3. Reutilización de datos abiertos</h2>
           <p className="mb-6 text-[var(--ds-gray-600)]">
             La base del proyecto son datos abiertos municipales reutilizados de forma operativa, no solo descriptiva.
           </p>
@@ -151,7 +151,7 @@ export default function MetodologiaPage() {
             </table>
           </div>
           <p className="mt-4 text-[var(--ds-gray-600)]">
-            Los conjuntos estructurales provienen de <strong>datos.madrid.es</strong>. AEMET OpenData se utiliza solo como fuente oficial de contexto meteorologico en tiempo real.
+            Los conjuntos estructurales provienen de <strong>datos.madrid.es</strong>. AEMET OpenData se utiliza solo como fuente oficial de contexto meteorológico en tiempo real.
           </p>
         </section>
 
@@ -159,10 +159,10 @@ export default function MetodologiaPage() {
           <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">4. Impacto social y acceso equitativo a rutas con sombra</h2>
           <div className="space-y-4 text-[var(--ds-gray-600)]">
             <p>
-              El analisis territorial senala barrios con una combinacion especialmente critica de edad, calor y deficit de cobertura. <strong>Villaverde y Aluche</strong> destacan como zonas prioritarias para la intervencion municipal.
+              El análisis territorial señala barrios con una combinación especialmente crítica de edad, calor y déficit de cobertura. <strong>Villaverde y Aluche</strong> destacan como zonas prioritarias para la intervención municipal.
             </p>
             <p>
-              La utilidad publica del sistema es directa: <strong>64,1 % de los barrios</strong> no tienen un refugio climatico operativo a menos de 300 metros caminables. Madrid Refugio ayuda a decidir donde conviene desplegar sombra, equipamientos y refugios primero.
+              La utilidad pública del sistema es directa: <strong>64,1 % de los barrios</strong> no tienen un refugio climático operativo a menos de 300 metros caminables. Madrid Refugio ayuda a decidir dónde conviene desplegar sombra, equipamientos y refugios primero.
             </p>
           </div>
         </section>
@@ -171,15 +171,15 @@ export default function MetodologiaPage() {
           <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">5. Escalabilidad y arquitectura</h2>
           <div className="space-y-4 text-[var(--ds-gray-600)]">
             <p>
-              La version operativa actual ya cubre los <em>21 distritos de Madrid</em>. El sistema esta disenado para escalar a <strong>PostgreSQL + PostGIS con pgRouting</strong> sin cambios en el esquema de precomputacion en Parquet, manteniendo la misma logica de pesos y franjas horarias en escenarios de mayor escala.
+              La versión operativa actual ya cubre los <em>21 distritos de Madrid</em>. El sistema está diseñado para escalar a <strong>PostgreSQL + PostGIS con pgRouting</strong> sin cambios en el esquema de precomputación en Parquet, manteniendo la misma lógica de pesos y franjas horarias en escenarios de mayor escala.
             </p>
           </div>
         </section>
 
         <section className="mb-12">
-          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">6. Conclusion</h2>
+          <h2 className="sub-heading-large mb-4 text-[var(--ds-black)]">6. Conclusión</h2>
           <p className="text-[var(--ds-gray-600)]">
-            Madrid Refugio convierte datos abiertos en una herramienta operativa de salud publica. Ya permite comparar rutas, medir minutos menos al sol y priorizar inversion climatica donde el deficit es medible.
+            Madrid Refugio convierte datos abiertos en una herramienta operativa de salud pública. Ya permite comparar rutas, medir minutos menos al sol y priorizar inversión climática donde el déficit es medible.
           </p>
         </section>
 
