@@ -154,7 +154,7 @@ function buildSuggestionLabel(feature: PhotonFeature): string | null {
 
 async function fetchPhotonSuggestions(query: string, signal: AbortSignal): Promise<Suggestion[]> {
   const response = await fetch(
-    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${PHOTON_BBOX}&limit=${PHOTON_LIMIT}&lang=es`,
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${PHOTON_BBOX}&limit=${PHOTON_LIMIT}&lang=en`,
     { signal },
   );
 
