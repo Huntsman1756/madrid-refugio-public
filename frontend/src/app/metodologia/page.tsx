@@ -15,7 +15,7 @@ const datasets = [
   {
     name: "Arbolado en parques y zonas verdes de Madrid (detalle)",
     source: "Datos Abiertos Madrid",
-    use: "Sombra biologica integrada en el peso de las aristas del grafo.",
+    use: "Sombra biologica integrada en el peso de las aristas del grafo a partir del detalle de arbolado viario y zonas verdes.",
   },
   {
     name: "Padron municipal",

@@ -33,7 +33,7 @@ La metrica de sombra es geometrica, no fisiologica: mide sombra acumulada a lo l
 
 Hemos integrado conjuntos de datos del ecosistema de datos de Madrid con sus titulos oficiales en el portal:
 1. **Modelo digital 3D de edificios:** Geoportal del Ayuntamiento de Madrid. 662.173 poligonos con atributo Z (altura real). Base para la simulacion de sombras.
-2. **Arbolado en parques y zonas verdes de Madrid (detalle):** 661.192 ejemplares geolocalizados reutilizados como sombra biologica.
+2. **Arbolado en parques y zonas verdes de Madrid (detalle):** 661.192 ejemplares geolocalizados reutilizados como sombra biologica. El dataset incluye arbolado viario y arbolado en zonas verdes municipales.
 3. **Padron municipal:** Poblacion por barrio, distrito y seccion censal agregada por sexo y edad. Base para identificar mayores de 65 anos.
 4. **Calidad del aire. Datos horarios desde 2001:** Series historicas de NO2 para analisis territorial.
 5. **Fuentes de agua para beber:** Puntos de apoyo hidrico integrados en el algoritmo de proximidad.
@@ -47,7 +47,7 @@ Hemos integrado conjuntos de datos del ecosistema de datos de Madrid con sus tit
 | Conjunto de datos | Portal / fuente | Uso en Madrid Refugio |
 |---|---|---|
 | **Modelo digital 3D de edificios** | Portal de Datos Abiertos del Ayuntamiento de Madrid / Geoportal | Base geometrica para proyectar sombras de edificacion y construir la matriz calle-sombra |
-| **Arbolado en parques y zonas verdes de Madrid (detalle)** | Portal de Datos Abiertos del Ayuntamiento de Madrid | Integracion de sombra biologica en el peso de las aristas del grafo |
+| **Arbolado en parques y zonas verdes de Madrid (detalle)** | Portal de Datos Abiertos del Ayuntamiento de Madrid | Integracion de sombra biologica en el peso de las aristas del grafo. Se reutiliza su detalle de arbolado viario y zonas verdes |
 | **Padron municipal** | Portal de Datos Abiertos del Ayuntamiento de Madrid | Identificacion del publico beneficiario y priorizacion territorial de mayores de 65 anos |
 | **Calidad del aire. Datos horarios desde 2001** | Portal de Datos Abiertos del Ayuntamiento de Madrid | Calculo del indicador territorial de exposicion cronica por NO2 |
 | **Fuentes de agua para beber** | Portal de Datos Abiertos del Ayuntamiento de Madrid | Localizacion de puntos de apoyo hidrico en las rutas |
