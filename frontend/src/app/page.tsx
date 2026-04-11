@@ -196,7 +196,7 @@ export default function Home() {
             </div>
             <h3 className="card-title text-[var(--ds-black)]">Salud</h3>
             <p className="text-[var(--ds-gray-600)] mb-1">Reducción del estrés térmico en el grupo de mayor mortalidad (mayores de 65). Protección activa.</p>
-            <span className="text-sm font-semibold text-[#0a72ef] mt-auto">+<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra acumulada en ruta óptima</span>
+            <span className="text-sm font-semibold text-[#0a72ef] mt-auto">Hasta +<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra acumulada (Plaza Elíptica → Gómez Ulla, 14:00)</span>
           </Card>
           <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
             <div className="w-10 h-10 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] mb-2 shadow-[var(--shadow-border)]">
@@ -223,7 +223,7 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-6 mb-24 stagger-children">
           <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30 fade-in-up">
             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo sur</span>
-            <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
+            <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor vulnerabilidad climática, con un <span className="font-bold">Índice de vulnerabilidad de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30 fade-in-up">
              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de proximidad</span>
@@ -231,7 +231,7 @@ export default function Home() {
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas optimizadas</span>
-             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">unos metros</span> permite sumar kilometros de sombra acumulada combinando arbolado y proyeccion geometrica de edificios.</p>
+             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">unos metros</span> permite sumar cientos de metros de sombra acumulada combinando arbolado y proyección geométrica de edificios.</p>
           </Card>
         </div>
 
@@ -484,13 +484,13 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
           {[
-            { icon: Building2, label: "Alturas de Edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef" },
-            { icon: TreePine, label: "Arbolado Viario", detail: "661.192 ejemplares", color: "#16a34a" },
-            { icon: Users, label: "Padrón Municipal", detail: "Enero 2026", color: "#de1d8d" },
-            { icon: Wind, label: "Calidad del Aire", detail: "NO₂ horario por estación", color: "#f97316" },
-            { icon: Droplets, label: "Fuentes de Agua", detail: "Red de hidrantes", color: "#0ea5e9" },
+            { icon: Building2, label: "Alturas de edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef" },
+            { icon: TreePine, label: "Arbolado viario", detail: "661.192 ejemplares", color: "#16a34a" },
+            { icon: Users, label: "Padrón municipal", detail: "Enero 2026", color: "#de1d8d" },
+            { icon: Wind, label: "Calidad del aire", detail: "NO₂ horario por estación", color: "#f97316" },
+            { icon: Droplets, label: "Fuentes de agua", detail: "Red de hidrantes", color: "#0ea5e9" },
             { icon: Landmark, label: "Equipamientos", detail: "Bibliotecas y CDM", color: "#8b5cf6" },
-            { icon: MapPin, label: "Límites Administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
+            { icon: MapPin, label: "Límites administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
             { icon: Database, label: "Portal datos.madrid.es", detail: "Fuente oficial", color: "#171717" },
           ].map((src) => (
             <div key={src.label} className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 hover:border-[var(--ds-gray-400)] hover:shadow-md transition-all group cursor-default">
