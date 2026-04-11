@@ -196,7 +196,7 @@ export default function Home() {
             </div>
             <h3 className="card-title text-[var(--ds-black)]">Salud</h3>
             <p className="text-[var(--ds-gray-600)] mb-1">Reducción del estrés térmico en el grupo de mayor mortalidad (mayores de 65). Protección activa.</p>
-            <span className="text-sm font-semibold text-[#0a72ef] mt-auto">Hasta +<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra acumulada (Plaza Elíptica → Gómez Ulla, 14:00)</span>
+            <span className="text-sm font-semibold text-[#0a72ef] mt-auto">Hasta +<CountUp key={`c1-${clickStamp}`} end={849} /> m de sombra acumulada (Plaza Elíptica → Gómez Ulla, 14:00)</span>
           </Card>
           <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
             <div className="w-10 h-10 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] mb-2 shadow-[var(--shadow-border)]">

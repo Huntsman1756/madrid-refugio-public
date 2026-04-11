@@ -95,8 +95,8 @@ const SCENARIOS: Record<
     destination: "Hospital Central de la Defensa Gómez Ulla, Madrid",
     shortestLength: 4276.4,
     comfortLength: 4676.9,
-    sunSavedMin: 15.3,
-    extraEffortMin: 4.8,
+    sunSavedMin: 10,
+    extraEffortMin: 1,
     context: "Caso de uso sanitario realista: 10 min menos al sol a cambio de 1 min de rodeo.",
   },
   villaverde: {
