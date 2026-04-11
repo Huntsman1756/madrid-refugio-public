@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { AlertTriangle, Download, LoaderCircle, Navigation, Share2 } from "lucide-react";
 
@@ -23,6 +23,7 @@ interface RoutingSectionProps {
 type ScenarioId = "carabanchel" | "villaverde";
 type Step = 1 | 2;
 type Priority = "directa" | "equilibrada" | "protegida";
+type SuggestionField = "origin" | "destination" | null;
 
 type RouteApiResult = {
   comfort_coords: number[][];
@@ -51,7 +52,28 @@ type RouteApiResult = {
   };
 };
 
+type PhotonFeature = {
+  properties?: {
+    name?: string;
+    street?: string;
+    housenumber?: string;
+    district?: string;
+    city?: string;
+    county?: string;
+    state?: string;
+  };
+};
+
+type Suggestion = {
+  label: string;
+  value: string;
+};
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+const PHOTON_BBOX = "-3.89,40.31,-3.52,40.64";
+const PHOTON_LIMIT = 5;
+const MIN_QUERY_LENGTH = 3;
+const SUGGESTION_BLUR_DELAY_MS = 150;
 
 const SCENARIOS: Record<
   ScenarioId,
@@ -68,10 +90,10 @@ const SCENARIOS: Record<
   }
 > = {
   carabanchel: {
-    label: "Plaza Eliptica -> Gomez Ulla",
+    label: "Plaza Elíptica → Gómez Ulla",
     tag: "Demo base",
-    origin: "Plaza Eliptica, Madrid",
-    destination: "Hospital Central de la Defensa Gomez Ulla, Madrid",
+    origin: "Plaza Elíptica, Madrid",
+    destination: "Hospital Central de la Defensa Gómez Ulla, Madrid",
     shortestLength: 4276.4,
     comfortLength: 4676.9,
     sunSavedMin: 15.3,
@@ -79,30 +101,80 @@ const SCENARIOS: Record<
     context: "Caso de uso sanitario realista: 15 min menos al sol a cambio de 5 min de rodeo.",
   },
   villaverde: {
-    label: "Villaverde Alto -> Ciudad de los Angeles",
-    tag: "Zona critica",
+    label: "Villaverde Alto → Ciudad de los Ángeles",
+    tag: "Zona crítica",
     origin: "Villaverde Alto, Madrid",
-    destination: "Ciudad de los Angeles, Madrid",
+    destination: "Ciudad de los Ángeles, Madrid",
     shortestLength: 3070,
     comfortLength: 3190,
     sunSavedMin: 3.4,
     extraEffortMin: 1.4,
     context:
-      "En zonas con deficit de arbolado e infraestructura verde, el sistema optimiza lo disponible pero evidencia la necesidad de mas inversion.",
+      "En zonas con déficit de arbolado e infraestructura verde, el sistema optimiza lo disponible pero evidencia la necesidad de más inversión.",
   },
 };
 
 const HOUR_OPTIONS = [
-  { value: 10, label: "10:00", note: "Manana" },
-  { value: 14, label: "14:00", note: "Mas calor" },
+  { value: 10, label: "10:00", note: "Mañana" },
+  { value: 14, label: "14:00", note: "Más calor" },
   { value: 18, label: "18:00", note: "Tarde" },
 ];
 
 const PRIORITY_OPTIONS: { key: Priority; label: string; description: string; preference: number }[] = [
-  { key: "directa", label: "Mas directa", description: "Recorta distancia", preference: 0.2 },
+  { key: "directa", label: "Más directa", description: "Recorta distancia", preference: 0.2 },
   { key: "equilibrada", label: "Equilibrada", description: "Balancea distancia y sombra", preference: 0.5 },
-  { key: "protegida", label: "Mas protegida", description: "Prioriza la sombra", preference: 0.8 },
+  { key: "protegida", label: "Más protegida", description: "Prioriza la sombra", preference: 0.8 },
 ];
+
+function normalizeText(value?: string | null): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function looksLikeCoordinates(value: string): boolean {
+  return /^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$/.test(value);
+}
+
+function buildSuggestionLabel(feature: PhotonFeature): string | null {
+  const props = feature.properties ?? {};
+  const name = props.name?.trim();
+  const streetLine = [props.street?.trim(), props.housenumber?.trim()].filter(Boolean).join(" ");
+  const primary = name || streetLine;
+  const locality = props.district?.trim() || props.city?.trim() || props.county?.trim() || props.state?.trim();
+
+  if (!primary) {
+    return null;
+  }
+
+  return locality ? `${primary}, ${locality}` : primary;
+}
+
+async function fetchPhotonSuggestions(query: string, signal: AbortSignal): Promise<Suggestion[]> {
+  const response = await fetch(
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${PHOTON_BBOX}&limit=${PHOTON_LIMIT}&lang=es`,
+    { signal },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Photon error ${response.status}`);
+  }
+
+  const data = await response.json();
+  const features = Array.isArray(data?.features) ? (data.features as PhotonFeature[]) : [];
+
+  return features
+    .filter((feature) => normalizeText(feature.properties?.city) === "madrid")
+    .map((feature) => {
+      const label = buildSuggestionLabel(feature);
+      return label ? { label, value: label } : null;
+    })
+    .filter((item): item is Suggestion => !!item)
+    .filter((item, index, array) => array.findIndex((candidate) => candidate.value === item.value) === index)
+    .slice(0, PHOTON_LIMIT);
+}
 
 function StepIndicator({ current }: { current: Step }) {
   const steps = [
@@ -174,20 +246,20 @@ function MetricCard({
 
 function mapErrorMessage(detail: string | null): string {
   if (!detail) {
-    return "No se ha podido calcular ahora mismo. Intentalo de nuevo en unos segundos.";
+    return "No se ha podido calcular ahora mismo. Inténtalo de nuevo en unos segundos.";
   }
 
   const normalized = detail.toLowerCase();
   if (normalized.includes("geocodificar")) {
-    return "No hemos encontrado esa direccion. Prueba con una calle y numero o usa uno de los escenarios de demo.";
+    return "No hemos encontrado esa dirección. Prueba con una calle y número o usa uno de los escenarios de demo.";
   }
   if (normalized.includes("fuera de madrid")) {
-    return "La direccion debe estar en Madrid. Prueba con una direccion mas concreta dentro del municipio.";
+    return "La dirección debe estar en Madrid. Prueba con una dirección más concreta dentro del municipio.";
   }
   if (normalized.includes("area de routing activa") || normalized.includes("corredor")) {
-    return "No hemos podido conectar ese punto con la red peatonal. Prueba con una direccion mas concreta dentro de Madrid.";
+    return "No hemos podido conectar ese punto con la red peatonal. Prueba con una dirección más concreta dentro de Madrid.";
   }
-  return "No se ha podido calcular ahora mismo. Intentalo de nuevo en unos segundos.";
+  return "No se ha podido calcular ahora mismo. Inténtalo de nuevo en unos segundos.";
 }
 
 function kmLabel(meters: number): string {
@@ -205,6 +277,15 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [routeResult, setRouteResult] = useState<RouteApiResult | null>(null);
+  const [activeField, setActiveField] = useState<SuggestionField>(null);
+  const [originSuggestions, setOriginSuggestions] = useState<Suggestion[]>([]);
+  const [destinationSuggestions, setDestinationSuggestions] = useState<Suggestion[]>([]);
+  const [originSuggestionsLoading, setOriginSuggestionsLoading] = useState(false);
+  const [destinationSuggestionsLoading, setDestinationSuggestionsLoading] = useState(false);
+
+  const blurTimeoutRef = useRef<number | null>(null);
+  const originAbortRef = useRef<AbortController | null>(null);
+  const destinationAbortRef = useRef<AbortController | null>(null);
 
   const scenario = SCENARIOS[scenarioId];
   const priorityOption = PRIORITY_OPTIONS.find((option) => option.key === priority) ?? PRIORITY_OPTIONS[1];
@@ -218,19 +299,113 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
 
   const summary = useMemo(
     () =>
-      `En el escenario actual: ruta rapida ~${kmLabel(shortestLength)} km · ruta protegida ~${kmLabel(
+      `En el escenario actual: ruta rápida ~${kmLabel(shortestLength)} km · ruta protegida ~${kmLabel(
         comfortLength,
       )} km · ${Math.round(sunSavedMin)} min menos al sol · ${Math.round(extraEffortMin)} min de rodeo`,
     [comfortLength, extraEffortMin, shortestLength, sunSavedMin],
   );
+
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        window.clearTimeout(blurTimeoutRef.current);
+      }
+      originAbortRef.current?.abort();
+      destinationAbortRef.current?.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const query = origin.trim();
+    if (query.length < MIN_QUERY_LENGTH || looksLikeCoordinates(query)) {
+      originAbortRef.current?.abort();
+      setOriginSuggestions([]);
+      setOriginSuggestionsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    originAbortRef.current?.abort();
+    originAbortRef.current = controller;
+    setOriginSuggestionsLoading(true);
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const suggestions = await fetchPhotonSuggestions(query, controller.signal);
+        setOriginSuggestions(suggestions);
+      } catch (err) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          setOriginSuggestions([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setOriginSuggestionsLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [origin]);
+
+  useEffect(() => {
+    const query = destination.trim();
+    if (query.length < MIN_QUERY_LENGTH || looksLikeCoordinates(query)) {
+      destinationAbortRef.current?.abort();
+      setDestinationSuggestions([]);
+      setDestinationSuggestionsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    destinationAbortRef.current?.abort();
+    destinationAbortRef.current = controller;
+    setDestinationSuggestionsLoading(true);
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const suggestions = await fetchPhotonSuggestions(query, controller.signal);
+        setDestinationSuggestions(suggestions);
+      } catch (err) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          setDestinationSuggestions([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setDestinationSuggestionsLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [destination]);
+
+  const resetFeedback = () => {
+    setRouteResult(null);
+    setError(null);
+  };
+
+  const clearSuggestions = (field?: SuggestionField) => {
+    if (!field || field === "origin") {
+      setOriginSuggestions([]);
+    }
+    if (!field || field === "destination") {
+      setDestinationSuggestions([]);
+    }
+  };
 
   const selectScenario = (nextScenarioId: ScenarioId) => {
     const nextScenario = SCENARIOS[nextScenarioId];
     setScenarioId(nextScenarioId);
     setOrigin(nextScenario.origin);
     setDestination(nextScenario.destination);
-    setRouteResult(null);
-    setError(null);
+    clearSuggestions();
+    resetFeedback();
   };
 
   const goToStep2 = () => {
@@ -246,6 +421,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     setLoading(true);
     setRouteResult(null);
     setError(null);
+    clearSuggestions();
 
     try {
       const response = await fetch(`${API_BASE}/api/route`, {
@@ -286,7 +462,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     const gpxData = `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Madrid Refugio">
   <trk>
-    <name>Ruta climatica Madrid Refugio</name>
+    <name>Ruta climática Madrid Refugio</name>
     <trkseg>
 ${gpxPoints}
     </trkseg>
@@ -314,7 +490,7 @@ ${gpxPoints}
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Ruta mas fresca - Madrid Refugio",
+          title: "Ruta más fresca - Madrid Refugio",
           text,
           url: window.location.href,
         });
@@ -328,10 +504,72 @@ ${gpxPoints}
     setError("Resumen copiado al portapapeles.");
   };
 
+  const applySuggestion = (field: Exclude<SuggestionField, null>, suggestion: Suggestion) => {
+    if (field === "origin") {
+      setOrigin(suggestion.value);
+      setOriginSuggestions([]);
+    } else {
+      setDestination(suggestion.value);
+      setDestinationSuggestions([]);
+    }
+    setActiveField(null);
+    resetFeedback();
+  };
+
+  const scheduleBlurClose = () => {
+    if (blurTimeoutRef.current) {
+      window.clearTimeout(blurTimeoutRef.current);
+    }
+    blurTimeoutRef.current = window.setTimeout(() => setActiveField(null), SUGGESTION_BLUR_DELAY_MS);
+  };
+
+  const cancelBlurClose = () => {
+    if (blurTimeoutRef.current) {
+      window.clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
+  };
+
+  const renderSuggestions = (field: Exclude<SuggestionField, null>, suggestions: Suggestion[], isLoading: boolean) => {
+    const isVisible = activeField === field && (isLoading || suggestions.length > 0);
+    if (!isVisible) {
+      return null;
+    }
+
+    return (
+      <div className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-20 overflow-hidden rounded-xl border border-[var(--ds-gray-100)] bg-white shadow-lg">
+        {isLoading ? (
+          <div className="flex items-center gap-2 px-4 py-3 text-sm text-[var(--ds-gray-500)]">
+            <LoaderCircle className="h-4 w-4 animate-spin" />
+            Buscando direcciones...
+          </div>
+        ) : (
+          <ul className="py-1">
+            {suggestions.map((suggestion) => (
+              <li key={`${field}-${suggestion.value}`}>
+                <button
+                  type="button"
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    cancelBlurClose();
+                    applySuggestion(field, suggestion);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-[var(--ds-black)] transition-colors hover:bg-[var(--ds-gray-50)]"
+                >
+                  {suggestion.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="mb-24">
       <div className="mb-8 border-b border-[var(--ds-gray-100)] pb-6">
-        <h2 className="sub-heading-large text-[var(--ds-black)]">Navegador de rutas climaticas</h2>
+        <h2 className="sub-heading-large text-[var(--ds-black)]">Navegador de rutas climáticas</h2>
         <p className="mt-2 text-[var(--ds-gray-600)]">
           Planifica tu trayecto con pasos claros, botones grandes y una comparativa centrada en tiempo menos al sol.
         </p>
@@ -364,13 +602,13 @@ ${gpxPoints}
                 <div>
                   <h3 className="card-title text-[var(--ds-black)]">Paso 1. Origen y destino</h3>
                   <p className="mt-2 text-sm text-[var(--ds-gray-600)]">
-                    Puedes escribir tus direcciones o empezar con uno de los escenarios de demostracion.
+                    Puedes escribir tus direcciones o empezar con uno de los escenarios de demostración.
                   </p>
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">
-                    Escenario de demostracion
+                    Escenario de demostración
                   </label>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {(Object.entries(SCENARIOS) as [ScenarioId, (typeof SCENARIOS)[ScenarioId]][]).map(
@@ -395,30 +633,29 @@ ${gpxPoints}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
+                  <div className="relative">
                     <label className="mb-2 flex items-center justify-between text-sm font-medium text-[var(--ds-gray-600)]">
-                      <span>Desde donde sales</span>
+                      <span>Desde dónde sales</span>
                       <button
                         type="button"
                         onClick={() => {
                           if (!navigator.geolocation) {
-                            setError("Tu navegador no permite usar la ubicacion actual.");
+                            setError("Tu navegador no permite usar la ubicación actual.");
                             return;
                           }
 
                           setLocating(true);
-                          setRouteResult(null);
-                          setError(null);
+                          resetFeedback();
+                          clearSuggestions("origin");
 
                           navigator.geolocation.getCurrentPosition(
                             (pos) => {
                               setOrigin(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
-                              setRouteResult(null);
-                              setError(null);
+                              setActiveField(null);
                               setLocating(false);
                             },
                             () => {
-                              setError("No hemos podido obtener tu ubicacion actual. Revisa los permisos del navegador.");
+                              setError("No hemos podido obtener tu ubicación actual. Revisa los permisos del navegador.");
                               setLocating(false);
                             },
                           );
@@ -427,32 +664,40 @@ ${gpxPoints}
                         className="inline-flex items-center gap-1 text-xs text-[#0a72ef] hover:underline disabled:cursor-wait disabled:no-underline disabled:opacity-70"
                       >
                         {locating ? <LoaderCircle className="h-3 w-3 animate-spin" /> : null}
-                        {locating ? "Ubicando..." : "Ubicame"}
+                        {locating ? "Ubicando..." : "Ubícame"}
                       </button>
                     </label>
                     <input
                       type="text"
                       value={origin}
+                      onFocus={() => setActiveField("origin")}
+                      onBlur={scheduleBlurClose}
                       onChange={(e) => {
                         setOrigin(e.target.value);
-                        setRouteResult(null);
-                        setError(null);
+                        setActiveField("origin");
+                        resetFeedback();
                       }}
                       className="min-h-14 w-full rounded-xl border border-[var(--ds-gray-100)] px-4 text-base text-[var(--ds-black)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ds-focus-color)]"
+                      autoComplete="off"
                     />
+                    {renderSuggestions("origin", originSuggestions, originSuggestionsLoading)}
                   </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">A donde vas</label>
+                  <div className="relative">
+                    <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">A dónde vas</label>
                     <input
                       type="text"
                       value={destination}
+                      onFocus={() => setActiveField("destination")}
+                      onBlur={scheduleBlurClose}
                       onChange={(e) => {
                         setDestination(e.target.value);
-                        setRouteResult(null);
-                        setError(null);
+                        setActiveField("destination");
+                        resetFeedback();
                       }}
                       className="min-h-14 w-full rounded-xl border border-[var(--ds-gray-100)] px-4 text-base text-[var(--ds-black)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ds-focus-color)]"
+                      autoComplete="off"
                     />
+                    {renderSuggestions("destination", destinationSuggestions, destinationSuggestionsLoading)}
                   </div>
                 </div>
 
@@ -474,7 +719,7 @@ ${gpxPoints}
                 <div>
                   <h3 className="card-title text-[var(--ds-black)]">Paso 2. Hora y tipo de ruta</h3>
                   <p className="mt-2 text-sm text-[var(--ds-gray-600)]">
-                    Elige una hora facil de entender y la prioridad de la ruta. Despues calcula la opcion mas protegida.
+                    Elige una hora fácil de entender y la prioridad de la ruta. Después calcula la opción más protegida.
                   </p>
                 </div>
 
@@ -544,7 +789,7 @@ ${gpxPoints}
                     onClick={calculate}
                     disabled={loading}
                   >
-                    {loading ? "Calculando..." : "Calcular la ruta mas fresca"}
+                    {loading ? "Calculando..." : "Calcular la ruta más fresca"}
                   </Button>
                 </div>
               </div>
@@ -562,8 +807,8 @@ ${gpxPoints}
           </div>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <MetricCard value={kmLabel(shortestLength)} unit="km" label="ruta rapida" />
-            <MetricCard value={kmLabel(comfortLength)} unit="km" label="ruta mas protegida" tone="positive" />
+            <MetricCard value={kmLabel(shortestLength)} unit="km" label="ruta rápida" />
+            <MetricCard value={kmLabel(comfortLength)} unit="km" label="ruta más protegida" tone="positive" />
           </div>
 
           {metrics ? (
@@ -595,7 +840,7 @@ ${gpxPoints}
                   <thead className="border-b border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] text-[var(--ds-gray-500)]">
                     <tr>
                       <th className="px-4 py-3 font-medium">Comparativa</th>
-                      <th className="px-4 py-3 text-center font-medium">Ruta rapida</th>
+                      <th className="px-4 py-3 text-center font-medium">Ruta rápida</th>
                       <th className="px-4 py-3 text-center font-medium text-[#166534]">Ruta protegida</th>
                     </tr>
                   </thead>
@@ -639,10 +884,10 @@ ${gpxPoints}
               <div className="flex items-start gap-3">
                 <Navigation className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--ds-gray-500)]" />
                 <div>
-                  <p className="font-medium text-[var(--ds-black)]">Todavia no has calculado una ruta</p>
+                  <p className="font-medium text-[var(--ds-black)]">Todavía no has calculado una ruta</p>
                   <p className="mt-1">
-                    Completa los dos pasos y te mostraremos una comparativa sencilla: cuanto tiempo evitas al sol,
-                    cuanto rodeo anades y que recursos de apoyo quedan cerca.
+                    Completa los dos pasos y te mostraremos una comparativa sencilla: cuánto tiempo evitas al sol,
+                    cuánto rodeo añades y qué recursos de apoyo quedan cerca.
                   </p>
                 </div>
               </div>
