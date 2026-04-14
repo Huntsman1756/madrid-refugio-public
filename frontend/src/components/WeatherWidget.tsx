@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cloud, Sun, CloudRain, Thermometer, AlertCircle, RefreshCw } from "lucide-react";
+import { Thermometer, AlertCircle, RefreshCw, Clock3 } from "lucide-react";
 
 interface WeatherData {
   municipio: string;
@@ -70,9 +70,12 @@ export function WeatherWidget() {
       </div>
       <div className="h-3 w-px bg-current opacity-20"></div>
       <div className="flex items-center gap-1.5 text-xs font-medium">
-        <Sun className="w-3.5 h-3.5 opacity-70" />
-        <span className="hidden sm:inline capitalize">{weather.estado_cielo}</span>
-        <span className="opacity-60 text-[10px] ml-1">{weather.timestamp}</span>
+        <span className="capitalize">{weather.estado_cielo}</span>
+      </div>
+      <div className="h-3 w-px bg-current opacity-20"></div>
+      <div className="flex items-center gap-1 text-xs font-medium">
+        <Clock3 className="w-3.5 h-3.5 opacity-70" />
+        <span>{weather.timestamp}</span>
       </div>
       {isHot && (
         <>
