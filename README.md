@@ -61,7 +61,6 @@ python api.py
 
 Variables de entorno esperadas:
 
-- `AEMET_API_KEY`: clave de OpenData AEMET para la predicción meteorológica.
 - `GITHUB_TOKEN`: opcional, solo si quieres usar peticiones autenticadas a GitHub.
 
 ### Despliegue en Railway
@@ -74,7 +73,6 @@ El backend de producción en Railway necesita estas condiciones para arrancar de
 
 Configuración operativa validada en producción:
 
-- `AEMET_API_KEY` configurada
 - `DATA_DIR=/mnt/data/processed`
 - volumen persistente con `madrid_shadow_graph.graphml` y `shadow_matrix.parquet`
 - límite del servicio en Railway de al menos `8 vCPU / 8 GB RAM`
