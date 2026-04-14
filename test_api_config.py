@@ -123,6 +123,34 @@ class ApiConfigTests(unittest.TestCase):
                 )
             )
 
+    def test_get_allowed_origins_includes_env_overrides(self):
+        previous_frontend = os.environ.get("FRONTEND_ORIGIN")
+        previous_additional = os.environ.get("ADDITIONAL_ALLOWED_ORIGINS")
+        os.environ["FRONTEND_ORIGIN"] = "https://custom.madrid-refugio.es"
+        os.environ["ADDITIONAL_ALLOWED_ORIGINS"] = "https://preview.example.com, https://ops.example.com"
+        try:
+            import api
+
+            reloaded = importlib.reload(api)
+            origins = reloaded.get_allowed_origins()
+            self.assertIn("https://madrid-refugio.vercel.app", origins)
+            self.assertIn("http://localhost:3000", origins)
+            self.assertIn("https://custom.madrid-refugio.es", origins)
+            self.assertIn("https://preview.example.com", origins)
+            self.assertIn("https://ops.example.com", origins)
+        finally:
+            if previous_frontend is None:
+                os.environ.pop("FRONTEND_ORIGIN", None)
+            else:
+                os.environ["FRONTEND_ORIGIN"] = previous_frontend
+            if previous_additional is None:
+                os.environ.pop("ADDITIONAL_ALLOWED_ORIGINS", None)
+            else:
+                os.environ["ADDITIONAL_ALLOWED_ORIGINS"] = previous_additional
+            import api
+
+            importlib.reload(api)
+
 
 if __name__ == "__main__":
     unittest.main()

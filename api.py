@@ -105,6 +105,22 @@ AEMET_API_KEY = os.getenv("AEMET_API_KEY")
 MADRID_MUNICIPIO_ID = "28079"
 
 
+def get_allowed_origins() -> list[str]:
+    origins = {
+        "https://madrid-refugio.vercel.app",
+        "http://localhost:3000",
+    }
+    for env_key in ("FRONTEND_ORIGIN", "ADDITIONAL_ALLOWED_ORIGINS"):
+        raw = os.getenv(env_key, "")
+        if not raw:
+            continue
+        for origin in raw.split(","):
+            origin = origin.strip()
+            if origin:
+                origins.add(origin)
+    return sorted(origins)
+
+
 def select_current_aemet_snapshot(prediccion_dias: list[dict], now: datetime) -> tuple[dict, str]:
     """Pick the latest available hourly temperature slot, falling back to the nearest future slot."""
     past_candidates: list[tuple[float, dict, str]] = []
@@ -196,7 +212,14 @@ def select_current_sky_state(prediccion_dias: list[dict], now: datetime) -> str:
 def fetch_aemet_data():
     """Implementa el patrón de doble fetch de AEMET OpenData"""
     if not AEMET_API_KEY:
-        return {"error": "AEMET_API_KEY no configurada"}
+        return {
+            "municipio": "Madrid",
+            "temperatura": "N/D",
+            "estado_cielo": "AEMET no disponible",
+            "timestamp": "",
+            "fuente": "AEMET (OpenData)",
+            "error": "AEMET_API_KEY no configurada",
+        }
     
     # Cache de 15 minutos (900 segundos)
     if app_state.weather_cache and (time.time() - app_state.weather_last_update < 900):
@@ -209,7 +232,14 @@ def fetch_aemet_data():
         meta = resp_meta.json()
         
         if meta.get("estado") != 200:
-            return {"error": f"AEMET Error: {meta.get('descripcion')}"}
+            return {
+                "municipio": "Madrid",
+                "temperatura": "N/D",
+                "estado_cielo": "AEMET no disponible",
+                "timestamp": "",
+                "fuente": "AEMET (OpenData)",
+                "error": f"AEMET Error: {meta.get('descripcion')}",
+            }
         
         # Paso 2: Obtener datos reales de la URL temporal
         url_datos = meta.get("datos")
@@ -240,7 +270,14 @@ def fetch_aemet_data():
         app_state.weather_last_update = time.time()
         return result
     except Exception as e:
-        return {"error": f"Error conectando con AEMET: {str(e)}"}
+        return {
+            "municipio": "Madrid",
+            "temperatura": "N/D",
+            "estado_cielo": "AEMET no disponible",
+            "timestamp": "",
+            "fuente": "AEMET (OpenData)",
+            "error": f"Error conectando con AEMET: {str(e)}",
+        }
 
 
 def resolve_release_asset_download(asset_name: str) -> tuple[str, dict]:
@@ -511,10 +548,8 @@ def get_weather():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://madrid-refugio.vercel.app",
-        "http://localhost:3000",
-    ],
+    allow_origins=get_allowed_origins(),
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

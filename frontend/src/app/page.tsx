@@ -265,8 +265,8 @@ export default function Home() {
             </div>
             <p className="mt-3 text-[11px] sm:text-xs text-[var(--ds-gray-500)] leading-relaxed">
               {viewMode === 'vulnerability' 
-                ? "Índice compuesto: temperatura superficial + % mayores de 65 + cobertura de arbolado. Rojo intenso = intervención urgente."
-                : "Barrios donde la distancia media al refugio más cercano supera 500m. A mayor déficit, mayor riesgo para población vulnerable."}
+                ? "Mapa territorial agregado, no sombra instantánea: índice compuesto de temperatura superficial, % mayores de 65 y cobertura de arbolado."
+                : "Mapa territorial agregado de acceso a refugios: barrios donde la distancia media al refugio más cercano supera 500 m."}
             </p>
           </div>
         </div>
@@ -493,11 +493,11 @@ export default function Home() {
             { icon: MapPin, label: "Límites administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
             { icon: Database, label: "Portal datos.madrid.es", detail: "Fuente oficial", color: "#171717" },
           ].map((src) => (
-            <div key={src.label} className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 hover:border-[var(--ds-gray-400)] hover:shadow-md transition-all group cursor-default">
+            <div key={src.label} className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 cursor-default">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
                 <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
               </div>
-              <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 group-hover:text-[var(--ds-black)] leading-tight">{src.label}</p>
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 leading-tight">{src.label}</p>
               <p className="text-xs text-[var(--ds-gray-500)]">{src.detail}</p>
             </div>
           ))}

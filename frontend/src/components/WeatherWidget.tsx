@@ -54,7 +54,7 @@ export function WeatherWidget() {
         ? "Alerta por calor extremo"
         : isWarm
           ? "Calor intenso"
-        : `${weather?.municipio ?? "Madrid"} ahora:`;
+          : `${weather?.municipio ?? "Madrid"} ahora:`;
 
   const statusText =
     loading && !weather
