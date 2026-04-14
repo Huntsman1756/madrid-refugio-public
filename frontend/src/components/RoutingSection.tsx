@@ -60,7 +60,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const formatSunSaved = (minutes: number | null | undefined) => (minutes == null ? "—" : `-${minutes} min`);
+  const formatSunSaved = (minutes: number | null | undefined) => (minutes == null ? "—" : `${minutes} min`);
   const formatExtraEffort = (minutes: number | null | undefined) => (minutes == null ? "—" : `+${minutes} min`);
 
   useEffect(() => {
