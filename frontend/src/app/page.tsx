@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
 import { RoutingSection } from "@/components/RoutingSection";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { getTop10PanelState } from "./home-data-state";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false, loading: () => <div className="w-full h-full bg-[var(--ds-gray-50)] rounded-xl animate-pulse flex items-center justify-center text-[var(--ds-gray-500)]">Loading Map...</div> });
@@ -43,6 +44,7 @@ function CountUp({ end, decimals = 0, suffix = "" }: { end: number, decimals?: n
 
 export default function Home() {
   const [mergedData, setMergedData] = useState<any>(null);
+  const [mergedDataError, setMergedDataError] = useState<string | null>(null);
   const [refugios, setRefugios] = useState<any>(null);
   const [fuentes, setFuentes] = useState<any>(null);
   const [selectedBarrio, setSelectedBarrio] = useState<string | null>(null);
@@ -52,10 +54,29 @@ export default function Home() {
   const [fontScale, setFontScale] = useState(1);
   const [clickStamp, setClickStamp] = useState(Date.now());
 
+  const loadMergedData = async () => {
+    setMergedDataError(null);
+
+    try {
+      const response = await fetch('/data/barrios_merged.geojson');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      setMergedData(data);
+    } catch {
+      setMergedData(null);
+      setSelectedBarrio(null);
+      setBarrioStats(null);
+      setMergedDataError('No se pudo cargar el análisis territorial.');
+    }
+  };
+
   useEffect(() => {
-    fetch('/data/barrios_merged.geojson').then(res => res.json()).then(setMergedData);
-    fetch('/data/refugios_sustitutos.geojson').then(res => res.json()).then(setRefugios);
-    fetch('/data/fuentes.geojson').then(res => res.json()).then(setFuentes);
+    loadMergedData();
+    fetch('/data/refugios_sustitutos.geojson').then(res => res.json()).then(setRefugios).catch(() => setRefugios(null));
+    fetch('/data/fuentes.geojson').then(res => res.json()).then(setFuentes).catch(() => setFuentes(null));
   }, []);
 
   // ── Scroll reveal observer ──
@@ -127,6 +148,7 @@ export default function Home() {
         .sort((a: any, b: any) => (b.properties.priority_score_norm || 0) - (a.properties.priority_score_norm || 0))
         .slice(0, 10)
     : [];
+  const top10PanelState = getTop10PanelState(mergedData, mergedDataError);
 
   return (
     <main ref={mainRef} className="min-h-screen bg-[var(--background)]">
@@ -407,9 +429,17 @@ export default function Home() {
                     <p className="text-xs text-[var(--ds-gray-500)] mt-0.5">Vulnerabilidad térmica climática. Click para ver detalle.</p>
                   </div>
                   <div className="flex-1 overflow-y-auto space-y-1 -mx-1 px-1">
-                    {top10.length === 0 ? (
+                    {top10PanelState === 'loading' ? (
                       <div className="flex items-center justify-center h-full text-[var(--ds-gray-400)] text-sm">
                         <Navigation className="w-5 h-5 mr-2 opacity-50" /> Cargando datos...
+                      </div>
+                    ) : top10PanelState === 'error' ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                        <p className="text-sm font-medium text-[var(--ds-black)]">{mergedDataError}</p>
+                        <p className="text-xs text-[var(--ds-gray-500)] mt-2">Reintenta la carga para recuperar el ranking y el mapa territorial.</p>
+                        <Button variant="primary" className="mt-4 h-9 px-4 text-sm" onClick={() => void loadMergedData()}>
+                          Reintentar carga
+                        </Button>
                       </div>
                     ) : (
                       top10.map((f: any, i: number) => {
