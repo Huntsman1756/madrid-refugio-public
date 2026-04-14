@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { MapPin, Navigation, Clock, Settings, X, ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { MapPin, Navigation } from "lucide-react";
 
 export interface SearchBarState {
   origin: string;
@@ -16,6 +16,14 @@ interface SearchBarProps {
   initialState?: Partial<SearchBarState>;
   loading?: boolean;
 }
+
+const HOUR_OPTIONS = [10, 14, 18] as const;
+
+const HOUR_LABELS: Record<number, string> = {
+  10: "Manana",
+  14: "Mas calor",
+  18: "Tarde",
+};
 
 const PREFERENCE_LABELS: Record<string, string> = {
   "0.0": "Mínima distancia",
@@ -36,22 +44,26 @@ function getPreferenceLabel(val: number): string {
   return PREFERENCE_LABELS[key] || "Equilibrada";
 }
 
+function normalizeHour(val: number): number {
+  return HOUR_OPTIONS.reduce((closest, option) =>
+    Math.abs(option - val) < Math.abs(closest - val) ? option : closest
+  , HOUR_OPTIONS[0]);
+}
+
 export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   const [destination, setDestination] = useState(initialState?.destination || "");
   const [origin, setOrigin] = useState(initialState?.origin || "");
-  const [hour, setHour] = useState(initialState?.hour ?? new Date().getHours());
+  const [hour, setHour] = useState(() => normalizeHour(initialState?.hour ?? new Date().getHours()));
   const [preference, setPreference] = useState(initialState?.preference ?? 0.5);
   const [useMyLocation, setUseMyLocation] = useState(initialState?.useMyLocation ?? true);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [geolocationStatus, setGeolocationStatus] = useState<"idle" | "requesting" | "granted" | "denied" | "error">("idle");
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
   const destinationRef = useRef<HTMLInputElement>(null);
   const originRef = useRef<HTMLInputElement>(null);
 
-  // Clamp hour to valid range
-  const clampedHour = Math.max(8, Math.min(20, hour));
+  const isLocationReady = useMyLocation && geolocationStatus === "granted" && Boolean(origin);
+  const canSearch = destination.trim() && (useMyLocation ? isLocationReady : origin.trim());
 
-  // Geolocation on mount
   useEffect(() => {
     if (useMyLocation && geolocationStatus === "idle") {
       requestGeolocation();
@@ -61,7 +73,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   useEffect(() => {
     if (initialState?.destination !== undefined) setDestination(initialState.destination);
     if (initialState?.origin !== undefined) setOrigin(initialState.origin);
-    if (initialState?.hour !== undefined) setHour(initialState.hour);
+    if (initialState?.hour !== undefined) setHour(normalizeHour(initialState.hour));
     if (initialState?.preference !== undefined) setPreference(initialState.preference);
     if (initialState?.useMyLocation !== undefined) setUseMyLocation(initialState.useMyLocation);
   }, [
@@ -83,7 +95,6 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     setGeolocationStatus("requesting");
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // Store coordinates for later API use
         setOrigin(`${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
         setGeolocationStatus("granted");
         setGeolocationError(null);
@@ -91,7 +102,6 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
       (error) => {
         setGeolocationStatus("denied");
         setUseMyLocation(false);
-        setShowAdvanced(true);
         if (error.code === error.PERMISSION_DENIED) {
           setGeolocationError("Ubicación denegada. Escribe tu origen manualmente.");
         } else {
@@ -109,10 +119,21 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
       destinationRef.current?.focus();
       return;
     }
+
+    if (useMyLocation && !isLocationReady) {
+      requestGeolocation();
+      return;
+    }
+
+    if (!useMyLocation && !origin.trim()) {
+      originRef.current?.focus();
+      return;
+    }
+
     onSearch({
-      origin: useMyLocation && origin ? origin : (origin || "Puerta del Sol, Madrid"),
+      origin: useMyLocation ? origin : origin.trim(),
       destination: destination.trim(),
-      hour: clampedHour,
+      hour,
       preference,
       useMyLocation: useMyLocation && geolocationStatus === "granted",
     });
@@ -125,157 +146,157 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     } else {
       setUseMyLocation(false);
       setOrigin("");
+      setGeolocationError(null);
       setGeolocationStatus("idle");
+      window.setTimeout(() => originRef.current?.focus(), 0);
     }
   };
 
+  const locationTitle = useMyLocation
+    ? geolocationStatus === "granted"
+      ? "Tu ubicación actual"
+      : geolocationStatus === "requesting"
+        ? "Obteniendo ubicación"
+        : "Activar ubicación"
+    : "Origen manual";
+
+  const locationDetail = useMyLocation
+    ? geolocationStatus === "granted"
+      ? origin
+      : geolocationStatus === "requesting"
+        ? "Estamos buscando tu posición para calcular la salida."
+        : "Usa tu ubicación o cambia a origen manual."
+    : "Calle, lugar o coordenadas en Madrid";
+
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      {/* Main search bar */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        {/* Destination input — primary focus */}
-        <div className="flex-1 relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ds-gray-400)]">
-            <Navigation className="w-4 h-4" />
+    <form onSubmit={handleSubmit} className="w-full space-y-4">
+      <div className="rounded-[28px] border border-black/5 bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] sm:p-5">
+        <div className="flex gap-3 sm:gap-4">
+          <div className="flex flex-col items-center pt-1">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+              <MapPin className="h-4 w-4" />
+            </span>
+            <span className="my-2 h-12 w-px bg-[var(--ds-gray-200)]" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--ds-gray-100)] text-[var(--ds-black)]">
+              <Navigation className="h-4 w-4" />
+            </span>
+          </div>
+
+          <div className="min-w-0 flex-1 space-y-4">
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label className="text-sm font-medium text-[var(--ds-black)]">Origen</label>
+                <button
+                  type="button"
+                  onClick={handleToggleMyLocation}
+                  className="shrink-0 text-xs font-medium text-emerald-700 transition-colors hover:text-emerald-800"
+                >
+                  {useMyLocation ? "Escribir origen" : "Usar mi ubicación"}
+                </button>
+              </div>
+
+              {useMyLocation ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isLocationReady) requestGeolocation();
+                  }}
+                  className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-left transition-colors hover:border-[var(--ds-gray-300)]"
+                >
+                  <div className="text-sm font-medium text-[var(--ds-black)]">{locationTitle}</div>
+                  <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>
+                </button>
+              ) : (
+                <>
+                  <input
+                    ref={originRef}
+                    type="text"
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    placeholder="Calle, lugar o coordenadas en Madrid"
+                    className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)]"
+                  />
+                  <p className="mt-1.5 text-xs text-[var(--ds-gray-500)]">
+                    Usa una calle, un lugar o unas coordenadas.
+                  </p>
+                </>
+              )}
+
+              {geolocationError && !useMyLocation && (
+                <p className="mt-1.5 text-xs text-red-500">{geolocationError}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--ds-black)]">Destino</label>
+              <input
+                ref={destinationRef}
+                type="text"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                placeholder="¿A dónde quieres ir?"
+                className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-base font-medium text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)]"
+                autoFocus
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
+        <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <label className="text-sm font-medium text-[var(--ds-black)]">Hora de salida</label>
+            <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{hour}:00</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {HOUR_OPTIONS.map((option) => {
+              const selected = option === hour;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setHour(option)}
+                  className={`rounded-2xl border px-3 py-2 text-left transition-all ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                >
+                  <div className="text-sm font-semibold">{option}:00</div>
+                  <div className={`mt-0.5 text-[11px] ${selected ? "text-white/75" : "text-[var(--ds-gray-500)]"}`}>
+                    {HOUR_LABELS[option]}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/5 bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <label className="text-sm font-medium text-[var(--ds-black)]">Tipo de ruta</label>
+            <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
           </div>
           <input
-            ref={destinationRef}
-            type="text"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            placeholder="¿A dónde quieres ir?"
-            className="w-full pl-9 pr-4 py-3.5 sm:py-4 bg-white border border-[var(--ds-gray-200)] rounded-xl focus:ring-2 focus:ring-[var(--ds-focus-color)] focus:border-transparent text-[var(--ds-black)] text-base font-medium placeholder:text-[var(--ds-gray-400)] shadow-sm"
-            autoFocus
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value={preference}
+            onChange={(e) => setPreference(parseFloat(e.target.value))}
+            className="w-full cursor-pointer appearance-none rounded-lg accent-[#16a34a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
           />
+          <div className="mt-2 flex justify-between gap-3 text-[11px] text-[var(--ds-gray-500)]">
+            <span>Minima distancia</span>
+            <span className="text-right">Maxima sombra</span>
+          </div>
         </div>
-
-        {/* Search button */}
-        <button
-          type="submit"
-          disabled={loading || !destination.trim()}
-          className="h-12 sm:h-[52px] px-8 bg-[var(--ds-black)] text-white font-semibold rounded-xl hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[var(--shadow-ring-light)] active:scale-[0.98] whitespace-nowrap"
-        >
-          {loading ? "Calculando..." : "Buscar ruta con sombra"}
-        </button>
       </div>
 
-      {/* Origin summary line — below search */}
-      <div className="mt-2 flex items-center gap-2 px-1">
-        <button
-          type="button"
-          onClick={handleToggleMyLocation}
-          className="inline-flex items-center gap-1.5 text-xs text-[var(--ds-gray-500)] hover:text-[var(--ds-black)] transition-colors"
-        >
-          <MapPin className={`w-3 h-3 ${geolocationStatus === "granted" ? "text-green-500" : geolocationStatus === "denied" ? "text-red-400" : "text-[var(--ds-gray-400)]"}`} />
-          {useMyLocation && geolocationStatus === "granted" ? (
-            <span className="text-green-700">Tu ubicación actual</span>
-          ) : useMyLocation && geolocationStatus === "requesting" ? (
-            <span className="text-[var(--ds-gray-400)]">Obteniendo ubicación...</span>
-          ) : geolocationStatus === "denied" || geolocationStatus === "error" ? (
-            <span className="text-red-500">{geolocationError}</span>
-          ) : (
-            <span>Usar mi ubicación</span>
-          )}
-        </button>
-
-        {/* Advanced options toggle */}
-        <button
-          type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="ml-auto inline-flex items-center gap-1 text-xs text-[var(--ds-gray-500)] hover:text-[var(--ds-black)] transition-colors"
-        >
-          <Settings className="w-3 h-3" />
-          {showAdvanced ? "Ocultar opciones" : "Opciones"}
-          {showAdvanced ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>
-      </div>
-
-      {/* Collapsed advanced options */}
-      {showAdvanced && (
-        <div className="mt-4 p-4 bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)] rounded-xl space-y-4 animate-fade-in">
-          {/* Origin input (when not using geolocation or to override) */}
-          <div>
-            <label className="block text-xs font-semibold text-[var(--ds-gray-600)] mb-1.5 uppercase tracking-wide">
-              Origen
-            </label>
-            <input
-              ref={originRef}
-              type="text"
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-              placeholder="Tu ubicación actual o escribe una dirección"
-              className="w-full px-3 py-2.5 bg-white border border-[var(--ds-gray-200)] rounded-lg focus:ring-2 focus:ring-[var(--ds-focus-color)] text-[var(--ds-black)] text-sm"
-            />
-            <div className="mt-1.5 rounded-lg border border-[var(--ds-gray-200)] bg-white px-3 py-2 text-[11px] text-[var(--ds-gray-600)] leading-relaxed">
-              Puedes escribir una calle, un lugar conocido o unas coordenadas como <code>40.4168, -3.7038</code>.
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-[var(--ds-gray-200)] bg-white px-3 py-2 text-[11px] text-[var(--ds-gray-600)] leading-relaxed">
-            Si usas tu ubicacion actual, solo necesitas indicar el destino. Si no, completa origen y destino para calcular la ruta.
-          </div>
-
-          {/* Hour selector */}
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="text-xs font-semibold text-[var(--ds-gray-600)] uppercase tracking-wide">
-                Hora de salida
-              </label>
-              <span className="text-xs font-mono font-bold text-[var(--ds-black)]">{clampedHour}:00</span>
-            </div>
-            <input
-              type="range"
-              min="8"
-              max="20"
-              value={clampedHour}
-              onChange={(e) => setHour(parseInt(e.target.value))}
-              className="w-full h-2 bg-[var(--ds-gray-200)] rounded-lg appearance-none cursor-pointer accent-[var(--ds-black)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
-            />
-            <div className="flex justify-between text-[10px] text-[var(--ds-gray-400)] mt-1">
-              <span>8:00</span>
-              <span>14:00</span>
-              <span>20:00</span>
-            </div>
-          </div>
-
-          {/* Preference selector */}
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="text-xs font-semibold text-[var(--ds-gray-600)] uppercase tracking-wide">
-                Tipo de ruta
-              </label>
-              <span className="text-xs font-bold text-[var(--ds-black)]">{getPreferenceLabel(preference)}</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={preference}
-              onChange={(e) => setPreference(parseFloat(e.target.value))}
-              className="w-full h-2 bg-[var(--ds-gray-200)] rounded-lg appearance-none cursor-pointer accent-[#16a34a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
-            />
-            <div className="flex justify-between text-[10px] text-[var(--ds-gray-400)] mt-1">
-              <span>🚶 Mínima distancia</span>
-              <span>🌿 Máxima sombra</span>
-            </div>
-            <div className="mt-1.5 rounded-lg border border-[var(--ds-gray-200)] bg-white px-3 py-2 text-[11px] text-[var(--ds-gray-600)] leading-relaxed">
-              Elige si prefieres llegar antes o caminar por un recorrido con mas sombra y recursos cercanos.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hidden summary for when user searches without expanding */}
-      {!showAdvanced && (
-        <div className="mt-2 flex gap-3 text-[11px] text-[var(--ds-gray-400)] px-1">
-          <span className="inline-flex items-center gap-1">
-            <Clock className="w-3 h-3" /> {clampedHour}:00
-          </span>
-          <span>·</span>
-          <span>{getPreferenceLabel(preference)}</span>
-        </div>
-      )}
+      <button
+        type="submit"
+        disabled={loading || !canSearch}
+        className="flex h-14 w-full items-center justify-center rounded-2xl bg-[#16a34a] px-6 text-base font-semibold text-white transition-all hover:bg-[#15803d] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {loading ? "Calculando..." : "Buscar ruta con sombra"}
+      </button>
     </form>
   );
 }
