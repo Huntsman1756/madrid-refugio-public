@@ -145,10 +145,12 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       const tooltipContent = viewMode === 'shelter_deficit'
         ? `<strong>${feature.properties.NOMBRE}</strong><br>` +
           `Refugios a 400m: ${refugios}<br>` +
-          `Estado: ${refugios === 0 ? 'CRÍTICO' : refugios === 1 ? 'Insuficiente' : 'Cubierto'}`
+          `Estado: ${refugios === 0 ? 'CRÍTICO' : refugios === 1 ? 'Insuficiente' : 'Cubierto'}<br>` +
+          `<em>Mapa territorial agregado</em>`
         : `<strong>${feature.properties.NOMBRE}</strong><br>` +
-          `Índice: ${feature.properties.priority_score_norm?.toFixed(3) ?? 'N/A'}<br>` +
-          `Mayores 65+: ${feature.properties.pop_65plus ?? 'N/A'}`;
+          `Índice territorial: ${feature.properties.priority_score_norm?.toFixed(3) ?? 'N/A'}<br>` +
+          `Mayores 65+: ${feature.properties.pop_65plus ?? 'N/A'}<br>` +
+          `<em>No representa sombra instantánea</em>`;
       
       layer.bindTooltip(tooltipContent);
     }
@@ -247,7 +249,10 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       {!routeResult && showLegend && (
         <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-2 z-[1000] shadow-sm max-w-[180px]">
           <p className="font-bold text-[var(--ds-black)] mb-1">
-            {viewMode === 'shelter_deficit' ? 'Déficit de refugios' : 'Vulnerabilidad'}
+            {viewMode === 'shelter_deficit' ? 'Acceso a refugios' : 'Vulnerabilidad climática'}
+          </p>
+          <p className="text-[10px] leading-relaxed text-[var(--ds-gray-500)]">
+            {viewMode === 'shelter_deficit' ? 'Mapa por barrio de acceso a refugios.' : 'Mapa por barrio, no sombra en tiempo real.'}
           </p>
           <div className="space-y-1">
             {viewMode === 'shelter_deficit' ? (

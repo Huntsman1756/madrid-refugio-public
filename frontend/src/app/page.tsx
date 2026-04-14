@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
+import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity } from "lucide-react";
 import { RoutingSection } from "@/components/RoutingSection";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
@@ -183,9 +183,13 @@ export default function Home() {
             Madrid Refugio es un motor dinámico de sombras que cruza la altura de los edificios (LiDAR) y la posición del sol con la densidad demográfica. Identificamos la ruta de mayor confort térmico calle a calle.
           </p>
           <div className="flex items-center gap-4 pt-4">
-            <Button variant="primary" className="h-12 px-6 text-base" onClick={() => document.getElementById("routing")?.scrollIntoView({behavior: "smooth"})}>Explorar Mapa <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            <Button variant="primary" className="h-12 px-6 text-base" onClick={() => document.getElementById("routing")?.scrollIntoView({behavior: "smooth"})}>Buscar ruta con menos sol <ArrowRight className="w-4 h-4 ml-2" /></Button>
             <Link href="/metodologia"><Button variant="secondary" className="h-12 px-6 text-base">Leer metodología</Button></Link>
           </div>
+        </div>
+
+        <div id="routing" className="mb-24">
+          <RoutingSection />
         </div>
 
         {/* Workflow / Pillars Section */}
@@ -235,15 +239,11 @@ export default function Home() {
           </Card>
         </div>
 
-        <div id="routing">
-          <RoutingSection />
-        </div>
-
         {/* Map and Detail Section */}
         <div className="mb-6 border-b border-[var(--ds-gray-100)] pb-6">
           <div>
             <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de vulnerabilidad territorial</h2>
-            <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
+            <p className="text-[var(--ds-gray-600)] mt-2">Mapa agregado por barrio para identificar prioridad climática y acceso a refugios. No representa la sombra instantánea de este momento.</p>
           </div>
         </div>
 
@@ -254,19 +254,19 @@ export default function Home() {
                 onClick={() => setViewMode('vulnerability')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'vulnerability' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Vulnerabilidad general
+                Vulnerabilidad climática
               </button>
               <button 
                 onClick={() => setViewMode('shelter_deficit')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'shelter_deficit' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Déficit de refugios
+                Acceso a refugios
               </button>
             </div>
             <p className="mt-3 text-[11px] sm:text-xs text-[var(--ds-gray-500)] leading-relaxed">
               {viewMode === 'vulnerability' 
                 ? "Mapa territorial agregado, no sombra instantánea: índice compuesto de temperatura superficial, % mayores de 65 y cobertura de arbolado."
-                : "Mapa territorial agregado de acceso a refugios: barrios donde la distancia media al refugio más cercano supera 500 m."}
+                : "Mapa territorial agregado de acceso a refugios: barrios donde la distancia media al refugio más cercano supera 500 m a pie."}
             </p>
           </div>
         </div>
@@ -477,31 +477,19 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Data Sources Section */}
-        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de datos abiertos</h2>
-          <p className="text-[var(--ds-gray-600)] mt-2">Todos los datos provienen del ecosistema abierto del Ayuntamiento de Madrid.</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
-          {[
-            { icon: Building2, label: "Alturas de edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef" },
-            { icon: TreePine, label: "Arbolado viario", detail: "661.192 ejemplares", color: "#16a34a" },
-            { icon: Users, label: "Padrón municipal", detail: "Enero 2026", color: "#de1d8d" },
-            { icon: Wind, label: "Calidad del aire", detail: "NO₂ horario por estación", color: "#f97316" },
-            { icon: Droplets, label: "Fuentes de agua", detail: "Red de hidrantes", color: "#0ea5e9" },
-            { icon: Landmark, label: "Equipamientos", detail: "Bibliotecas y CDM", color: "#8b5cf6" },
-            { icon: MapPin, label: "Límites administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
-            { icon: Database, label: "Portal datos.madrid.es", detail: "Fuente oficial", color: "#171717" },
-          ].map((src) => (
-            <div key={src.label} className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 cursor-default">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
-                <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
-              </div>
-              <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 leading-tight">{src.label}</p>
-              <p className="text-xs text-[var(--ds-gray-500)]">{src.detail}</p>
+        <Card level={2} className="mb-24 p-6 fade-in-up">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-2xl">
+              <h2 className="sub-heading-large text-[var(--ds-black)]">Metodología y datos</h2>
+              <p className="mt-2 text-[var(--ds-gray-600)]">
+                La parte técnica, las fuentes de datos abiertos y el detalle del modelo quedan reunidos fuera de la portada para no competir con la acción principal de buscar una ruta.
+              </p>
             </div>
-          ))}
-        </div>
+            <Link href="/metodologia">
+              <Button variant="secondary" className="h-12 px-6 text-base">Ver metodología y datasets</Button>
+            </Link>
+          </div>
+        </Card>
 
         {/* Footer */}
         <footer className="border-t border-[var(--ds-gray-100)] pt-12 mt-24 pb-12 flex flex-col md:flex-row justify-between items-center text-sm text-[var(--ds-gray-500)]">

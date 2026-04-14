@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import requests
 import socket
@@ -18,6 +19,7 @@ import osmnx as ox
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from pyproj import Transformer
 from shapely.geometry import LineString, Point
@@ -51,6 +53,13 @@ SHADOW_MATRIX_RELEASE_URL = f"{RELEASE_BASE_URL}/shadow_matrix.parquet"
 import sys
 import time
 
+logger = logging.getLogger("madrid_refugio")
+if not logger.handlers:
+    logging.basicConfig(
+        level=os.getenv("LOG_LEVEL", "INFO").upper(),
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
+
 def check_data_files():
     missing = [p for p in [GRAPH_PATH, SHADOW_MATRIX_PATH] if not p.exists()]
     if missing:
@@ -81,12 +90,20 @@ _GEOCODING_CACHE = {
     "nuevos ministerios, madrid": (40.4460, -3.6933),
     "nuevos ministerios, madrid, spain": (40.4460, -3.6933),
 }
+_GEOCODING_RUNTIME_CACHE: dict[str, tuple[float, float]] = {}
 MADRID_BBOX = {
     "lat_min": 40.31,
     "lat_max": 40.55,
     "lon_min": -3.83,
     "lon_max": -3.52,
 }
+
+
+class RoutingInputError(ValueError):
+    def __init__(self, detail: str, error_code: str):
+        super().__init__(detail)
+        self.detail = detail
+        self.error_code = error_code
 
 # --- Global State for Caching ---
 class AppState:
@@ -97,6 +114,7 @@ class AppState:
     # Caché meteorológica
     weather_cache: dict | None = None
     weather_last_update: float = 0
+    graph_loaded_at: float | None = None
 
 app_state = AppState()
 
@@ -212,6 +230,7 @@ def select_current_sky_state(prediccion_dias: list[dict], now: datetime) -> str:
 def fetch_aemet_data():
     """Implementa el patrón de doble fetch de AEMET OpenData"""
     if not AEMET_API_KEY:
+        logger.warning("AEMET_API_KEY missing; serving degraded weather payload")
         return {
             "municipio": "Madrid",
             "temperatura": "N/D",
@@ -223,6 +242,7 @@ def fetch_aemet_data():
     
     # Cache de 15 minutos (900 segundos)
     if app_state.weather_cache and (time.time() - app_state.weather_last_update < 900):
+        logger.info("serving weather from cache")
         return app_state.weather_cache
 
     try:
@@ -268,8 +288,10 @@ def fetch_aemet_data():
         
         app_state.weather_cache = result
         app_state.weather_last_update = time.time()
+        logger.info("weather refreshed from AEMET for %s", forecast_timestamp)
         return result
     except Exception as e:
+        logger.exception("weather fetch failed")
         return {
             "municipio": "Madrid",
             "temperatura": "N/D",
@@ -473,25 +495,81 @@ def point_in_madrid(lat: float, lon: float) -> bool:
 def normalize_address(address: str) -> str:
     return " ".join(address.strip().lower().split())
 
+
+def build_geocode_candidates(address: str) -> list[str]:
+    trimmed = address.strip()
+    if not trimmed:
+        return []
+
+    candidates = [trimmed]
+    lowered = trimmed.lower()
+    if "madrid" not in lowered:
+        candidates.append(f"{trimmed}, Madrid")
+        candidates.append(f"{trimmed}, Madrid, Spain")
+    elif "spain" not in lowered and "españa" not in lowered:
+        candidates.append(f"{trimmed}, Spain")
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        normalized = normalize_address(candidate)
+        if normalized not in seen:
+            deduped.append(candidate)
+            seen.add(normalized)
+    return deduped
+
+
 def geocode_address(address: str) -> tuple[float, float]:
-    normalized = normalize_address(address)
-    if normalized in _GEOCODING_CACHE:
-        lat, lon = _GEOCODING_CACHE[normalized]
-    else:
-        previous_timeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(GEOCODE_TIMEOUT_SECONDS)
-        try:
-            lat, lon = ox.geocode(address)
-        except Exception as exc:
-            raise ValueError(
-                "No se ha podido geocodificar la direccion. "
-                "Prueba una direccion mas especifica de Madrid."
-            ) from exc
-        finally:
-            socket.setdefaulttimeout(previous_timeout)
-    if not point_in_madrid(lat, lon):
-        raise ValueError("La direccion esta fuera de Madrid.")
-    return lat, lon
+    candidates = build_geocode_candidates(address)
+    if not candidates:
+        raise RoutingInputError(
+            "La dirección está vacía. Escribe una calle, número o un lugar de Madrid.",
+            "empty_address",
+        )
+
+    previous_timeout = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(GEOCODE_TIMEOUT_SECONDS)
+    outside_madrid_match = False
+    try:
+        for candidate in candidates:
+            normalized = normalize_address(candidate)
+            if normalized in _GEOCODING_RUNTIME_CACHE:
+                lat, lon = _GEOCODING_RUNTIME_CACHE[normalized]
+            elif normalized in _GEOCODING_CACHE:
+                lat, lon = _GEOCODING_CACHE[normalized]
+                _GEOCODING_RUNTIME_CACHE[normalized] = (lat, lon)
+            else:
+                try:
+                    lat, lon = ox.geocode(candidate)
+                except Exception as exc:
+                    logger.warning("geocode lookup failed for '%s': %s", candidate, exc)
+                    continue
+                _GEOCODING_RUNTIME_CACHE[normalized] = (lat, lon)
+
+            if not point_in_madrid(lat, lon):
+                outside_madrid_match = True
+                continue
+            return lat, lon
+    finally:
+        socket.setdefaulttimeout(previous_timeout)
+
+    if outside_madrid_match:
+        raise RoutingInputError(
+            "La dirección está fuera de Madrid. Prueba con una dirección dentro del municipio.",
+            "outside_madrid",
+        )
+
+    normalized_input = normalize_address(address)
+    if "madrid" in normalized_input:
+        raise RoutingInputError(
+            "No hemos encontrado esa dirección. Prueba con una calle y número dentro de Madrid.",
+            "geocode_not_found",
+        )
+
+    raise RoutingInputError(
+        "No hemos encontrado esa dirección. Añade una calle, número o referencia concreta en Madrid.",
+        "geocode_not_found",
+    )
 
 def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
     # --- Guard 1: validate the projected point is within Madrid's EPSG:25830 extent ---
@@ -500,9 +578,9 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
     # Madrid municipality roughly spans x=[430_000, 470_000], y=[4_460_000, 4_500_000]
     point_graph = gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326").to_crs("EPSG:25830").iloc[0]
     if not (400_000 < point_graph.x < 500_000 and 4_400_000 < point_graph.y < 4_550_000):
-        raise ValueError(
-            "Las coordenadas proyectadas están fuera del sistema de referencia de Madrid. "
-            "Revisa que la dirección sea específica (incluye número y 'Madrid')."
+        raise RoutingInputError(
+            "La dirección está fuera de Madrid o no es lo bastante precisa. Incluye número y 'Madrid'.",
+            "outside_madrid",
         )
 
     # --- Guard 2: snap-distance validation ---
@@ -511,7 +589,13 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
     # while still blocking addresses in different districts (which would produce fake routes).
     MAX_SNAP_METRES = 500
 
-    node_id = ox.distance.nearest_nodes(graph, point_graph.x, point_graph.y)
+    try:
+        node_id = ox.distance.nearest_nodes(graph, point_graph.x, point_graph.y)
+    except Exception as exc:
+        raise RoutingInputError(
+            "No hemos podido conectar ese punto con la red peatonal disponible.",
+            "out_of_corridor",
+        ) from exc
     node_data = graph.nodes[node_id]
     node_point = Point(float(node_data["x"]), float(node_data["y"]))
     snap_distance = point_graph.distance(node_point)
@@ -520,11 +604,10 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
         # Reverse-project the nearest node to WGS84 for a dynamic reference point
         transformer_back = Transformer.from_crs("EPSG:25830", "EPSG:4326", always_xy=True)
         ref_lon, ref_lat = transformer_back.transform(node_point.x, node_point.y)
-        raise ValueError(
-            f"La dirección está a {snap_distance:.0f} m del área de routing activa "
-            f"(máximo permitido: {MAX_SNAP_METRES} m). "
-            f"El punto más cercano del grafo está en ({ref_lat:.5f}, {ref_lon:.5f}). "
-            "Usa una dirección más específica dentro de Madrid."
+        raise RoutingInputError(
+            f"La dirección está a {snap_distance:.0f} m de la red peatonal conectada "
+            f"(máximo permitido: {MAX_SNAP_METRES} m). Punto de referencia más cercano: ({ref_lat:.5f}, {ref_lon:.5f}).",
+            "out_of_corridor",
         )
 
     return node_id
@@ -557,7 +640,18 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    weather_cache_age = None
+    if app_state.weather_last_update:
+        weather_cache_age = round(time.time() - app_state.weather_last_update, 1)
+
+    return {
+        "status": "ok",
+        "graph_loaded": app_state.graph is not None,
+        "shadow_matrix_loaded": app_state.shadow_dict is not None,
+        "weather_configured": bool(AEMET_API_KEY),
+        "weather_cache_age_s": weather_cache_age,
+        "release_tag": RELEASE_TAG,
+    }
 
 
 @app.get("/api/health")
@@ -697,6 +791,7 @@ def startup_event():
         )
     
     app_state.graph = graph
+    app_state.graph_loaded_at = time.time()
     
     if SHADOW_MATRIX_PATH.exists():
         print("Cargando matriz de sombras dinámica...")
@@ -705,6 +800,11 @@ def startup_event():
     else:
         app_state.shadow_dict = {}
 
+    logger.info(
+        "backend started with %s nodes and %s edges",
+        graph.number_of_nodes(),
+        graph.number_of_edges(),
+    )
     print("Datos cargados correctamente.")
 
 # --- API Models ---
@@ -723,19 +823,25 @@ def calculate_route(req: RouteRequest):
     if not graph or refugios_utm is None or fuentes_utm is None:
         raise HTTPException(status_code=500, detail="Server not fully initialized")
 
+    request_started_at = time.time()
     try:
+        logger.info(
+            "route request origin='%s' destination='%s' hour=%s preference=%.2f",
+            req.origin,
+            req.destination,
+            req.hour,
+            req.preference,
+        )
         origin_latlon = geocode_address(req.origin)
         destination_latlon = geocode_address(req.destination)
         try:
             origin_node = nearest_node(graph, *origin_latlon)
             destination_node = nearest_node(graph, *destination_latlon)
-        except (ValueError, nx.NodeNotFound):
-            from fastapi.responses import JSONResponse
-
-            return JSONResponse(
-                status_code=400,
-                content={"detail": "out_of_corridor", "error_code": "out_of_corridor"},
-            )
+        except nx.NodeNotFound as exc:
+            raise RoutingInputError(
+                "No hemos podido conectar ese punto con la red peatonal disponible.",
+                "out_of_corridor",
+            ) from exc
 
         hour_val = max(8, min(20, req.hour))
         hour_col = f"h{hour_val:02d}"
@@ -763,16 +869,17 @@ def calculate_route(req: RouteRequest):
         try:
             shortest_route = nx.shortest_path(graph, origin_node, destination_node, weight="length")
             comfort_route = nx.shortest_path(graph, origin_node, destination_node, weight=get_dynamic_weight)
-        except (nx.NetworkXNoPath, nx.NodeNotFound):
-            from fastapi.responses import JSONResponse
-
-            return JSONResponse(
-                status_code=400,
-                content={"detail": "out_of_corridor", "error_code": "out_of_corridor"},
-            )
+        except (nx.NetworkXNoPath, nx.NodeNotFound) as exc:
+            raise RoutingInputError(
+                "No hemos encontrado un camino peatonal válido entre los dos puntos.",
+                "out_of_corridor",
+            ) from exc
 
         if shortest_route is None or comfort_route is None:
-            raise ValueError("No se ha podido calcular una ruta válida entre estos puntos.")
+            raise RoutingInputError(
+                "No se ha podido calcular una ruta válida entre estos puntos.",
+                "out_of_corridor",
+            )
 
         shortest_length, shortest_t_shade, shortest_b_shade, shortest_total_shade = route_metrics(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
         comfort_length, comfort_t_shade, comfort_b_shade, comfort_total_shade = route_metrics(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
@@ -796,7 +903,7 @@ def calculate_route(req: RouteRequest):
         # Tiempo extra de caminata total (segundos)
         extra_effort_sec = (comfort_length - shortest_length) / WALKING_SPEED
 
-        return {
+        result = {
             "origin_latlon": origin_latlon,
             "destination_latlon": destination_latlon,
             "shortest_coords": extract_wgs84_coords(graph, shortest_route),
@@ -828,9 +935,24 @@ def calculate_route(req: RouteRequest):
                 }
             }
         }
+        logger.info(
+            "route solved in %.2fs shortest=%.0fm comfort=%.0fm",
+            time.time() - request_started_at,
+            shortest_length,
+            comfort_length,
+        )
+        return result
+    except RoutingInputError as exc:
+        logger.warning("route rejected (%s): %s", exc.error_code, exc.detail)
+        return JSONResponse(
+            status_code=400,
+            content={"detail": exc.detail, "error_code": exc.error_code},
+        )
     except ValueError as e:
+        logger.warning("route value error: %s", e)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.exception("unexpected route error")
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 if __name__ == "__main__":

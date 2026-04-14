@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { AlertTriangle, Download, LoaderCircle, Navigation, Share2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, Download, LoaderCircle, Navigation, Share2 } from "lucide-react";
 
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
@@ -247,7 +247,20 @@ function MetricCard({
   );
 }
 
-function mapErrorMessage(detail: string | null): string {
+function mapErrorMessage(detail: string | null, errorCode?: string | null): string {
+  if (errorCode === "empty_address") {
+    return "Completa origen y destino con una dirección concreta de Madrid.";
+  }
+  if (errorCode === "outside_madrid") {
+    return "La dirección debe estar dentro de Madrid. Prueba con una calle o equipamiento del municipio.";
+  }
+  if (errorCode === "geocode_not_found") {
+    return "No hemos encontrado esa dirección. Prueba con una calle y número o elige una sugerencia.";
+  }
+  if (errorCode === "out_of_corridor") {
+    return "No hemos podido conectar ese punto con la red peatonal disponible. Prueba con una dirección más cercana a una calle reconocida.";
+  }
+
   if (!detail) {
     return "No se ha podido calcular ahora mismo. Inténtalo de nuevo en unos segundos.";
   }
@@ -285,6 +298,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [destinationSuggestions, setDestinationSuggestions] = useState<Suggestion[]>([]);
   const [originSuggestionsLoading, setOriginSuggestionsLoading] = useState(false);
   const [destinationSuggestionsLoading, setDestinationSuggestionsLoading] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   const blurTimeoutRef = useRef<number | null>(null);
   const originAbortRef = useRef<AbortController | null>(null);
@@ -434,7 +448,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
 
       const body = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(mapErrorMessage(body?.detail ?? null));
+        throw new Error(mapErrorMessage(body?.detail ?? null, body?.error_code ?? null));
       }
 
       setRouteResult(body);
@@ -716,7 +730,7 @@ ${gpxPoints}
                 <div>
                   <h3 className="card-title text-[var(--ds-black)]">Paso 2. Hora y tipo de ruta</h3>
                   <p className="mt-2 text-sm text-[var(--ds-gray-600)]">
-                    Elige una hora fácil de entender y la prioridad de la ruta. Después calcula la opción más protegida.
+                    Elige una hora sencilla de entender. Si lo necesitas, puedes abrir los ajustes avanzados para afinar la prioridad de la ruta.
                   </p>
                 </div>
 
@@ -741,25 +755,45 @@ ${gpxPoints}
                   </div>
                 </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">Tipo de ruta</label>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {PRIORITY_OPTIONS.map((option) => (
-                      <button
-                        key={option.key}
-                        type="button"
-                        onClick={() => setPriority(option.key)}
-                        className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
-                          priority === option.key
-                            ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white"
-                            : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-black)]"
-                        }`}
-                      >
-                        <span className="block text-base font-semibold">{option.label}</span>
-                        <span className="mt-1 block text-sm opacity-75">{option.description}</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="rounded-xl border border-[var(--ds-gray-100)] bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedOptions((current) => !current)}
+                    className="flex w-full items-center justify-between px-4 py-4 text-left"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-[var(--ds-black)]">Ajustes avanzados</p>
+                      <p className="mt-1 text-sm text-[var(--ds-gray-500)]">
+                        Ahora mismo: <span className="font-medium text-[var(--ds-gray-700)]">{priorityOption.label}</span>
+                      </p>
+                    </div>
+                    <ChevronDown
+                      className={`h-4 w-4 text-[var(--ds-gray-500)] transition-transform ${showAdvancedOptions ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {showAdvancedOptions ? (
+                    <div className="border-t border-[var(--ds-gray-100)] px-4 py-4">
+                      <label className="mb-2 block text-sm font-medium text-[var(--ds-gray-600)]">Tipo de ruta</label>
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        {PRIORITY_OPTIONS.map((option) => (
+                          <button
+                            key={option.key}
+                            type="button"
+                            onClick={() => setPriority(option.key)}
+                            className={`rounded-2xl border px-4 py-4 text-left transition-colors ${
+                              priority === option.key
+                                ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white"
+                                : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-black)]"
+                            }`}
+                          >
+                            <span className="block text-base font-semibold">{option.label}</span>
+                            <span className="mt-1 block text-sm opacity-75">{option.description}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] p-4 text-sm text-[var(--ds-gray-600)]">

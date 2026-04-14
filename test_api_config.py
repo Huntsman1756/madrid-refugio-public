@@ -151,6 +151,36 @@ class ApiConfigTests(unittest.TestCase):
 
             importlib.reload(api)
 
+    def test_health_payload_exposes_runtime_details(self):
+        import api
+
+        response = api.health_check()
+
+        self.assertIn("status", response)
+        self.assertIn("graph_loaded", response)
+        self.assertIn("shadow_matrix_loaded", response)
+        self.assertIn("weather_configured", response)
+        self.assertIn("release_tag", response)
+
+    def test_fetch_aemet_data_without_key_returns_degraded_payload(self):
+        previous_key = os.environ.get("AEMET_API_KEY")
+        try:
+            os.environ.pop("AEMET_API_KEY", None)
+            import api
+
+            reloaded = importlib.reload(api)
+            payload = reloaded.fetch_aemet_data()
+            self.assertEqual(payload["municipio"], "Madrid")
+            self.assertEqual(payload["estado_cielo"], "AEMET no disponible")
+            self.assertEqual(payload["fuente"], "AEMET (OpenData)")
+            self.assertEqual(payload["error"], "AEMET_API_KEY no configurada")
+        finally:
+            if previous_key is not None:
+                os.environ["AEMET_API_KEY"] = previous_key
+            import api
+
+            importlib.reload(api)
+
 
 if __name__ == "__main__":
     unittest.main()
