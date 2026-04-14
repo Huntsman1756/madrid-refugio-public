@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity } from "lucide-react";
+import { ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
 import { RoutingSection } from "@/components/RoutingSection";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
@@ -131,142 +131,117 @@ export default function Home() {
 
   return (
     <main ref={mainRef} className="min-h-screen bg-[var(--background)]">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-[rgba(255,255,255,0.8)] backdrop-blur-md border-b shadow-[var(--shadow-border)] px-6 py-4 flex justify-between items-center">
+      {/* Navbar — minimal */}
+      <nav className="sticky top-0 z-50 bg-[rgba(255,255,255,0.8)] backdrop-blur-md border-b shadow-[var(--shadow-border)] px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <ThermometerSun className="w-6 h-6 text-[var(--ds-black)]" />
-          <span className="font-sans font-semibold text-[var(--ds-black)] tracking-tight">Madrid Refugio</span>
+          <ThermometerSun className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--ds-black)]" />
+          <span className="font-sans font-semibold text-[var(--ds-black)] tracking-tight text-sm sm:text-base">Madrid Refugio</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-1 bg-[var(--ds-gray-50)] rounded-md border border-[var(--ds-gray-100)] px-1 py-1 mr-2 shadow-sm">
-            <button onClick={() => changeScale(-0.1)} className="px-2 py-0.5 text-xs font-bold text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-100)] rounded transition-colors" title="Reducir letra">A-</button>
-            <div className="w-px h-3 bg-[var(--ds-gray-100)]"></div>
-            <button onClick={() => { setFontScale(1); document.documentElement.style.setProperty('--scale', '1'); }} className="px-2 py-0.5 text-xs font-bold text-[var(--ds-gray-600)] hover:text-[var(--ds-black)] transition-colors" title="Restaurar">{(fontScale*100).toFixed(0)}%</button>
-            <div className="w-px h-3 bg-[var(--ds-gray-100)]"></div>
-            <button onClick={() => changeScale(0.1)} className="px-2 py-0.5 text-sm font-bold text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-100)] rounded transition-colors" title="Aumentar letra">A+</button>
-          </div>
-          <Link href="/metodologia"><Button variant="primary" className="hidden sm:inline-flex">Metodología</Button></Link>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link href="/metodologia"><Button variant="primary" className="hidden sm:inline-flex h-9 px-4 text-sm">Metodología</Button></Link>
         </div>
       </nav>
 
-      <div className="max-w-[1200px] mx-auto px-6 py-16 sm:py-24">
-        {/* Hero Section */}
-        <div className="flex flex-col items-center text-center mb-24 max-w-3xl mx-auto space-y-6 relative">
-          {/* Animated skyline shadow behind hero */}
-          <div className="absolute inset-0 flex items-end justify-center pointer-events-none overflow-hidden -z-10" aria-hidden="true">
-            <svg viewBox="0 0 800 200" className="w-full max-w-2xl opacity-[0.06]" preserveAspectRatio="xMidYMax meet">
-              <g fill="#171717">
-                <rect x="80" y="60" width="40" height="140" rx="2" />
-                <rect x="140" y="30" width="55" height="170" rx="2" />
-                <rect x="220" y="80" width="35" height="120" rx="2" />
-                <rect x="280" y="20" width="60" height="180" rx="2" />
-                <rect x="370" y="50" width="45" height="150" rx="2" />
-                <rect x="440" y="70" width="50" height="130" rx="2" />
-                <rect x="520" y="40" width="65" height="160" rx="2" />
-                <rect x="610" y="90" width="40" height="110" rx="2" />
-                <rect x="670" y="55" width="50" height="145" rx="2" />
-              </g>
-              <ellipse cx="400" cy="200" rx="380" ry="30" className="hero-shadow" fill="#171717" />
-            </svg>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4 fade-in-up">
+      {/* Hero — focused on search, not exposition */}
+      <div className="max-w-[800px] mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-8 sm:pb-16">
+        {/* Hero search — the single focus of the page */}
+        <div id="routing" className="text-center">
+          {/* Alert badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6 fade-in-up">
             <WeatherWidget />
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] shadow-[var(--shadow-border)] text-[var(--ds-gray-600)] text-sm font-medium">
-              Madrid 2026 Data Open
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs sm:text-sm font-medium shadow-sm">
+              <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+              Alerta ola de calor
             </div>
           </div>
-          <h1 className="display-hero text-[var(--ds-black)]">
-            Protegiendo a la población mayor del <span className="text-[#b42318]">calor extremo</span>
+
+          {/* Headline — shorter, action-oriented */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--ds-black)] leading-tight mb-4 fade-in-up">
+            Encuentra tu ruta con <span className="gradient-text">sombra</span>
           </h1>
-          <p className="body-large text-[var(--ds-gray-600)]">
-            Madrid Refugio es un motor dinámico de sombras que cruza la altura de los edificios (LiDAR) y la posición del sol con la densidad demográfica. Identificamos la ruta de mayor confort térmico calle a calle.
+          <p className="text-base sm:text-lg text-[var(--ds-gray-600)] mb-8 max-w-2xl mx-auto fade-in-up">
+            Calcula la ruta más fresca caminando por Madrid. Sombra de edificios (LiDAR) y árboles en tiempo real.
           </p>
-          <div className="flex items-center gap-4 pt-4">
-            <Button variant="primary" className="h-12 px-6 text-base" onClick={() => document.getElementById("routing")?.scrollIntoView({behavior: "smooth"})}>Buscar ruta con menos sol <ArrowRight className="w-4 h-4 ml-2" /></Button>
-            <Link href="/metodologia"><Button variant="secondary" className="h-12 px-6 text-base">Leer metodología</Button></Link>
+
+          {/* Search bar embedded in hero */}
+          <div className="fade-in-up">
+            <RoutingSection />
           </div>
         </div>
+      </div>
 
-        <div id="routing" className="mb-24">
-          <RoutingSection />
-        </div>
-
-        {/* Workflow / Pillars Section */}
-        <div className="grid md:grid-cols-3 gap-8 mb-24 stagger-children">
-          <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
-            <div className="w-10 h-10 rounded-full bg-[#ebf5ff] flex items-center justify-center text-[#0a72ef] mb-2 shadow-[var(--shadow-border)]">
-              <Activity className="w-5 h-5" />
+      {/* Secondary content — below the fold */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+        {/* Workflow / Pillars — kept but smaller */}
+        <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16 stagger-children">
+          <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3 fade-in-up">
+            <div className="w-8 h-8 rounded-full bg-[#ebf5ff] flex items-center justify-center text-[#0a72ef] shadow-[var(--shadow-border)]">
+              <Activity className="w-4 h-4" />
             </div>
-            <h3 className="card-title text-[var(--ds-black)]">Salud</h3>
-            <p className="text-[var(--ds-gray-600)] mb-1">Reducción del estrés térmico en el grupo de mayor mortalidad (mayores de 65). Protección activa.</p>
-            <span className="text-sm font-semibold text-[#0a72ef] mt-auto">Hasta +<CountUp key={`c1-${clickStamp}`} end={849} /> m de sombra acumulada (Plaza Elíptica → Gómez Ulla, 14:00)</span>
+            <h3 className="text-sm font-bold text-[var(--ds-black)]">Salud</h3>
+            <p className="text-xs text-[var(--ds-gray-600)]">Protección activa para mayores de 65+. +<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra en ruta óptima.</p>
           </Card>
-          <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
-            <div className="w-10 h-10 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] mb-2 shadow-[var(--shadow-border)]">
-              <TreePine className="w-5 h-5" />
+          <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3 fade-in-up">
+            <div className="w-8 h-8 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] shadow-[var(--shadow-border)]">
+              <TreePine className="w-4 h-4" />
             </div>
-            <h3 className="card-title text-[var(--ds-black)]">Clima</h3>
-            <p className="text-[var(--ds-gray-600)] mb-1">Optimización de la sombra urbana como activo de salud pública precalculado. Infraestructura Verde.</p>
-            <span className="text-sm font-semibold text-[#de1d8d] mt-auto">662.173 polígonos LiDAR procesados</span>
+            <h3 className="text-sm font-bold text-[var(--ds-black)]">Clima</h3>
+            <p className="text-xs text-[var(--ds-gray-600)]">662.173 polígonos LiDAR + 661.192 árboles del Inventario Municipal.</p>
           </Card>
-          <Card level={2} className="p-6 flex flex-col gap-4 fade-in-up">
-            <div className="w-10 h-10 rounded-full bg-[#fef2f2] flex items-center justify-center text-[#ff5b4f] mb-2 shadow-[var(--shadow-border)]">
-              <MapIcon className="w-5 h-5" />
+          <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3 fade-in-up">
+            <div className="w-8 h-8 rounded-full bg-[#fef2f2] flex items-center justify-center text-[#ff5b4f] shadow-[var(--shadow-border)]">
+              <MapIcon className="w-4 h-4" />
             </div>
-            <h3 className="card-title text-[var(--ds-black)]">Equidad</h3>
-            <p className="text-[var(--ds-gray-600)] mb-1">Intervención prioritaria en barrios con déficit de refugios y alta contaminación. Acceso equitativo a rutas con sombra.</p>
-            <span className="text-sm font-semibold text-[#ff5b4f] mt-auto">64,1% de barrios sin refugio a &lt;300 m</span>
+            <h3 className="text-sm font-bold text-[var(--ds-black)]">Equidad</h3>
+            <p className="text-xs text-[var(--ds-gray-600)]">64,1% de barrios sin refugio a &lt;300 m. Justicia térmica con datos abiertos.</p>
           </Card>
         </div>
 
-        {/* Diagnóstico urbano (insights) */}
+        {/* Diagnóstico Urbano (Insights) */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico urbano</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico Urbano</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-24 stagger-children">
           <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30 fade-in-up">
-            <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo sur</span>
-            <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor vulnerabilidad climática, con un <span className="font-bold">Índice de vulnerabilidad de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
+            <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo Sur</span>
+            <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30 fade-in-up">
-             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de proximidad</span>
+             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de Proximidad</span>
              <p className="text-sm text-[var(--ds-black)] font-medium"><span className="font-bold">64,1% de los barrios</span> de Madrid no cuentan con un refugio climático operativo a menos de 300 metros caminables.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
-             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas optimizadas</span>
-             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">unos metros</span> permite sumar cientos de metros de sombra acumulada combinando arbolado y proyección geométrica de edificios.</p>
+             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas Optimizadas</span>
+             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">unos metros</span> permite multiplicar por <span className="font-bold">10 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
           </Card>
         </div>
 
         {/* Map and Detail Section */}
-        <div className="mb-6 border-b border-[var(--ds-gray-100)] pb-6">
+        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de vulnerabilidad territorial</h2>
-            <p className="text-[var(--ds-gray-600)] mt-2">Mapa agregado por barrio para identificar prioridad climática y acceso a refugios. No representa la sombra instantánea de este momento.</p>
+            <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de Vulnerabilidad Territorial</h2>
+            <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
           </div>
-        </div>
-
-        <div className="mb-8">
-          <div className="max-w-[420px] rounded-2xl border border-[var(--ds-gray-100)] bg-white p-3 shadow-sm">
-            <div className="flex rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] p-1">
+          
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex bg-[var(--ds-gray-50)] p-1 rounded-lg border border-[var(--ds-gray-100)] shadow-sm">
               <button 
                 onClick={() => setViewMode('vulnerability')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'vulnerability' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Vulnerabilidad climática
+                Vulnerabilidad General
               </button>
               <button 
                 onClick={() => setViewMode('shelter_deficit')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'shelter_deficit' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Acceso a refugios
+                Déficit de Refugios
               </button>
             </div>
-            <p className="mt-3 text-[11px] sm:text-xs text-[var(--ds-gray-500)] leading-relaxed">
+            <p className="text-[10px] sm:text-xs text-[var(--ds-gray-500)] italic text-right max-w-[300px]">
               {viewMode === 'vulnerability' 
-                ? "Mapa territorial agregado, no sombra instantánea: índice compuesto de temperatura superficial, % mayores de 65 y cobertura de arbolado."
-                : "Mapa territorial agregado de acceso a refugios: barrios donde la distancia media al refugio más cercano supera 500 m a pie."}
+                ? "Índice compuesto: temperatura superficial + % mayores de 65 + cobertura de arbolado. Rojo intenso = intervención urgente."
+                : "Barrios donde la distancia media al refugio más cercano supera 500m. A mayor déficit, mayor riesgo para población vulnerable."}
             </p>
           </div>
         </div>
@@ -477,19 +452,31 @@ export default function Home() {
           </div>
         </div>
 
-        <Card level={2} className="mb-24 p-6 fade-in-up">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="max-w-2xl">
-              <h2 className="sub-heading-large text-[var(--ds-black)]">Metodología y datos</h2>
-              <p className="mt-2 text-[var(--ds-gray-600)]">
-                La parte técnica, las fuentes de datos abiertos y el detalle del modelo quedan reunidos fuera de la portada para no competir con la acción principal de buscar una ruta.
-              </p>
+        {/* Data Sources Section */}
+        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
+          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de Datos Abiertos</h2>
+          <p className="text-[var(--ds-gray-600)] mt-2">Todos los datos provienen del ecosistema abierto del Ayuntamiento de Madrid.</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
+          {[
+            { icon: Building2, label: "Alturas de Edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef" },
+            { icon: TreePine, label: "Arbolado Viario", detail: "661.192 ejemplares", color: "#16a34a" },
+            { icon: Users, label: "Padrón Municipal", detail: "Enero 2026", color: "#de1d8d" },
+            { icon: Wind, label: "Calidad del Aire", detail: "NO₂ horario por estación", color: "#f97316" },
+            { icon: Droplets, label: "Fuentes de Agua", detail: "Red de hidrantes", color: "#0ea5e9" },
+            { icon: Landmark, label: "Equipamientos", detail: "Bibliotecas y CDM", color: "#8b5cf6" },
+            { icon: MapPin, label: "Límites Administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
+            { icon: Database, label: "Portal datos.madrid.es", detail: "Fuente oficial", color: "#171717" },
+          ].map((src) => (
+            <div key={src.label} className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 hover:border-[var(--ds-gray-400)] hover:shadow-md transition-all group cursor-default">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
+                <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
+              </div>
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 group-hover:text-[var(--ds-black)] leading-tight">{src.label}</p>
+              <p className="text-xs text-[var(--ds-gray-500)]">{src.detail}</p>
             </div>
-            <Link href="/metodologia">
-              <Button variant="secondary" className="h-12 px-6 text-base">Ver metodología y datasets</Button>
-            </Link>
-          </div>
-        </Card>
+          ))}
+        </div>
 
         {/* Footer */}
         <footer className="border-t border-[var(--ds-gray-100)] pt-12 mt-24 pb-12 flex flex-col md:flex-row justify-between items-center text-sm text-[var(--ds-gray-500)]">

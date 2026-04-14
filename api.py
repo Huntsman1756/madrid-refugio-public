@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import requests
 import socket
 from datetime import datetime
+
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
@@ -60,6 +62,7 @@ if not logger.handlers:
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
 
+
 def check_data_files():
     missing = [p for p in [GRAPH_PATH, SHADOW_MATRIX_PATH] if not p.exists()]
     if missing:
@@ -68,6 +71,7 @@ def check_data_files():
             print(f"   - {f}")
         print("Asegurate de que los archivos estan en 'data/processed/'.\n")
         sys.exit(1)
+
 
 # Se llamará dentro de startup_event tras la descarga
 # check_data_files()
@@ -105,6 +109,7 @@ class RoutingInputError(ValueError):
         self.detail = detail
         self.error_code = error_code
 
+
 # --- Global State for Caching ---
 class AppState:
     graph: nx.MultiDiGraph | None = None
@@ -116,6 +121,7 @@ class AppState:
     weather_last_update: float = 0
     graph_loaded_at: float | None = None
     startup_errors: list[str] = []
+
 
 app_state = AppState()
 
@@ -140,7 +146,9 @@ def get_allowed_origins() -> list[str]:
     return sorted(origins)
 
 
-def select_current_aemet_snapshot(prediccion_dias: list[dict], now: datetime) -> tuple[dict, str]:
+def select_current_aemet_snapshot(
+    prediccion_dias: list[dict], now: datetime
+) -> tuple[dict, str]:
     """Pick the latest available hourly temperature slot, falling back to the nearest future slot."""
     past_candidates: list[tuple[float, dict, str]] = []
     future_candidates: list[tuple[float, dict, str]] = []
@@ -215,7 +223,10 @@ def select_current_sky_state(prediccion_dias: list[dict], now: datetime) -> str:
                 microsecond=0,
             )
             delta_seconds = (candidate_dt - now).total_seconds()
-            candidate = (abs(delta_seconds), sky_entry.get("descripcion") or "Despejado")
+            candidate = (
+                abs(delta_seconds),
+                sky_entry.get("descripcion") or "Despejado",
+            )
             if delta_seconds <= 0:
                 past_candidates.append(candidate)
             else:
@@ -227,6 +238,7 @@ def select_current_sky_state(prediccion_dias: list[dict], now: datetime) -> str:
     pool = past_candidates or future_candidates
     _, sky_desc = min(pool, key=lambda item: item[0])
     return sky_desc
+
 
 def fetch_aemet_data():
     """Implementa el patrón de doble fetch de AEMET OpenData"""
@@ -240,7 +252,7 @@ def fetch_aemet_data():
             "fuente": "AEMET (OpenData)",
             "error": "AEMET_API_KEY no configurada",
         }
-    
+
     # Cache de 15 minutos (900 segundos)
     if app_state.weather_cache and (time.time() - app_state.weather_last_update < 900):
         logger.info("serving weather from cache")
@@ -251,7 +263,7 @@ def fetch_aemet_data():
         url_meta = f"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/{MADRID_MUNICIPIO_ID}?api_key={AEMET_API_KEY}"
         resp_meta = requests.get(url_meta, timeout=10)
         meta = resp_meta.json()
-        
+
         if meta.get("estado") != 200:
             return {
                 "municipio": "Madrid",
@@ -261,32 +273,35 @@ def fetch_aemet_data():
                 "fuente": "AEMET (OpenData)",
                 "error": f"AEMET Error: {meta.get('descripcion')}",
             }
-        
+
         # Paso 2: Obtener datos reales de la URL temporal
         url_datos = meta.get("datos")
         resp_datos = requests.get(url_datos, timeout=10)
         datos = resp_datos.json()
-        
+
         # Extraer info relevante buscando la hora mas cercana a la actual
         try:
             from zoneinfo import ZoneInfo
+
             now_madrid = datetime.now(ZoneInfo("Europe/Madrid"))
         except Exception:
             now_madrid = datetime.utcnow()
 
         prediccion_dias = datos[0]["prediccion"]["dia"]
-        best_temp, forecast_timestamp = select_current_aemet_snapshot(prediccion_dias, now_madrid)
+        best_temp, forecast_timestamp = select_current_aemet_snapshot(
+            prediccion_dias, now_madrid
+        )
         temp_actual = best_temp.get("value", "N/A")
         cielo_desc = select_current_sky_state(prediccion_dias, now_madrid)
-        
+
         result = {
             "municipio": "Madrid",
             "temperatura": temp_actual,
             "estado_cielo": cielo_desc,
             "timestamp": forecast_timestamp,
-            "fuente": "AEMET (OpenData)"
+            "fuente": "AEMET (OpenData)",
         }
-        
+
         app_state.weather_cache = result
         app_state.weather_last_update = time.time()
         logger.info("weather refreshed from AEMET for %s", forecast_timestamp)
@@ -327,10 +342,13 @@ def resolve_release_asset_download(asset_name: str) -> tuple[str, dict]:
                 "Accept": "application/octet-stream",
             }
 
-    raise RuntimeError(f"No se ha encontrado el asset '{asset_name}' en el release {RELEASE_TAG}.")
+    raise RuntimeError(
+        f"No se ha encontrado el asset '{asset_name}' en el release {RELEASE_TAG}."
+    )
 
 
 # --- Utility Functions ---
+
 
 def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
     for u, v, key, data in graph.edges(keys=True, data=True):
@@ -376,16 +394,23 @@ def should_refresh_release_asset(
         return marker_path.read_text(encoding="utf-8").strip() != expected_tag
     return False
 
-def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = None, shadow_dict: dict = None, pref: float = 0.0) -> gpd.GeoDataFrame:
+
+def route_edges_gdf(
+    graph: nx.MultiDiGraph,
+    route: list[int],
+    hour_col: str = None,
+    shadow_dict: dict = None,
+    pref: float = 0.0,
+) -> gpd.GeoDataFrame:
     rows = []
     for u, v in zip(route[:-1], route[1:]):
         edge_data_dict = graph.get_edge_data(u, v)
         if not edge_data_dict:
             continue
-        
+
         # Encontrar la arista que minimiza el peso (Dijkstra's choice)
         best_key = None
-        min_w = float('inf')
+        min_w = float("inf")
         for key, data in edge_data_dict.items():
             t_shade = get_tree_shade_score(data)
             b_shade = get_building_shade_score(shadow_dict, u, v, key, hour_col)
@@ -400,7 +425,7 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = No
             if w < min_w:
                 min_w = w
                 best_key = key
-        
+
         edge_data = edge_data_dict[best_key]
         geom = edge_data.get("geometry")
         if geom is None:
@@ -414,7 +439,9 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = No
                 "key": best_key,
                 "length": float(edge_data.get("length", 0.0)),
                 "tree_shade_score": get_tree_shade_score(edge_data),
-                "building_shade_score": get_building_shade_score(shadow_dict, u, v, best_key, hour_col),
+                "building_shade_score": get_building_shade_score(
+                    shadow_dict, u, v, best_key, hour_col
+                ),
                 "shade_score": combine_shade_scores(
                     get_tree_shade_score(edge_data),
                     get_building_shade_score(shadow_dict, u, v, best_key, hour_col),
@@ -423,6 +450,7 @@ def route_edges_gdf(graph: nx.MultiDiGraph, route: list[int], hour_col: str = No
             }
         )
     return gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:25830")
+
 
 def route_metrics(
     graph: nx.MultiDiGraph,
@@ -439,9 +467,9 @@ def route_metrics(
         edge_data_dict = graph.get_edge_data(u, v)
         if not edge_data_dict:
             continue
-        
+
         best_key = None
-        min_w = float('inf')
+        min_w = float("inf")
         for key, data in edge_data_dict.items():
             t_shade = get_tree_shade_score(data)
             b_shade = get_building_shade_score(shadow_dict, u, v, key, hour_col)
@@ -456,27 +484,33 @@ def route_metrics(
             if w < min_w:
                 min_w = w
                 best_key = key
-        
+
         edge_data = edge_data_dict[best_key]
         edge_length = float(edge_data.get("length", 0.0))
         edge_t_shade = get_tree_shade_score(edge_data)
         edge_b_shade = get_building_shade_score(shadow_dict, u, v, best_key, hour_col)
         edge_total_shade = combine_shade_scores(edge_t_shade, edge_b_shade)
-        
+
         total_length += edge_length
         total_t_shade += edge_t_shade * edge_length
         total_b_shade += edge_b_shade * edge_length
         total_combined_shade += edge_total_shade * edge_length
-        
+
     return total_length, total_t_shade, total_b_shade, total_combined_shade
 
-def count_points_near_route(points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFrame, buffer_m: float) -> int:
+
+def count_points_near_route(
+    points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFrame, buffer_m: float
+) -> int:
     if route_gdf.empty:
         return 0
     route_buffer = route_gdf.geometry.union_all().buffer(buffer_m)
     return int(points[points.geometry.within(route_buffer)].shape[0])
 
-def get_points_near_route(points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFrame, buffer_m: float) -> List[Tuple[float, float]]:
+
+def get_points_near_route(
+    points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFrame, buffer_m: float
+) -> List[Tuple[float, float]]:
     if route_gdf.empty:
         return []
     route_buffer = route_gdf.geometry.union_all().buffer(buffer_m)
@@ -487,11 +521,13 @@ def get_points_near_route(points: gpd.GeoDataFrame, route_gdf: gpd.GeoDataFrame,
     nearby_wgs84 = nearby.to_crs("EPSG:4326")
     return [(float(geom.y), float(geom.x)) for geom in nearby_wgs84.geometry]
 
+
 def point_in_madrid(lat: float, lon: float) -> bool:
     return (
         MADRID_BBOX["lat_min"] <= lat <= MADRID_BBOX["lat_max"]
         and MADRID_BBOX["lon_min"] <= lon <= MADRID_BBOX["lon_max"]
     )
+
 
 def normalize_address(address: str) -> str:
     return " ".join(address.strip().lower().split())
@@ -527,6 +563,22 @@ def geocode_address(address: str) -> tuple[float, float]:
             "La dirección está vacía. Escribe una calle, número o un lugar de Madrid.",
             "empty_address",
         )
+    normalized = normalize_address(address)
+    if normalized in _GEOCODING_RUNTIME_CACHE:
+        return _GEOCODING_RUNTIME_CACHE[normalized]
+    if normalized in _GEOCODING_CACHE:
+        return _GEOCODING_CACHE[normalized]
+
+    coord_match = re.match(r"^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$", normalized)
+    if coord_match:
+        lat, lon = float(coord_match.group(1)), float(coord_match.group(2))
+        if not point_in_madrid(lat, lon):
+            raise RoutingInputError(
+                "Las coordenadas están fuera de Madrid.",
+                "outside_madrid",
+            )
+        _GEOCODING_RUNTIME_CACHE[normalized] = (lat, lon)
+        return lat, lon
 
     previous_timeout = socket.getdefaulttimeout()
     socket.setdefaulttimeout(GEOCODE_TIMEOUT_SECONDS)
@@ -572,13 +624,18 @@ def geocode_address(address: str) -> tuple[float, float]:
         "geocode_not_found",
     )
 
+
 def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
     # --- Guard 1: validate the projected point is within Madrid's EPSG:25830 extent ---
     # Catches edge cases where Nominatim returns a vague / wrong geocode
     # (e.g. "Madrid, España" instead of a street), producing garbage projections.
     # Madrid municipality roughly spans x=[430_000, 470_000], y=[4_460_000, 4_500_000]
-    point_graph = gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326").to_crs("EPSG:25830").iloc[0]
-    if not (400_000 < point_graph.x < 500_000 and 4_400_000 < point_graph.y < 4_550_000):
+    point_graph = (
+        gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326").to_crs("EPSG:25830").iloc[0]
+    )
+    if not (
+        400_000 < point_graph.x < 500_000 and 4_400_000 < point_graph.y < 4_550_000
+    ):
         raise RoutingInputError(
             "La dirección está fuera de Madrid o no es lo bastante precisa. Incluye número y 'Madrid'.",
             "outside_madrid",
@@ -603,7 +660,9 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
 
     if snap_distance > MAX_SNAP_METRES:
         # Reverse-project the nearest node to WGS84 for a dynamic reference point
-        transformer_back = Transformer.from_crs("EPSG:25830", "EPSG:4326", always_xy=True)
+        transformer_back = Transformer.from_crs(
+            "EPSG:25830", "EPSG:4326", always_xy=True
+        )
         ref_lon, ref_lat = transformer_back.transform(node_point.x, node_point.y)
         raise RoutingInputError(
             f"La dirección está a {snap_distance:.0f} m de la red peatonal conectada "
@@ -613,7 +672,10 @@ def nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:
 
     return node_id
 
-def extract_wgs84_coords(graph: nx.MultiDiGraph, route: list[int]) -> List[Tuple[float, float]]:
+
+def extract_wgs84_coords(
+    graph: nx.MultiDiGraph, route: list[int]
+) -> List[Tuple[float, float]]:
     transformer = Transformer.from_crs("EPSG:25830", "EPSG:4326", always_xy=True)
     coords = []
     for node_id in route:
@@ -622,13 +684,16 @@ def extract_wgs84_coords(graph: nx.MultiDiGraph, route: list[int]) -> List[Tuple
         coords.append((lat_wgs, lon_wgs))
     return coords
 
+
 # --- FastAPI App Setup ---
 
 app = FastAPI(title="Madrid Refugio API")
 
+
 @app.get("/api/weather")
 def get_weather():
     return fetch_aemet_data()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -638,6 +703,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.get("/health")
 def health_check():
@@ -660,12 +726,13 @@ def health_check():
 def api_health_check():
     return health_check()
 
+
 @app.on_event("startup")
 def startup_event():
     app_state.startup_errors = []
     logger.info("starting backend")
     logger.info("processed data directory: %s", PROCESSED_DIR)
-    
+
     # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
     def download_release_file(
         path: Path,
@@ -685,14 +752,23 @@ def startup_event():
         if refresh_needed:
             path.parent.mkdir(parents=True, exist_ok=True)
             if force_refresh:
-                logger.info("force refresh enabled for %s; downloading release asset", path.name)
+                logger.info(
+                    "force refresh enabled for %s; downloading release asset", path.name
+                )
             else:
-                logger.info("%s missing or outdated in volume; downloading release asset", path.name)
+                logger.info(
+                    "%s missing or outdated in volume; downloading release asset",
+                    path.name,
+                )
             try:
                 download_url, headers = resolve_release_asset_download(asset_name)
                 if download_url != public_url:
-                    logger.info("using authenticated GitHub asset download for %s", asset_name)
-                with requests.get(download_url, headers=headers, stream=True, timeout=300) as r:
+                    logger.info(
+                        "using authenticated GitHub asset download for %s", asset_name
+                    )
+                with requests.get(
+                    download_url, headers=headers, stream=True, timeout=300
+                ) as r:
                     r.raise_for_status()
                     with open(path, "wb") as f:
                         for chunk in r.iter_content(chunk_size=8192):
@@ -705,7 +781,11 @@ def startup_event():
                 logger.exception("error preparing %s", path.name)
 
         else:
-            logger.info("%s loaded from local volume (%.1f MB)", path.name, path.stat().st_size / 1e6)
+            logger.info(
+                "%s loaded from local volume (%.1f MB)",
+                path.name,
+                path.stat().st_size / 1e6,
+            )
 
     # Descargar el grafo tal y como estÃ¡ publicado en GitHub Releases.
     download_release_file(
@@ -716,15 +796,21 @@ def startup_event():
         marker_path=GRAPH_RELEASE_MARKER_PATH,
         expected_tag=RELEASE_TAG,
     )
-    
+
     # Descargar la matriz (esta no va comprimida en .gz extra, ya es parquet)
     if not SHADOW_MATRIX_PATH.exists() or SHADOW_MATRIX_PATH.stat().st_size < 100000:
-        logger.info("shadow_matrix.parquet missing in volume; downloading release asset")
+        logger.info(
+            "shadow_matrix.parquet missing in volume; downloading release asset"
+        )
         try:
             SHADOW_MATRIX_PATH.parent.mkdir(parents=True, exist_ok=True)
-            download_url, headers = resolve_release_asset_download("shadow_matrix.parquet")
+            download_url, headers = resolve_release_asset_download(
+                "shadow_matrix.parquet"
+            )
             if download_url != SHADOW_MATRIX_RELEASE_URL:
-                logger.info("using authenticated GitHub asset download for shadow_matrix.parquet")
+                logger.info(
+                    "using authenticated GitHub asset download for shadow_matrix.parquet"
+                )
             r = requests.get(download_url, headers=headers, stream=True, timeout=300)
             r.raise_for_status()
             with open(SHADOW_MATRIX_PATH, "wb") as f:
@@ -741,16 +827,16 @@ def startup_event():
         )
 
     logger.info("verifying graph data at %s", GRAPH_PATH)
-    
+
     if not GRAPH_PATH.exists():
         error_message = f"Grafo no disponible en {GRAPH_PATH}"
         logger.error(error_message)
         app_state.startup_errors.append(error_message)
         return
-    
+
     file_size = GRAPH_PATH.stat().st_size
     logger.info("graph file size: %.2f MB", file_size / (1024 * 1024))
-    
+
     logger.info("loading graph into memory")
     t_start = time.time()
     try:
@@ -763,7 +849,7 @@ def startup_event():
         raise e
 
     ensure_edge_geometry(graph)
-    
+
     app_state.refugios_utm = gpd.read_file(REFUGIOS_PATH).to_crs("EPSG:25830")
     app_state.fuentes_utm = gpd.read_file(FUENTES_PATH).to_crs("EPSG:25830")
 
@@ -771,8 +857,12 @@ def startup_event():
     # We want the Eco-Route to prefer edges near fountains/shelters
     logger.info("computing resource proximity bonuses")
     # Buffer resources once
-    fuentes_buffer = app_state.fuentes_utm.geometry.union_all().buffer(50.0) # 50m for fountains
-    refugios_buffer = app_state.refugios_utm.geometry.union_all().buffer(150.0) # 150m for shelters
+    fuentes_buffer = app_state.fuentes_utm.geometry.union_all().buffer(
+        50.0
+    )  # 50m for fountains
+    refugios_buffer = app_state.refugios_utm.geometry.union_all().buffer(
+        150.0
+    )  # 150m for shelters
 
     for u, v, key, data in graph.edges(keys=True, data=True):
         data["key"] = key
@@ -781,16 +871,16 @@ def startup_event():
         data["tree_shade_score"] = tree_shade
         data["shade_score"] = tree_shade
         data["tree_count"] = int(float(data.get("tree_count", 0) or 0))
-        
+
         # Calculate resource bonus (discount factor)
         # Default bonus is 1.0 (no discount)
         bonus = 1.0
         geom = data["geometry"]
         if fuentes_buffer.intersects(geom):
-            bonus -= 0.05 # 5% discount for fountains
+            bonus -= 0.05  # 5% discount for fountains
         if refugios_buffer.intersects(geom):
-            bonus -= 0.10 # 10% discount for shelters
-        data["resource_bonus"] = max(0.8, bonus) # Max 20% total discount
+            bonus -= 0.10  # 10% discount for shelters
+        data["resource_bonus"] = max(0.8, bonus)  # Max 20% total discount
 
         # Siempre recalculamos el peso base de confort incorporando el bonus de recursos
         data["comfort_weight"] = compute_comfort_weight(
@@ -800,10 +890,10 @@ def startup_event():
             preference=1.0,
             resource_bonus=data["resource_bonus"],
         )
-    
+
     app_state.graph = graph
     app_state.graph_loaded_at = time.time()
-    
+
     if SHADOW_MATRIX_PATH.exists():
         logger.info("loading dynamic shadow matrix")
         shadow_df = pd.read_parquet(SHADOW_MATRIX_PATH)
@@ -818,12 +908,14 @@ def startup_event():
     )
     print("Datos cargados correctamente.")
 
+
 # --- API Models ---
 class RouteRequest(BaseModel):
     origin: str
     destination: str
     hour: int
     preference: float = 1.0  # 0.0: Priorizar distancia, 1.0: Priorizar sombra
+
 
 @app.post("/api/route")
 def calculate_route(req: RouteRequest):
@@ -869,7 +961,9 @@ def calculate_route(req: RouteRequest):
             weights = []
             for key, data in d.items():
                 t_shade = get_tree_shade_score(data)
-                b_shade = get_building_shade_score(app_state.shadow_dict, u, v, key, hour_col)
+                b_shade = get_building_shade_score(
+                    app_state.shadow_dict, u, v, key, hour_col
+                )
                 res_bonus = float(data.get("resource_bonus", 1.0))
                 weights.append(
                     compute_comfort_weight(
@@ -880,12 +974,16 @@ def calculate_route(req: RouteRequest):
                         resource_bonus=res_bonus,
                     )
                 )
-            
+
             return min(weights) if weights else 1.0e6
 
         try:
-            shortest_route = nx.shortest_path(graph, origin_node, destination_node, weight="length")
-            comfort_route = nx.shortest_path(graph, origin_node, destination_node, weight=get_dynamic_weight)
+            shortest_route = nx.shortest_path(
+                graph, origin_node, destination_node, weight="length"
+            )
+            comfort_route = nx.shortest_path(
+                graph, origin_node, destination_node, weight=get_dynamic_weight
+            )
         except (nx.NetworkXNoPath, nx.NodeNotFound) as exc:
             raise RoutingInputError(
                 "No hemos encontrado un camino peatonal válido entre los dos puntos.",
@@ -898,21 +996,41 @@ def calculate_route(req: RouteRequest):
                 "out_of_corridor",
             )
 
-        shortest_length, shortest_t_shade, shortest_b_shade, shortest_total_shade = route_metrics(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
-        comfort_length, comfort_t_shade, comfort_b_shade, comfort_total_shade = route_metrics(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
-        
-        shortest_gdf = route_edges_gdf(graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0)
-        comfort_gdf = route_edges_gdf(graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref)
+        shortest_length, shortest_t_shade, shortest_b_shade, shortest_total_shade = (
+            route_metrics(
+                graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0
+            )
+        )
+        comfort_length, comfort_t_shade, comfort_b_shade, comfort_total_shade = (
+            route_metrics(
+                graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref
+            )
+        )
 
-        shortest_fuentes_pts = get_points_near_route(fuentes_utm, shortest_gdf, buffer_m=75.0)
-        comfort_fuentes_pts = get_points_near_route(fuentes_utm, comfort_gdf, buffer_m=75.0)
-        shortest_refugios_pts = get_points_near_route(refugios_utm, shortest_gdf, buffer_m=200.0)
-        comfort_refugios_pts = get_points_near_route(refugios_utm, comfort_gdf, buffer_m=200.0)
+        shortest_gdf = route_edges_gdf(
+            graph, shortest_route, hour_col, app_state.shadow_dict, pref=0.0
+        )
+        comfort_gdf = route_edges_gdf(
+            graph, comfort_route, hour_col, app_state.shadow_dict, pref=pref
+        )
+
+        shortest_fuentes_pts = get_points_near_route(
+            fuentes_utm, shortest_gdf, buffer_m=75.0
+        )
+        comfort_fuentes_pts = get_points_near_route(
+            fuentes_utm, comfort_gdf, buffer_m=75.0
+        )
+        shortest_refugios_pts = get_points_near_route(
+            refugios_utm, shortest_gdf, buffer_m=200.0
+        )
+        comfort_refugios_pts = get_points_near_route(
+            refugios_utm, comfort_gdf, buffer_m=200.0
+        )
 
         # Calcular métricas humanas
         # Velocidad media de caminata: 1.4 m/s (5 km/h)
         WALKING_SPEED = 1.4
-        
+
         # Sombra total ganada en metros
         shade_gain_m = comfort_total_shade - shortest_total_shade
         # Tiempo "ahorrado" bajo el sol directo (segundos)
@@ -934,7 +1052,7 @@ def calculate_route(req: RouteRequest):
                     "fuentes": len(shortest_fuentes_pts),
                     "fuentes_pts": shortest_fuentes_pts,
                     "refugios": len(shortest_refugios_pts),
-                    "refugios_pts": shortest_refugios_pts
+                    "refugios_pts": shortest_refugios_pts,
                 },
                 "comfort": {
                     "length": comfort_length,
@@ -944,13 +1062,13 @@ def calculate_route(req: RouteRequest):
                     "fuentes": len(comfort_fuentes_pts),
                     "fuentes_pts": comfort_fuentes_pts,
                     "refugios": len(comfort_refugios_pts),
-                    "refugios_pts": comfort_refugios_pts
+                    "refugios_pts": comfort_refugios_pts,
                 },
                 "human": {
                     "sun_time_saved_min": round(max(0, time_saved_sun_sec / 60), 1),
-                    "extra_effort_min": round(max(0, extra_effort_sec / 60), 1)
-                }
-            }
+                    "extra_effort_min": round(max(0, extra_effort_sec / 60), 1),
+                },
+            },
         }
         logger.info(
             "route solved in %.2fs shortest=%.0fm comfort=%.0fm",
@@ -972,6 +1090,8 @@ def calculate_route(req: RouteRequest):
         logger.exception("unexpected route error")
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
