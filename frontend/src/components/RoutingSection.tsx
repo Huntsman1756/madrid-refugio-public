@@ -78,6 +78,15 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     setHour(Math.max(8, Math.min(20, now)));
   }, []);
 
+  useEffect(() => {
+    const savedPreference = loadSavedPreference();
+    if (savedPreference !== null) {
+      setPreference(savedPreference);
+    }
+    const now = new Date().getHours();
+    setHour(Math.max(8, Math.min(20, now)));
+  }, []);
+
   // Time slider automation
   useEffect(() => {
     let interval: NodeJS.Timeout;
