@@ -61,7 +61,11 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [hasSearched, setHasSearched] = useState(false);
 
   const formatSunSaved = (minutes: number | null | undefined) => (minutes == null ? "—" : `${minutes} min`);
-  const formatExtraEffort = (minutes: number | null | undefined) => (minutes == null ? "—" : `+${minutes} min`);
+  const formatExtraEffort = (minutes: number | null | undefined) => {
+    if (minutes == null) return "—";
+    if (minutes === 0) return "0 min";
+    return `+${minutes} min`;
+  };
 
   useEffect(() => {
     const savedPreference = loadSavedPreference();
@@ -203,7 +207,7 @@ ${gpxPoints}
         <div className="mb-6 flex items-center gap-3">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all ${isPlaying ? 'bg-red-500 text-white shadow' : 'bg-[var(--ds-gray-100)] text-[var(--ds-gray-600)] hover:bg-[var(--ds-gray-200)]'}`}
+            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all ${isPlaying ? 'bg-red-500 text-white shadow' : 'bg-[var(--ds-gray-100)] text-[var(--ds-black)] border-[1.5px] border-[#333] hover:bg-[var(--ds-gray-200)]'}`}
           >
             {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
             {isPlaying ? "DETENER SIMULACIÓN" : "SIMULAR DÍA"}
