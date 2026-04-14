@@ -220,22 +220,22 @@ export default function Home() {
             <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
           </div>
           
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col gap-2">
             <div className="flex bg-[var(--ds-gray-50)] p-1 rounded-lg border border-[var(--ds-gray-100)] shadow-sm">
               <button 
                 onClick={() => setViewMode('vulnerability')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'vulnerability' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Vulnerabilidad General
+                Vulnerabilidad general
               </button>
               <button 
                 onClick={() => setViewMode('shelter_deficit')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'shelter_deficit' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
               >
-                Déficit de Refugios
+                Déficit de refugios
               </button>
             </div>
-            <p className="text-[10px] sm:text-xs text-[var(--ds-gray-500)] italic text-right max-w-[300px]">
+            <p className="max-w-[420px] text-sm text-[var(--ds-gray-500)]">
               {viewMode === 'vulnerability' 
                 ? "Índice compuesto: temperatura superficial + % mayores de 65 + cobertura de arbolado. Rojo intenso = intervención urgente."
                 : "Barrios donde la distancia media al refugio más cercano supera 500m. A mayor déficit, mayor riesgo para población vulnerable."}
