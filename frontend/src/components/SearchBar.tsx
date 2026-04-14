@@ -19,15 +19,21 @@ interface SearchBarProps {
 
 const PREFERENCE_LABELS: Record<string, string> = {
   "0.0": "Mínima distancia",
+  "0.1": "Muy directa",
+  "0.2": "Bastante directa",
   "0.3": "Más directa",
-  "0.5": "Equilibrio distancia-sombra",
+  "0.4": "Directa con algo de sombra",
+  "0.5": "Equilibrada",
+  "0.6": "Equilibrada con sombra",
   "0.7": "Más sombra",
+  "0.8": "Bastante sombra",
+  "0.9": "Mucha sombra",
   "1.0": "Máxima sombra",
 };
 
 function getPreferenceLabel(val: number): string {
   const key = val.toFixed(1);
-  return PREFERENCE_LABELS[key] || "Equilibrio distancia-sombra";
+  return PREFERENCE_LABELS[key] || "Equilibrada";
 }
 
 export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
@@ -200,9 +206,9 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               placeholder="Tu ubicación actual o escribe una dirección"
               className="w-full px-3 py-2.5 bg-white border border-[var(--ds-gray-200)] rounded-lg focus:ring-2 focus:ring-[var(--ds-focus-color)] text-[var(--ds-black)] text-sm"
             />
-            <p className="mt-1.5 text-[11px] text-[var(--ds-gray-500)]">
+            <div className="mt-1.5 rounded-lg border border-[var(--ds-gray-200)] bg-white px-3 py-2 text-[11px] text-[var(--ds-gray-600)] leading-relaxed">
               Puedes escribir una calle, un lugar conocido o unas coordenadas como <code>40.4168, -3.7038</code>.
-            </p>
+            </div>
           </div>
 
           <div className="rounded-lg border border-[var(--ds-gray-200)] bg-white px-3 py-2 text-[11px] text-[var(--ds-gray-600)] leading-relaxed">
@@ -253,9 +259,9 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               <span>🚶 Mínima distancia</span>
               <span>🌿 Máxima sombra</span>
             </div>
-            <p className="mt-1.5 text-[11px] text-[var(--ds-gray-500)]">
+            <div className="mt-1.5 rounded-lg border border-[var(--ds-gray-200)] bg-white px-3 py-2 text-[11px] text-[var(--ds-gray-600)] leading-relaxed">
               Elige si prefieres llegar antes o caminar por un recorrido con mas sombra y recursos cercanos.
-            </p>
+            </div>
           </div>
         </div>
       )}
