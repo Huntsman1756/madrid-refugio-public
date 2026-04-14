@@ -52,9 +52,45 @@ Colócalos en `data/processed/` antes de lanzar `uvicorn`.
 
 ### Backend (Python 3.12+)
 ```bash
+copy .env.example .env
 pip install -r requirements.txt
 python api.py
 ```
+
+Variables de entorno esperadas:
+
+- `AEMET_API_KEY`: clave de OpenData AEMET para la predicciÃ³n meteorolÃ³gica.
+- `GITHUB_TOKEN`: opcional, solo si quieres usar peticiones autenticadas a GitHub.
+
+### Despliegue en Railway
+
+El backend de produccion en Railway necesita estas condiciones para arrancar de forma estable:
+
+- Volumen montado en `/mnt/data`
+- `DATA_DIR=/mnt/data/processed`
+- Recursos del servicio suficientes para cargar el grafo completo en memoria
+
+Configuracion operativa validada en produccion:
+
+- `AEMET_API_KEY` configurada
+- `DATA_DIR=/mnt/data/processed`
+- volumen persistente con `madrid_shadow_graph.graphml` y `shadow_matrix.parquet`
+- limite del servicio en Railway de al menos `8 vCPU / 8 GB RAM`
+
+El archivo `railway.json` de la raiz deja fijados en codigo el `startCommand`, `healthcheckPath` y `healthcheckTimeout`.
+
+Si el servicio vuelve a responder `502` durante el arranque, lo primero que hay que revisar es:
+
+1. que el volumen sigue montado en `/mnt/data`
+2. que `DATA_DIR` apunta a `/mnt/data/processed`
+3. que el override de recursos del servicio no haya bajado de `8 GB`
+4. que `GET /health` llegue a `200` antes de dar por valido el deploy
+
+## Nota sobre acceso y derechos
+
+Este repositorio se facilita como soporte de evaluaciÃ³n, documentaciÃ³n y revisiÃ³n del proyecto durante la convocatoria 2026 de los Premios a la ReutilizaciÃ³n de Datos Abiertos del Ayuntamiento de Madrid.
+
+Salvo que se indique expresamente lo contrario en un subdirectorio o dependencia de terceros, no se concede permiso general de reutilizaciÃ³n, modificaciÃ³n o redistribuciÃ³n del cÃ³digo de este repositorio. Consulta el archivo `LICENSE` de la raÃ­z para el detalle legal aplicable.
 
 ### Frontend (Node.js 20+)
 ```bash
