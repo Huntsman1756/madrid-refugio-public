@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
 import { RoutingSection } from "@/components/RoutingSection";
-import { WeatherWidget } from "@/components/WeatherWidget";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
@@ -148,7 +147,6 @@ export default function Home() {
         <div id="routing" className="text-center">
           {/* Alert badges */}
           <div className="flex flex-wrap items-center justify-center gap-2 mb-6 fade-in-up">
-            <WeatherWidget />
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] text-[var(--ds-gray-600)] text-xs sm:text-sm font-medium shadow-sm">
               Madrid 2026 Data Open
             </div>
