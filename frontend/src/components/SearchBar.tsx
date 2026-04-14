@@ -20,15 +20,15 @@ interface SearchBarProps {
 const HOUR_OPTIONS = [10, 14, 18] as const;
 
 const HOUR_LABELS: Record<number, string> = {
-  10: "Manana",
-  14: "Mas calor",
+  10: "Mañana",
+  14: "Más calor",
   18: "Tarde",
 };
 
 const PREFERENCE_OPTIONS = [
   { value: 0.0, label: "Directa", detail: "Llega antes" },
   { value: 0.5, label: "Equilibrada", detail: "Buen balance" },
-  { value: 1.0, label: "Mas sombra", detail: "Mas fresco" },
+  { value: 1.0, label: "Más sombra", detail: "Más fresco" },
 ] as const;
 
 function getPreferenceLabel(val: number): string {
@@ -161,9 +161,9 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   const locationDetail = useMyLocation
     ? geolocationStatus === "granted"
       ? origin
-      : geolocationStatus === "requesting"
+    : geolocationStatus === "requesting"
         ? "Estamos buscando tu posición para calcular la salida."
-        : "Usa tu ubicación o cambia a origen manual."
+        : ""
     : "Calle, lugar o coordenadas en Madrid";
 
   return (
@@ -202,7 +202,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
                   className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-left transition-colors hover:border-[var(--ds-gray-300)]"
                 >
                   <div className="text-sm font-medium text-[var(--ds-black)]">{locationTitle}</div>
-                  <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>
+                  {locationDetail && <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>}
                 </button>
               ) : (
                 <>

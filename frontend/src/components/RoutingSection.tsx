@@ -19,11 +19,18 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 
 const STORAGE_KEY = "madrid-refugio-preference";
 
+function normalizePreference(val: number): number {
+  const options = [0, 0.5, 1];
+  return options.reduce((closest, option) =>
+    Math.abs(option - val) < Math.abs(closest - val) ? option : closest
+  , 0.5);
+}
+
 function loadSavedPreference(): number | null {
   if (typeof window === "undefined") return null;
   try {
     const val = localStorage.getItem(STORAGE_KEY);
-    if (val !== null) return parseFloat(val);
+    if (val !== null) return normalizePreference(parseFloat(val));
   } catch { /* ignore */ }
   return null;
 }
@@ -31,7 +38,7 @@ function loadSavedPreference(): number | null {
 function savePreference(val: number) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, String(val));
+    localStorage.setItem(STORAGE_KEY, String(normalizePreference(val)));
   } catch { /* ignore */ }
 }
 
@@ -52,6 +59,9 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [routeResult, setRouteResult] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
+  const formatSunSaved = (minutes: number) => (minutes === 0 ? "—" : `-${minutes} min`);
+  const formatExtraEffort = (minutes: number) => (minutes === 0 ? "—" : `+${minutes} min`);
 
   useEffect(() => {
     const savedPreference = loadSavedPreference();
@@ -233,13 +243,13 @@ ${gpxPoints}
             {/* Health impact */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="p-5 bg-orange-50 border border-orange-100 rounded-2xl flex flex-col">
-                <span className="text-[10px] font-black uppercase text-orange-600 tracking-widest mb-2">Protección</span>
-                <span className="text-3xl font-black text-orange-700">-{routeResult.metrics.human.sun_time_saved_min} min</span>
+                <span className="text-xs font-bold text-orange-600 mb-2">Protección</span>
+                <span className="text-3xl font-black text-orange-700">{formatSunSaved(routeResult.metrics.human.sun_time_saved_min)}</span>
                 <span className="text-xs font-bold text-orange-600 mt-1">bajo el sol directo</span>
               </div>
               <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl flex flex-col">
-                <span className="text-[10px] font-black uppercase text-blue-600 tracking-widest mb-2">Esfuerzo</span>
-                <span className="text-3xl font-black text-blue-700">+{routeResult.metrics.human.extra_effort_min} min</span>
+                <span className="text-xs font-bold text-blue-600 mb-2">Esfuerzo</span>
+                <span className="text-3xl font-black text-blue-700">{formatExtraEffort(routeResult.metrics.human.extra_effort_min)}</span>
                 <span className="text-xs font-bold text-blue-600 mt-1">de caminata adicional</span>
               </div>
             </div>
