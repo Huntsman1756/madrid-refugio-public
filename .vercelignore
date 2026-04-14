@@ -6,7 +6,7 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 
-data/
+/data/
 cache/
 .tmp_backlog/
 awesome-design-md-main/
@@ -23,6 +23,3 @@ frontend/.env.*.local
 *.parquet
 *.graphml
 *.shp
-
-data/**/*.geojson
-!frontend/public/data/**/*.geojson
