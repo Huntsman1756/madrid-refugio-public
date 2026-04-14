@@ -42,7 +42,7 @@ export default function MetodologiaPage() {
           <div className="space-y-4">
             <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Modelo de Alturas de Edificación</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">Procesamiento de 448.997 polígonos del Geoportal de Madrid con atributos de altura real (Z).</p>
+              <p className="text-sm text-[var(--ds-gray-600)]">Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).</p>
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#de1d8d]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Proyección Geométrica Solar</h4>
@@ -115,7 +115,7 @@ export default function MetodologiaPage() {
             Madrid Refugio nace con vocación de producto estable y exportable. La arquitectura modular (Frontend, Backend y Motor Algorítmico) está diseñada para ser replicable por otros consistorios que deseen implementar sistemas similares de protección climática.
           </p>
           <p className="text-[var(--ds-gray-600)]">
-            La arquitectura algorítmica expuesta en este demostrador está diseñada para escalar: el salto a <em>Madrid Completo</em> abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (<strong>PostgreSQL + PostGIS con pgRouting</strong>), permitiendo cálculos de millones de aristas con sombra dinámica en apenas milisegundos gracias al pre-cálculo masivo en formato Parquet.
+            La arquitectura algorítmica expuesta en este demostrador está diseñada para escalar: el salto a una cobertura metropolitana completa abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (<strong>PostgreSQL + PostGIS con pgRouting</strong>), permitiendo cálculos de millones de aristas con sombra dinámica en apenas milisegundos gracias al pre-cálculo masivo en formato Parquet.
           </p>
         </section>
 

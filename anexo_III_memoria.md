@@ -72,12 +72,14 @@ Madrid Refugio responde a una necesidad municipal concreta:
 
 - **Más de 430.000 mayores de 65 años** viven en Madrid y son el grupo más expuesto a la mortalidad asociada al calor extremo.
 - **64,1 % de los barrios** no cuentan con un refugio climático operativo a menos de 300 metros caminables.
-- El motor calcula rutas sobre **520.128 aristas** y combina **662.173 polígonos LiDAR** con **661.192 árboles** para estimar confort térmico calle a calle en los **21 distritos de Madrid**.
+- El motor calcula rutas sobre **520.128 aristas** y combina **662.173 polígonos LiDAR** con **661.192 árboles** para estimar confort térmico calle a calle en el despliegue operativo actual.
 - El resultado no es solo informativo: permite priorizar inversión en sombra, equipamientos y refugios donde el déficit es medible y territorialmente comparable.
 
 ## 5. Escalabilidad y arquitectura
 
-La versión operativa actual ya cubre los **21 distritos de Madrid**. El sistema está diseñado para escalar a **PostgreSQL + PostGIS con `pgRouting`** sin cambios en el esquema de precomputación en Parquet, manteniendo la misma lógica de pesos y franjas horarias en escenarios de mayor escala.
+Madrid Refugio nace con vocación de producto estable y exportable. La arquitectura modular (Frontend, Backend y Motor Algorítmico) está diseñada para ser replicable por otros consistorios que deseen implementar sistemas similares de protección climática.
+
+Además, la arquitectura algorítmica expuesta en este demostrador está diseñada para escalar: el salto a una cobertura metropolitana completa abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (**PostgreSQL + PostGIS con `pgRouting`**), permitiendo cálculos de millones de aristas con sombra dinámica en apenas milisegundos gracias al pre-cálculo masivo en formato Parquet.
 
 ## 6. Conclusión
 
