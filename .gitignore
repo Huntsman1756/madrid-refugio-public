@@ -11,6 +11,22 @@ cache/
 memory/
 HEARTBEAT.md
 tracked.txt
+Documentos/
+awesome-design-md-main/
+output/
+frontend/videos/
+hero_map.png
+routing_concept.png
+debug_weight*.py
+test_preference*.py
+test_sol_matadero.py
+test_excel.py
+test_paths.py
+check_graph.py
+check_type.py
+update_content.py
+compress_graph.py
+verify_final_metrics.py
 
 # Data (large files)
 data/raw/
