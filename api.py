@@ -63,10 +63,10 @@ if not logger.handlers:
 def check_data_files():
     missing = [p for p in [GRAPH_PATH, SHADOW_MATRIX_PATH] if not p.exists()]
     if missing:
-        print("\n❌ Error Crítico: Faltan archivos de datos básicos para arrancar el backend.")
+        print("\nERROR: faltan archivos de datos basicos para arrancar el backend.")
         for f in missing:
             print(f"   - {f}")
-        print("Asegúrate de que los archivos están en 'data/processed/'.\n")
+        print("Asegurate de que los archivos estan en 'data/processed/'.\n")
         sys.exit(1)
 
 # Se llamará dentro de startup_event tras la descarga
@@ -660,8 +660,8 @@ def api_health_check():
 
 @app.on_event("startup")
 def startup_event():
-    print(f"\n--- Madrid Refugio: Iniciando Backend ---")
-    print(f"Directorio de datos resuelto: {PROCESSED_DIR}")
+    logger.info("starting backend")
+    logger.info("processed data directory: %s", PROCESSED_DIR)
     
     # --- Solución para Railway (Descarga desde GitHub Releases si LFS falla) ---
     def download_release_file(
@@ -682,13 +682,13 @@ def startup_event():
         if refresh_needed:
             path.parent.mkdir(parents=True, exist_ok=True)
             if force_refresh:
-                print(f"Refresco forzado activo para {path.name}. Descargando desde GitHub Releases...")
+                logger.info("force refresh enabled for %s; downloading release asset", path.name)
             else:
-                print(f"{path.name} desactualizado o no encontrado en volumen. Descargando desde GitHub Releases...")
+                logger.info("%s missing or outdated in volume; downloading release asset", path.name)
             try:
                 download_url, headers = resolve_release_asset_download(asset_name)
                 if download_url != public_url:
-                    print(f"Usando descarga autenticada de GitHub para {asset_name}.")
+                    logger.info("using authenticated GitHub asset download for %s", asset_name)
                 with requests.get(download_url, headers=headers, stream=True, timeout=300) as r:
                     r.raise_for_status()
                     with open(path, "wb") as f:
@@ -697,12 +697,12 @@ def startup_event():
 
                 if marker_path and expected_tag:
                     marker_path.write_text(expected_tag, encoding="utf-8")
-                print(f"{path.name} listo ({path.stat().st_size / 1e6:.1f} MB)")
+                logger.info("%s ready (%.1f MB)", path.name, path.stat().st_size / 1e6)
             except Exception as e:
-                print(f"Error procesando {path.name}: {e}")
+                logger.exception("error preparing %s", path.name)
 
         else:
-            print(f"Grafo cargado desde volumen local ({path.stat().st_size / 1e6:.1f} MB)")
+            logger.info("%s loaded from local volume (%.1f MB)", path.name, path.stat().st_size / 1e6)
 
     # Descargar el grafo tal y como estÃ¡ publicado en GitHub Releases.
     download_release_file(
@@ -716,39 +716,42 @@ def startup_event():
     
     # Descargar la matriz (esta no va comprimida en .gz extra, ya es parquet)
     if not SHADOW_MATRIX_PATH.exists() or SHADOW_MATRIX_PATH.stat().st_size < 100000:
-        print("shadow_matrix.parquet no encontrada en volumen. Descargando desde GitHub Releases...")
+        logger.info("shadow_matrix.parquet missing in volume; downloading release asset")
         try:
             SHADOW_MATRIX_PATH.parent.mkdir(parents=True, exist_ok=True)
             download_url, headers = resolve_release_asset_download("shadow_matrix.parquet")
             if download_url != SHADOW_MATRIX_RELEASE_URL:
-                print("Usando descarga autenticada de GitHub para shadow_matrix.parquet.")
+                logger.info("using authenticated GitHub asset download for shadow_matrix.parquet")
             r = requests.get(download_url, headers=headers, stream=True, timeout=300)
             r.raise_for_status()
             with open(SHADOW_MATRIX_PATH, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
-            print(f"✓ Matriz descargada.")
+            logger.info("shadow matrix downloaded")
         except Exception as e:
-            print(f"❌ Error descargando matriz: {e}")
+            logger.exception("error downloading shadow matrix")
 
     else:
-        print(f"shadow_matrix.parquet cargada desde volumen local ({SHADOW_MATRIX_PATH.stat().st_size / 1e6:.1f} MB)")
+        logger.info(
+            "shadow_matrix.parquet loaded from local volume (%.1f MB)",
+            SHADOW_MATRIX_PATH.stat().st_size / 1e6,
+        )
 
-    print(f"Verificando integridad de datos en {GRAPH_PATH}...")
+    logger.info("verifying graph data at %s", GRAPH_PATH)
     
     if not GRAPH_PATH.exists():
         raise RuntimeError(f"ERROR: No se encuentra el grafo en {GRAPH_PATH}")
     
     file_size = GRAPH_PATH.stat().st_size
-    print(f"Tamaño del archivo de grafo: {file_size / (1024*1024):.2f} MB")
+    logger.info("graph file size: %.2f MB", file_size / (1024 * 1024))
     
-    print("Cargando grafo en memoria (esto puede tardar 1-2 min)...")
+    logger.info("loading graph into memory")
     t_start = time.time()
     try:
         graph = ox.load_graphml(GRAPH_PATH)
-        print(f"✓ Grafo cargado en {time.time() - t_start:.1f} segundos.")
+        logger.info("graph loaded in %.1f seconds", time.time() - t_start)
     except Exception as e:
-        print(f"❌ Error al cargar el grafo: {str(e)}")
+        logger.exception("error loading graph")
         raise e
 
     ensure_edge_geometry(graph)
@@ -758,7 +761,7 @@ def startup_event():
 
     # --- Pre-calculate Resource Proximity Bonus ---
     # We want the Eco-Route to prefer edges near fountains/shelters
-    print("Calculando proximidad a recursos para el grafo...")
+    logger.info("computing resource proximity bonuses")
     # Buffer resources once
     fuentes_buffer = app_state.fuentes_utm.geometry.union_all().buffer(50.0) # 50m for fountains
     refugios_buffer = app_state.refugios_utm.geometry.union_all().buffer(150.0) # 150m for shelters
@@ -794,7 +797,7 @@ def startup_event():
     app_state.graph_loaded_at = time.time()
     
     if SHADOW_MATRIX_PATH.exists():
-        print("Cargando matriz de sombras dinámica...")
+        logger.info("loading dynamic shadow matrix")
         shadow_df = pd.read_parquet(SHADOW_MATRIX_PATH)
         app_state.shadow_dict = shadow_df.set_index(["u", "v", "key"]).to_dict("index")
     else:
