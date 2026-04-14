@@ -48,8 +48,6 @@ Los archivos grandes no están en el repositorio y se publican como artefactos d
 
 Colócalos en `data/processed/` antes de lanzar `uvicorn`.
 
-[![DOI](https://zenodo.org/badge/DOI/10.XXXX/zenodo.XXXXXXX.svg)](https://doi.org/10.XXXX/zenodo.XXXXXXX)
-
 ## 6. Instalación y uso
 
 ### Backend (Python 3.12+)

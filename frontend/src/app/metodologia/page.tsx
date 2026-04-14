@@ -29,7 +29,7 @@ export default function MetodologiaPage() {
             <strong>Madrid Refugio</strong> no es solo un mapa; es un <strong>motor de simulación climática urbana</strong> diseñado para proteger a la población más vulnerable de la capital frente al fenómeno de la isla de calor. Aunque la interfaz es accesible, el sistema está concebido como una <strong>herramienta de apoyo a la decisión para gestores municipales y servicios sociales</strong>.
           </p>
           <p className="text-[var(--ds-gray-600)]">
-            A diferencia de soluciones estáticas que simplemente muestran &quot;islas de calor&quot; históricas, nuestra plataforma ofrece una <strong>operatividad real</strong> mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una <strong>Aplicación Web Progresiva (Next.js + FastAPI)</strong> de acceso público, diseñada para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda planificar su exposición térmica.
+            A diferencia de soluciones estáticas que simplemente muestran &quot;islas de calor&quot; históricas, nuestra plataforma ofrece una <strong>operatividad real</strong> mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una <strong>aplicación web (Next.js + FastAPI)</strong> de acceso público, diseñada para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda planificar su exposición térmica.
           </p>
         </section>
 
@@ -119,7 +119,7 @@ export default function MetodologiaPage() {
         <section className="mb-12">
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">6. Conclusión</h2>
           <p className="text-[var(--ds-gray-600)]">
-            Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. <strong>No es una prueba de concepto, es infraestructura lista para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.</strong>
+            Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. <strong>Es un demostrador funcional con infraestructura real, preparado para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.</strong>
           </p>
         </section>
 
