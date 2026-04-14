@@ -6,7 +6,7 @@
 
 Su uso directo está pensado para cuidadores, familiares y personal municipal que planifican desplazamientos o priorizan intervenciones en apoyo de personas mayores. El beneficiario final es la población mayor de 65 años más expuesta al calor.
 
-A diferencia de los mapas estáticos de temperatura superficial, Madrid Refugio calcula rutas de confort térmico en tiempo real sobre 520.128 aristas y 13 franjas horarias.
+A diferencia de los mapas estáticos de temperatura superficial, Madrid Refugio calcula rutas de confort térmico en tiempo real sobre 320.844 aristas y 13 franjas horarias.
 
 ## 2. Innovación tecnológica: motor de sombra dinámica proyectada
 
@@ -14,7 +14,7 @@ Madrid Refugio calcula **sombra dinámica proyectada por edificación** y la com
 
 - **Modelo de alturas de edificación:** Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).
 - **Proyección geométrica solar:** Integración de la biblioteca `pvlib` y `pybdshadow` para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar en episodios de ola de calor en Madrid).
-- **Matriz de intersección calle-sombra:** Generación offline de una matriz de 520.128 aristas × 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
+- **Matriz de intersección calle-sombra:** Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
 - **Optimización de confort térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que suma sombra de edificación y arbolado con tope, permitiendo desvíos inteligentes hacia calles con mayor confort térmico.
 
 ## 3. Reutilización de datos abiertos

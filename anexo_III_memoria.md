@@ -18,7 +18,7 @@ Madrid Refugio calcula **sombra dinámica proyectada por edificación** y la com
 
 - **Modelo de alturas de edificación:** Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).
 - **Proyección geométrica solar:** Integración de las bibliotecas `pvlib` y `pybdshadow` para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar).
-- **Matriz de intersección calle-sombra:** Generación offline de una matriz de 520.128 aristas × 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
+- **Matriz de intersección calle-sombra:** Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
 - **Optimización de confort térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que suma sombra de edificación y arbolado con tope, permitiendo desvíos inteligentes hacia calles con mayor confort térmico.
 
 ### Simulación temporal de sombras
@@ -72,7 +72,7 @@ Madrid Refugio responde a una necesidad municipal concreta:
 
 - **Más de 430.000 mayores de 65 años** viven en Madrid y son el grupo más expuesto a la mortalidad asociada al calor extremo.
 - **64,1 % de los barrios** no cuentan con un refugio climático operativo a menos de 300 metros caminables.
-- El motor calcula rutas sobre **520.128 aristas** y combina **662.173 polígonos LiDAR** con **661.192 árboles** para estimar confort térmico calle a calle en el despliegue operativo actual.
+- El motor calcula rutas sobre **320.844 aristas** y combina **662.173 polígonos LiDAR** con **661.192 árboles** para estimar confort térmico calle a calle en el despliegue operativo actual.
 - El resultado no es solo informativo: permite priorizar inversión en sombra, equipamientos y refugios donde el déficit es medible y territorialmente comparable.
 
 ## 5. Escalabilidad y arquitectura
