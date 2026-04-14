@@ -194,9 +194,9 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Diagnóstico Urbano (Insights) */}
+        {/* Diagnóstico urbano (Insights) */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico Urbano</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico urbano</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-24 stagger-children">
           <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30 fade-in-up">
@@ -204,11 +204,11 @@ export default function Home() {
             <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30 fade-in-up">
-             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de Proximidad</span>
+              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de proximidad</span>
              <p className="text-sm text-[var(--ds-black)] font-medium"><span className="font-bold">64,1% de los barrios</span> de Madrid no cuentan con un refugio climático operativo a menos de 300 metros caminables.</p>
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
-             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas Optimizadas</span>
+              <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas optimizadas</span>
              <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">unos metros</span> permite multiplicar por <span className="font-bold">10 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
           </Card>
         </div>
@@ -216,7 +216,7 @@ export default function Home() {
         {/* Map and Detail Section */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de Vulnerabilidad Territorial</h2>
+            <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de vulnerabilidad territorial</h2>
             <p className="text-[var(--ds-gray-600)] mt-2">Identificación de barrios prioritarios para la intervención climática.</p>
           </div>
           
@@ -403,7 +403,7 @@ export default function Home() {
                 /* ── Default state: Top 10 ranking ── */
                 <div className="flex flex-col h-full">
                   <div className="mb-4">
-                    <h4 className="font-semibold text-[var(--ds-black)] text-sm">Top 10 · Prioridad de Intervención</h4>
+                    <h4 className="font-semibold text-[var(--ds-black)] text-sm">Top 10 · Prioridad de intervención</h4>
                     <p className="text-xs text-[var(--ds-gray-500)] mt-0.5">Vulnerabilidad térmica climática. Click para ver detalle.</p>
                   </div>
                   <div className="flex-1 overflow-y-auto space-y-1 -mx-1 px-1">
@@ -451,18 +451,18 @@ export default function Home() {
 
         {/* Data Sources Section */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de Datos Abiertos</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de datos abiertos</h2>
           <p className="text-[var(--ds-gray-600)] mt-2">Todos los datos provienen del ecosistema abierto del Ayuntamiento de Madrid.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
           {[
-            { icon: Building2, label: "Alturas de Edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef" },
-            { icon: TreePine, label: "Arbolado Viario", detail: "661.192 ejemplares", color: "#16a34a" },
-            { icon: Users, label: "Padrón Municipal", detail: "Enero 2026", color: "#de1d8d" },
-            { icon: Wind, label: "Calidad del Aire", detail: "NO₂ horario por estación", color: "#f97316" },
-            { icon: Droplets, label: "Fuentes de Agua", detail: "Red de hidrantes", color: "#0ea5e9" },
+            { icon: Building2, label: "Alturas de edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef" },
+            { icon: TreePine, label: "Arbolado viario", detail: "661.192 ejemplares", color: "#16a34a" },
+            { icon: Users, label: "Padrón municipal", detail: "Enero 2026", color: "#de1d8d" },
+            { icon: Wind, label: "Calidad del aire", detail: "NO₂ horario por estación", color: "#f97316" },
+            { icon: Droplets, label: "Fuentes de agua", detail: "Red de hidrantes", color: "#0ea5e9" },
             { icon: Landmark, label: "Equipamientos", detail: "Bibliotecas y CDM", color: "#8b5cf6" },
-            { icon: MapPin, label: "Límites Administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
+            { icon: MapPin, label: "Límites administrativos", detail: "Barrios y distritos", color: "#ff5b4f" },
             { icon: Database, label: "Portal datos.madrid.es", detail: "Fuente oficial", color: "#171717" },
           ].map((src) => (
             <div key={src.label} className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 hover:border-[var(--ds-gray-400)] hover:shadow-md transition-all group cursor-default">
@@ -480,7 +480,7 @@ export default function Home() {
           <div>&copy; 2026 Madrid Refugio. Datos Abiertos del Ayuntamiento de Madrid.</div>
           <div className="flex gap-4 mt-4 md:mt-0">
             <Link href="/metodologia" className="hover:text-[var(--ds-black)] transition-colors">Metodología</Link>
-            <a href="https://datos.madrid.es/pages/premios-de-reutilizacion-2026" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--ds-black)] transition-colors">Premios de Reutilización</a>
+            <a href="https://datos.madrid.es/pages/premios-de-reutilizacion-2026" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--ds-black)] transition-colors">Premios de reutilización</a>
           </div>
         </footer>
       </div>

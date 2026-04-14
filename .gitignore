@@ -3,9 +3,14 @@ __pycache__/
 *.pyc
 cache/
 .env
+.env.example.local
 .ipynb_checkpoints
 .vscode/
 .idea/
+.tmp_backlog/
+memory/
+HEARTBEAT.md
+tracked.txt
 
 # Data (large files)
 data/raw/
@@ -25,6 +30,7 @@ data/processed/*.geojson
 
 # Logs
 *.log
+*_log.txt
 
 # Frontend build
 frontend/.next/
@@ -33,3 +39,4 @@ frontend/.env.local
 frontend/.env.*.local
 frontend/dist/
 frontend/build/
+.vercel
