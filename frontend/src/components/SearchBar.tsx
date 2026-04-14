@@ -25,23 +25,15 @@ const HOUR_LABELS: Record<number, string> = {
   18: "Tarde",
 };
 
-const PREFERENCE_LABELS: Record<string, string> = {
-  "0.0": "Mínima distancia",
-  "0.1": "Muy directa",
-  "0.2": "Bastante directa",
-  "0.3": "Más directa",
-  "0.4": "Directa con algo de sombra",
-  "0.5": "Equilibrada",
-  "0.6": "Equilibrada con sombra",
-  "0.7": "Más sombra",
-  "0.8": "Bastante sombra",
-  "0.9": "Mucha sombra",
-  "1.0": "Máxima sombra",
-};
+const PREFERENCE_OPTIONS = [
+  { value: 0.0, label: "Directa", detail: "Llega antes" },
+  { value: 0.5, label: "Equilibrada", detail: "Buen balance" },
+  { value: 1.0, label: "Mas sombra", detail: "Mas fresco" },
+] as const;
 
 function getPreferenceLabel(val: number): string {
-  const key = val.toFixed(1);
-  return PREFERENCE_LABELS[key] || "Equilibrada";
+  const option = PREFERENCE_OPTIONS.find(({ value }) => value === val);
+  return option?.label || "Equilibrada";
 }
 
 function normalizeHour(val: number): number {
@@ -50,11 +42,17 @@ function normalizeHour(val: number): number {
   , HOUR_OPTIONS[0]);
 }
 
+function normalizePreference(val: number): number {
+  return PREFERENCE_OPTIONS.reduce<number>((closest, option) =>
+    Math.abs(option.value - val) < Math.abs(closest - val) ? option.value : closest
+  , PREFERENCE_OPTIONS[1].value);
+}
+
 export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   const [destination, setDestination] = useState(initialState?.destination || "");
   const [origin, setOrigin] = useState(initialState?.origin || "");
   const [hour, setHour] = useState(() => normalizeHour(initialState?.hour ?? new Date().getHours()));
-  const [preference, setPreference] = useState(initialState?.preference ?? 0.5);
+  const [preference, setPreference] = useState(() => normalizePreference(initialState?.preference ?? 0.5));
   const [useMyLocation, setUseMyLocation] = useState(initialState?.useMyLocation ?? true);
   const [geolocationStatus, setGeolocationStatus] = useState<"idle" | "requesting" | "granted" | "denied" | "error">("idle");
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
@@ -74,7 +72,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     if (initialState?.destination !== undefined) setDestination(initialState.destination);
     if (initialState?.origin !== undefined) setOrigin(initialState.origin);
     if (initialState?.hour !== undefined) setHour(normalizeHour(initialState.hour));
-    if (initialState?.preference !== undefined) setPreference(initialState.preference);
+    if (initialState?.preference !== undefined) setPreference(normalizePreference(initialState.preference));
     if (initialState?.useMyLocation !== undefined) setUseMyLocation(initialState.useMyLocation);
   }, [
     initialState?.destination,
@@ -274,18 +272,23 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
             <label className="text-sm font-medium text-[var(--ds-black)]">Tipo de ruta</label>
             <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
           </div>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={preference}
-            onChange={(e) => setPreference(parseFloat(e.target.value))}
-            className="w-full cursor-pointer appearance-none rounded-lg accent-[#16a34a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
-          />
-          <div className="mt-2 flex justify-between gap-3 text-[11px] text-[var(--ds-gray-500)]">
-            <span>Minima distancia</span>
-            <span className="text-right">Maxima sombra</span>
+          <div className="grid grid-cols-3 gap-2">
+            {PREFERENCE_OPTIONS.map((option) => {
+              const selected = option.value === preference;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setPreference(option.value)}
+                  className={`rounded-2xl border px-3 py-2 text-left transition-all ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                >
+                  <div className="text-sm font-semibold">{option.label}</div>
+                  <div className={`mt-0.5 text-[11px] ${selected ? "text-white/75" : "text-[var(--ds-gray-500)]"}`}>
+                    {option.detail}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
