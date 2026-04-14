@@ -115,6 +115,7 @@ class AppState:
     weather_cache: dict | None = None
     weather_last_update: float = 0
     graph_loaded_at: float | None = None
+    startup_errors: list[str] = []
 
 app_state = AppState()
 
@@ -303,7 +304,7 @@ def fetch_aemet_data():
 
 
 def resolve_release_asset_download(asset_name: str) -> tuple[str, dict]:
-    github_token = os.getenv("GITHUB_TOKEN")
+    github_token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
     if not github_token:
         return f"{RELEASE_BASE_URL}/{asset_name}", {}
 
@@ -645,12 +646,13 @@ def health_check():
         weather_cache_age = round(time.time() - app_state.weather_last_update, 1)
 
     return {
-        "status": "ok",
+        "status": "ok" if not app_state.startup_errors else "degraded",
         "graph_loaded": app_state.graph is not None,
         "shadow_matrix_loaded": app_state.shadow_dict is not None,
         "weather_configured": bool(AEMET_API_KEY),
         "weather_cache_age_s": weather_cache_age,
         "release_tag": RELEASE_TAG,
+        "startup_errors": app_state.startup_errors,
     }
 
 
@@ -660,6 +662,7 @@ def api_health_check():
 
 @app.on_event("startup")
 def startup_event():
+    app_state.startup_errors = []
     logger.info("starting backend")
     logger.info("processed data directory: %s", PROCESSED_DIR)
     
@@ -740,7 +743,10 @@ def startup_event():
     logger.info("verifying graph data at %s", GRAPH_PATH)
     
     if not GRAPH_PATH.exists():
-        raise RuntimeError(f"ERROR: No se encuentra el grafo en {GRAPH_PATH}")
+        error_message = f"Grafo no disponible en {GRAPH_PATH}"
+        logger.error(error_message)
+        app_state.startup_errors.append(error_message)
+        return
     
     file_size = GRAPH_PATH.stat().st_size
     logger.info("graph file size: %.2f MB", file_size / (1024 * 1024))
@@ -752,6 +758,8 @@ def startup_event():
         logger.info("graph loaded in %.1f seconds", time.time() - t_start)
     except Exception as e:
         logger.exception("error loading graph")
+        error_message = f"Error cargando el grafo: {e}"
+        app_state.startup_errors.append(error_message)
         raise e
 
     ensure_edge_geometry(graph)
@@ -824,7 +832,13 @@ def calculate_route(req: RouteRequest):
     fuentes_utm = app_state.fuentes_utm
 
     if not graph or refugios_utm is None or fuentes_utm is None:
-        raise HTTPException(status_code=500, detail="Server not fully initialized")
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": "backend_unavailable",
+                "error_code": "backend_unavailable",
+            },
+        )
 
     request_started_at = time.time()
     try:

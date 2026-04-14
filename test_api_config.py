@@ -161,6 +161,19 @@ class ApiConfigTests(unittest.TestCase):
         self.assertIn("shadow_matrix_loaded", response)
         self.assertIn("weather_configured", response)
         self.assertIn("release_tag", response)
+        self.assertIn("startup_errors", response)
+
+    def test_health_reports_degraded_when_startup_has_errors(self):
+        import api
+
+        previous_errors = list(api.app_state.startup_errors)
+        try:
+            api.app_state.startup_errors = ["missing graph"]
+            response = api.health_check()
+            self.assertEqual(response["status"], "degraded")
+            self.assertEqual(response["startup_errors"], ["missing graph"])
+        finally:
+            api.app_state.startup_errors = previous_errors
 
     def test_fetch_aemet_data_without_key_returns_degraded_payload(self):
         previous_key = os.environ.get("AEMET_API_KEY")

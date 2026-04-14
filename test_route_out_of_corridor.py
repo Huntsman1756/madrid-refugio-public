@@ -103,6 +103,19 @@ class RouteOutOfCorridorTests(unittest.TestCase):
             '{"detail":"La dirección está fuera de Madrid. Prueba con una dirección dentro del municipio.","error_code":"outside_madrid"}',
         )
 
+    def test_returns_backend_unavailable_when_graph_is_not_ready(self):
+        api.app_state.graph = None
+        response = api.calculate_route(
+            api.RouteRequest(origin="origen", destination="destino", hour=14, preference=0.5)
+        )
+
+        self.assertIsInstance(response, JSONResponse)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(
+            response.body.decode("utf-8"),
+            '{"detail":"backend_unavailable","error_code":"backend_unavailable"}',
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
