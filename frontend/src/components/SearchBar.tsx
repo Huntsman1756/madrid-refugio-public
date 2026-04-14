@@ -19,15 +19,15 @@ interface SearchBarProps {
 
 const PREFERENCE_LABELS: Record<string, string> = {
   "0.0": "Mínima distancia",
-  "0.3": "Casi distancia",
-  "0.5": "Equilibrada",
-  "0.7": "Casi máxima sombra",
+  "0.3": "Más directa",
+  "0.5": "Equilibrio distancia-sombra",
+  "0.7": "Más sombra",
   "1.0": "Máxima sombra",
 };
 
 function getPreferenceLabel(val: number): string {
   const key = val.toFixed(1);
-  return PREFERENCE_LABELS[key] || "Equilibrada";
+  return PREFERENCE_LABELS[key] || "Equilibrio distancia-sombra";
 }
 
 export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
@@ -200,6 +200,13 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               placeholder="Tu ubicación actual o escribe una dirección"
               className="w-full px-3 py-2.5 bg-white border border-[var(--ds-gray-200)] rounded-lg focus:ring-2 focus:ring-[var(--ds-focus-color)] text-[var(--ds-black)] text-sm"
             />
+            <p className="mt-1.5 text-[11px] text-[var(--ds-gray-500)]">
+              Puedes escribir una calle, un lugar conocido o unas coordenadas como <code>40.4168, -3.7038</code>.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-[var(--ds-gray-200)] bg-white px-3 py-2 text-[11px] text-[var(--ds-gray-600)] leading-relaxed">
+            Si usas tu ubicacion actual, solo necesitas indicar el destino. Si no, completa origen y destino para calcular la ruta.
           </div>
 
           {/* Hour selector */}
@@ -246,6 +253,9 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               <span>🚶 Mínima distancia</span>
               <span>🌿 Máxima sombra</span>
             </div>
+            <p className="mt-1.5 text-[11px] text-[var(--ds-gray-500)]">
+              Elige si prefieres llegar antes o caminar por un recorrido con mas sombra y recursos cercanos.
+            </p>
           </div>
         </div>
       )}

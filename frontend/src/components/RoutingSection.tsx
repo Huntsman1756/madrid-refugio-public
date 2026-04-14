@@ -224,6 +224,7 @@ ${gpxPoints}
               fuentes={null}
               onBarrioSelect={() => {}}
               routeResult={routeResult}
+              showAreaLegend={false}
             />
           </div>
 
@@ -306,6 +307,7 @@ ${gpxPoints}
             fuentes={null}
             onBarrioSelect={() => {}}
             routeResult={null}
+            showAreaLegend={false}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent pointer-events-none flex items-end justify-center pb-8">
             <div className="text-center">
