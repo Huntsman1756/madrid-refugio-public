@@ -78,8 +78,8 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     setHour(Math.max(8, Math.min(20, now)));
   }, []);
 
-  const formatSunSaved = (minutes: number) => (minutes === 0 ? "—" : `-${minutes} min`);
-  const formatExtraEffort = (minutes: number) => (minutes === 0 ? "—" : `+${minutes} min`);
+  const formatSunSaved = (minutes: number | null | undefined) => (minutes == null ? "—" : `-${minutes} min`);
+  const formatExtraEffort = (minutes: number | null | undefined) => (minutes == null ? "—" : `+${minutes} min`);
 
   useEffect(() => {
     const savedPreference = loadSavedPreference();

@@ -15,16 +15,20 @@ interface WeatherData {
 export function WeatherWidget() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   const fetchWeather = async () => {
     setLoading(true);
+    setFailed(false);
     try {
-      // Usamos el proxy de Vercel (URL vacía ataca al mismo dominio)
       const response = await fetch("/api/weather");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
+      if (!data || data.error) throw new Error(data?.error || "Sin datos de AEMET");
       setWeather(data);
     } catch (err) {
       console.error("Error fetching weather:", err);
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -46,8 +50,13 @@ export function WeatherWidget() {
     );
   }
 
-  if (weather?.error || !weather) {
-    return null; // Silencioso si hay error o no hay key configurada
+  if (!weather) {
+    return (
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)] text-[var(--ds-gray-500)] text-xs">
+        <RefreshCw className={`w-3 h-3 ${failed ? "" : "animate-spin"}`} />
+        {failed ? "AEMET no disponible" : "Consultando AEMET..."}
+      </div>
+    );
   }
 
   const isHot = weather.temperatura >= 30;
