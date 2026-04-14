@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AlertCircle, RefreshCw, Thermometer } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Thermometer, AlertCircle, RefreshCw, Clock3 } from "lucide-react";
 
 interface WeatherData {
   municipio: string;
-  temperatura: number | string;
+  temperatura: number;
   estado_cielo: string;
   timestamp: string;
   fuente: string;
@@ -28,7 +28,6 @@ export function WeatherWidget() {
       setWeather(data);
     } catch (err) {
       console.error("Error fetching weather:", err);
-      setWeather(null);
       setFailed(true);
     } finally {
       setLoading(false);
@@ -37,60 +36,56 @@ export function WeatherWidget() {
 
   useEffect(() => {
     fetchWeather();
+    // Refresh cada 15 min
     const interval = setInterval(fetchWeather, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const hasWeather = !!weather && !weather.error;
-  const temperature = hasWeather ? Number(weather.temperatura) : null;
-  const isHeatWarning = temperature !== null && temperature >= 35;
-  const isWarm = temperature !== null && temperature >= 30;
+  if (loading && !weather) {
+    return (
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)] text-[var(--ds-gray-500)] text-xs animate-pulse">
+        <RefreshCw className="w-3 h-3 animate-spin" />
+        Consultando AEMET...
+      </div>
+    );
+  }
 
-  const toneClasses = failed
-    ? "border-slate-200 bg-white text-slate-700"
-    : isHeatWarning
-      ? "border-orange-200 bg-orange-50 text-orange-800"
-      : isWarm
-        ? "border-amber-200 bg-amber-50 text-amber-800"
-        : "border-slate-200 bg-white text-slate-700";
+  if (!weather) {
+    return (
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)] text-[var(--ds-gray-500)] text-xs">
+        <RefreshCw className={`w-3 h-3 ${failed ? "" : "animate-spin"}`} />
+        {failed ? "AEMET no disponible" : "Consultando AEMET..."}
+      </div>
+    );
+  }
 
-  const leadText =
-    loading && !weather
-      ? "Consultando AEMET..."
-      : failed
-        ? "AEMET no disponible"
-        : isHeatWarning
-          ? "Alerta por calor extremo"
-          : isWarm
-            ? "Calor intenso"
-            : `${weather?.municipio ?? "Madrid"} ahora:`;
-
-  const statusText =
-    loading && !weather
-      ? ""
-      : hasWeather
-        ? `${temperature} °C, ${weather.estado_cielo}`
-        : "Contexto AEMET no disponible";
-
-  const metaText = hasWeather ? `AEMET ${weather.timestamp}` : null;
+  const isHot = weather.temperatura >= 30;
 
   return (
-    <div
-      className={`inline-flex min-h-[36px] items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium shadow-sm transition-all fade-in-up active sm:text-sm ${toneClasses}`}
-    >
-      {loading && !weather ? (
-        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-      ) : hasWeather ? (
-        <Thermometer className={`h-4 w-4 ${isHeatWarning ? "text-orange-500" : isWarm ? "text-amber-500" : "text-slate-500"}`} />
-      ) : (
-        <AlertCircle className="h-4 w-4" />
+    <div className={`inline-flex items-center gap-3 px-4 py-1.5 rounded-full border shadow-sm transition-all fade-in-up active
+      ${isHot ? 'bg-orange-50 border-orange-200 text-orange-800' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
+      <div className="flex items-center gap-1.5 font-medium text-xs sm:text-sm">
+        <Thermometer className={`w-4 h-4 ${isHot ? 'text-orange-500' : 'text-blue-500'}`} />
+        <span>{weather.temperatura}°C</span>
+      </div>
+      <div className="h-3 w-px bg-current opacity-20"></div>
+      <div className="flex items-center gap-1.5 text-xs font-medium">
+        <span className="capitalize">{weather.estado_cielo}</span>
+      </div>
+      <div className="h-3 w-px bg-current opacity-20"></div>
+      <div className="flex items-center gap-1 text-xs font-medium">
+        <Clock3 className="w-3.5 h-3.5 opacity-70" />
+        <span>{weather.timestamp}</span>
+      </div>
+      {isHot && (
+        <>
+          <div className="h-3 w-px bg-current opacity-20"></div>
+          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-orange-600">
+            <AlertCircle className="w-3 h-3" />
+            <span className="hidden xs:inline">Riesgo Térmico</span>
+          </div>
+        </>
       )}
-      {(isHeatWarning || isWarm) && !failed && (
-        <span className={`flex h-2 w-2 rounded-full ${isHeatWarning ? "bg-red-500" : "bg-orange-400"}`} />
-      )}
-      <span className="font-semibold">{leadText}</span>
-      {statusText && <span className="font-normal">{statusText}</span>}
-      {metaText && <span className="text-[11px] font-normal opacity-60 sm:text-xs">· {metaText}</span>}
     </div>
   );
 }
