@@ -53,6 +53,15 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  useEffect(() => {
+    const savedPreference = loadSavedPreference();
+    if (savedPreference !== null) {
+      setPreference(savedPreference);
+    }
+    const now = new Date().getHours();
+    setHour(Math.max(8, Math.min(20, now)));
+  }, []);
+
   // Time slider automation
   useEffect(() => {
     let interval: NodeJS.Timeout;

@@ -149,9 +149,8 @@ export default function Home() {
           {/* Alert badges */}
           <div className="flex flex-wrap items-center justify-center gap-2 mb-6 fade-in-up">
             <WeatherWidget />
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs sm:text-sm font-medium shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-              Alerta ola de calor
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] text-[var(--ds-gray-600)] text-xs sm:text-sm font-medium shadow-sm">
+              Madrid 2026 Data Open
             </div>
           </div>
 

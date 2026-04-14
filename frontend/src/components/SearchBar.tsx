@@ -40,6 +40,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   const [geolocationStatus, setGeolocationStatus] = useState<"idle" | "requesting" | "granted" | "denied" | "error">("idle");
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
   const destinationRef = useRef<HTMLInputElement>(null);
+  const originRef = useRef<HTMLInputElement>(null);
 
   // Clamp hour to valid range
   const clampedHour = Math.max(8, Math.min(20, hour));
@@ -50,6 +51,20 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
       requestGeolocation();
     }
   }, []);
+
+  useEffect(() => {
+    if (initialState?.destination !== undefined) setDestination(initialState.destination);
+    if (initialState?.origin !== undefined) setOrigin(initialState.origin);
+    if (initialState?.hour !== undefined) setHour(initialState.hour);
+    if (initialState?.preference !== undefined) setPreference(initialState.preference);
+    if (initialState?.useMyLocation !== undefined) setUseMyLocation(initialState.useMyLocation);
+  }, [
+    initialState?.destination,
+    initialState?.origin,
+    initialState?.hour,
+    initialState?.preference,
+    initialState?.useMyLocation,
+  ]);
 
   const requestGeolocation = () => {
     if (!navigator.geolocation) {
@@ -70,11 +85,13 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
       (error) => {
         setGeolocationStatus("denied");
         setUseMyLocation(false);
+        setShowAdvanced(true);
         if (error.code === error.PERMISSION_DENIED) {
           setGeolocationError("Ubicación denegada. Escribe tu origen manualmente.");
         } else {
           setGeolocationError("No se pudo obtener tu ubicación. Escribe tu origen manualmente.");
         }
+        window.setTimeout(() => originRef.current?.focus(), 0);
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
     );
@@ -176,6 +193,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               Origen
             </label>
             <input
+              ref={originRef}
               type="text"
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
@@ -198,7 +216,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               max="20"
               value={clampedHour}
               onChange={(e) => setHour(parseInt(e.target.value))}
-              className="w-full h-2 bg-[var(--ds-gray-200)] rounded-lg appearance-none cursor-pointer accent-[var(--ds-black)]"
+              className="w-full h-2 bg-[var(--ds-gray-200)] rounded-lg appearance-none cursor-pointer accent-[var(--ds-black)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
             />
             <div className="flex justify-between text-[10px] text-[var(--ds-gray-400)] mt-1">
               <span>8:00</span>
@@ -222,7 +240,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               step="0.1"
               value={preference}
               onChange={(e) => setPreference(parseFloat(e.target.value))}
-              className="w-full h-2 bg-[var(--ds-gray-200)] rounded-lg appearance-none cursor-pointer accent-[#16a34a]"
+              className="w-full h-2 bg-[var(--ds-gray-200)] rounded-lg appearance-none cursor-pointer accent-[#16a34a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
             />
             <div className="flex justify-between text-[10px] text-[var(--ds-gray-400)] mt-1">
               <span>🚶 Mínima distancia</span>
