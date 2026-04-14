@@ -15,16 +15,21 @@ interface WeatherData {
 export function WeatherWidget() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   const fetchWeather = async () => {
     setLoading(true);
+    setFailed(false);
     try {
       const response = await fetch("/api/weather");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
+      if (!data || data.error) throw new Error(data?.error || "Sin datos de AEMET");
       setWeather(data);
     } catch (err) {
       console.error("Error fetching weather:", err);
       setWeather(null);
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -41,20 +46,24 @@ export function WeatherWidget() {
   const isHeatWarning = temperature !== null && temperature >= 35;
   const isWarm = temperature !== null && temperature >= 30;
 
-  const toneClasses = isHeatWarning
-    ? "border-orange-200 bg-orange-50 text-orange-800"
-    : isWarm
-      ? "border-amber-200 bg-amber-50 text-amber-800"
-      : "border-slate-200 bg-white text-slate-700";
+  const toneClasses = failed
+    ? "border-slate-200 bg-white text-slate-700"
+    : isHeatWarning
+      ? "border-orange-200 bg-orange-50 text-orange-800"
+      : isWarm
+        ? "border-amber-200 bg-amber-50 text-amber-800"
+        : "border-slate-200 bg-white text-slate-700";
 
   const leadText =
     loading && !weather
       ? "Consultando AEMET..."
-      : isHeatWarning
-        ? "Alerta por calor extremo"
-        : isWarm
-          ? "Calor intenso"
-          : `${weather?.municipio ?? "Madrid"} ahora:`;
+      : failed
+        ? "AEMET no disponible"
+        : isHeatWarning
+          ? "Alerta por calor extremo"
+          : isWarm
+            ? "Calor intenso"
+            : `${weather?.municipio ?? "Madrid"} ahora:`;
 
   const statusText =
     loading && !weather
@@ -76,7 +85,7 @@ export function WeatherWidget() {
       ) : (
         <AlertCircle className="h-4 w-4" />
       )}
-      {(isHeatWarning || isWarm) && (
+      {(isHeatWarning || isWarm) && !failed && (
         <span className={`flex h-2 w-2 rounded-full ${isHeatWarning ? "bg-red-500" : "bg-orange-400"}`} />
       )}
       <span className="font-semibold">{leadText}</span>
