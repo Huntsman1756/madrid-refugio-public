@@ -1,4 +1,4 @@
-# Madrid Refugio: Motor de confort térmico urbano 4D
+# Madrid Refugio: motor de confort térmico urbano 4D
 
 ## 1. Introducción y propuesta de valor
 
@@ -47,6 +47,8 @@ Los archivos grandes no están en el repositorio y se publican como artefactos d
 | `shadow_matrix.parquet` | Matriz de sombra precomputada por hora para el despliegue operativo actual | [Release v1.4](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4) |
 
 Colócalos en `data/processed/` antes de lanzar `uvicorn`.
+
+[![DOI](https://zenodo.org/badge/DOI/10.XXXX/zenodo.XXXXXXX.svg)](https://doi.org/10.XXXX/zenodo.XXXXXXX)
 
 ## 6. Instalación y uso
 
