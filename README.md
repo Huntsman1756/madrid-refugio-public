@@ -57,7 +57,15 @@ python api.py
 
 El autocompletado de origen y destino usa el índice canónico `data/processed/madrid_search_index.json`, con metadatos de tamaño en `data/processed/madrid_search_index.meta.json`.
 
-El backend ahora garantiza ese índice durante el arranque: si falta `data/processed/madrid_search_index.json`, reutiliza `data/processed/213605-4-callejero-oficial-madrid-csv.csv` cuando exista; si tampoco está presente, descarga automáticamente el CSV oficial del Callejero del Ayuntamiento de Madrid desde `datos.madrid.es` y vuelve a generar ambos artefactos antes de atender `/api/suggest`, mezclándolos con la fuente curada versionada.
+El backend puede reconstruir ese índice durante el arranque o al atender `/api/suggest` solo si ya existe `data/processed/213605-4-callejero-oficial-madrid-csv.csv` en disco. Si faltan tanto el índice como ese CSV oficial, el servicio falla con un error operativo claro: no intenta descargar el fichero municipal en runtime ni durante el startup.
+
+En producción debes preparar antes del deploy estos artefactos en `data/processed/`:
+
+- `213605-4-callejero-oficial-madrid-csv.csv`
+- `madrid_search_index.json`
+- `madrid_search_index.meta.json`
+
+Si despliegas sin ellos, `/api/suggest` responderá `503 Service Unavailable` hasta que el CSV oficial y/o el índice precomputado estén presentes.
 
 La demo del frontend lo sirve desde `/data/madrid_search_index.json`, por lo que tras regenerarlo conviene sincronizar la copia publicada en `frontend/public/data/madrid_search_index.json`.
 
@@ -76,7 +84,7 @@ python build_madrid_search_index.py --csv "ruta/al/fichero_municipal.csv"
 Fuentes del índice:
 
 - `data/reference/madrid_search_curated.json`: entradas curadas versionadas para demos y destinos/orígenes prioritarios de Madrid.
-- `data/processed/213605-4-callejero-oficial-madrid-csv.csv`: descarga local del Callejero oficial usada por el backend cuando necesita reconstruir el índice en un checkout limpio.
+- `data/processed/213605-4-callejero-oficial-madrid-csv.csv`: copia local preparada previamente del Callejero oficial usada por el backend cuando necesita reconstruir el índice.
 - `--csv`: fuente municipal opcional en CSV con columnas como `label` o `direccion`, coordenadas `lat`/`lon` o `LATITUD`/`LONGITUD`, y opcionalmente `district` o `distrito`.
 
 El builder prioriza las entradas curadas cuando hay colisiones y vuelve a escribir ambos artefactos generados en `data/processed/`. La fuente curada ya no vive en `data/processed/`, para que un checkout limpio conserve esas entradas aunque se limpie la carpeta de artefactos generados.

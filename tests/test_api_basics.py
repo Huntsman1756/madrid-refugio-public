@@ -88,54 +88,25 @@ def test_suggest_endpoint_returns_empty_list_for_blank_queries():
     assert response.json() == []
 
 
-def test_ensure_search_index_downloads_csv_and_builds_index(monkeypatch):
+def test_ensure_search_index_requires_prepared_csv_when_index_missing(monkeypatch):
     with tempfile.TemporaryDirectory(dir=ROOT) as temp_dir:
         temp_path = Path(temp_dir)
         csv_path = temp_path / "official.csv"
         index_path = temp_path / "madrid_search_index.json"
         meta_path = temp_path / "madrid_search_index.meta.json"
 
-        download_calls = []
-        build_calls = []
-
-        def fake_download(url: str, destination: Path) -> None:
-            download_calls.append((url, destination))
-            destination.write_text(
-                "direccion,LATITUD,LONGITUD\nPuerta del Sol,40.4169,-3.7035\n",
-                encoding="utf-8",
-            )
-
-        def fake_build(
-            csv_source: Path, output_path: Path, meta_output_path: Path
-        ) -> None:
-            build_calls.append((csv_source, output_path, meta_output_path))
-            output_path.write_text(
-                '[{"label":"Puerta del Sol","search_text":"puerta del sol","lat":40.4169,"lon":-3.7035,"kind":"address"}]',
-                encoding="utf-8",
-            )
-            meta_output_path.write_text(
-                '{"raw_bytes": 1, "gzip_bytes": 1}', encoding="utf-8"
-            )
-
         monkeypatch.setattr("api.SEARCH_SOURCE_CSV_PATH", csv_path)
         monkeypatch.setattr("api.SEARCH_INDEX_PATH", index_path)
         monkeypatch.setattr("api.SEARCH_INDEX_META_PATH", meta_path)
-        monkeypatch.setattr("api.download_file", fake_download)
-        monkeypatch.setattr("api.generate_search_index", fake_build)
 
-        entries = api.ensure_search_index()
+        try:
+            api.ensure_search_index()
+            assert False, "ensure_search_index should fail when CSV is missing"
+        except RuntimeError as exc:
+            message = str(exc)
 
-        assert entries == [
-            {
-                "label": "Puerta del Sol",
-                "search_text": "puerta del sol",
-                "lat": 40.4169,
-                "lon": -3.7035,
-                "kind": "address",
-            }
-        ]
-        assert download_calls == [(api.MADRID_OFFICIAL_STREET_CSV_URL, csv_path)]
-        assert build_calls == [(csv_path, index_path, meta_path)]
+        assert str(csv_path) in message
+        assert "must be prepared before startup or /api/suggest" in message
 
 
 def test_ensure_search_index_reuses_existing_index_without_download(monkeypatch):
@@ -149,9 +120,6 @@ def test_ensure_search_index_reuses_existing_index_without_download(monkeypatch)
             encoding="utf-8",
         )
 
-        download_mock = Mock(
-            side_effect=AssertionError("download_file should not be called")
-        )
         generate_mock = Mock(
             side_effect=AssertionError("generate_search_index should not be called")
         )
@@ -159,7 +127,6 @@ def test_ensure_search_index_reuses_existing_index_without_download(monkeypatch)
         monkeypatch.setattr("api.SEARCH_SOURCE_CSV_PATH", csv_path)
         monkeypatch.setattr("api.SEARCH_INDEX_PATH", index_path)
         monkeypatch.setattr("api.SEARCH_INDEX_META_PATH", meta_path)
-        monkeypatch.setattr("api.download_file", download_mock)
         monkeypatch.setattr("api.generate_search_index", generate_mock)
 
         entries = api.ensure_search_index()
@@ -173,7 +140,6 @@ def test_ensure_search_index_reuses_existing_index_without_download(monkeypatch)
                 "kind": "area",
             }
         ]
-        download_mock.assert_not_called()
         generate_mock.assert_not_called()
 
 
@@ -186,16 +152,14 @@ def test_ensure_search_index_builds_from_downloaded_csv_with_versioned_curated_d
         index_path = temp_path / "madrid_search_index.json"
         meta_path = temp_path / "madrid_search_index.meta.json"
 
-        def fake_download(url: str, destination: Path) -> None:
-            destination.write_text(
-                "direccion,LATITUD,LONGITUD\nPuerta del Sol,40.4169,-3.7035\n",
-                encoding="utf-8",
-            )
+        csv_path.write_text(
+            "direccion,LATITUD,LONGITUD\nPuerta del Sol,40.4169,-3.7035\n",
+            encoding="utf-8",
+        )
 
         monkeypatch.setattr("api.SEARCH_SOURCE_CSV_PATH", csv_path)
         monkeypatch.setattr("api.SEARCH_INDEX_PATH", index_path)
         monkeypatch.setattr("api.SEARCH_INDEX_META_PATH", meta_path)
-        monkeypatch.setattr("api.download_file", fake_download)
 
         entries = api.ensure_search_index()
 
@@ -205,6 +169,29 @@ def test_ensure_search_index_builds_from_downloaded_csv_with_versioned_curated_d
         assert "Gomez Ulla" in labels
         assert index_path.exists()
         assert meta_path.exists()
+
+
+def test_suggest_endpoint_returns_503_when_search_prerequisites_are_missing(
+    monkeypatch,
+):
+    app_state.search_index = None
+
+    monkeypatch.setattr(
+        "api.ensure_search_index",
+        Mock(
+            side_effect=RuntimeError(
+                "Search index prerequisites missing: data/processed/213605-4-callejero-oficial-madrid-csv.csv must be prepared before startup or /api/suggest."
+            )
+        ),
+    )
+
+    client = TestClient(app)
+    response = client.get("/api/suggest", params={"q": "plaza"})
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "Search index prerequisites missing: data/processed/213605-4-callejero-oficial-madrid-csv.csv must be prepared before startup or /api/suggest."
+    }
 
 
 def test_route_endpoint_accepts_latlon_origin(monkeypatch):

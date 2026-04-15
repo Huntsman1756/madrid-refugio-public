@@ -16,7 +16,6 @@ except ImportError:
     from backports.zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import List, Tuple
-from urllib.parse import urlparse
 
 import geopandas as gpd
 import networkx as nx
@@ -32,7 +31,6 @@ from build_madrid_search_index import (
     DEFAULT_META_OUTPUT_PATH,
     DEFAULT_MUNICIPAL_CSV_PATH,
     DEFAULT_OUTPUT_PATH,
-    OFFICIAL_STREET_CSV_URL,
     build_search_index_files,
     normalize_search_text,
 )
@@ -47,7 +45,6 @@ SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
 SEARCH_INDEX_PATH = DEFAULT_OUTPUT_PATH
 SEARCH_INDEX_META_PATH = DEFAULT_META_OUTPUT_PATH
 SEARCH_SOURCE_CSV_PATH = DEFAULT_MUNICIPAL_CSV_PATH
-MADRID_OFFICIAL_STREET_CSV_URL = OFFICIAL_STREET_CSV_URL
 
 GEOCODE_TIMEOUT_SECONDS = 8
 
@@ -359,14 +356,12 @@ def load_search_index(index_path: Path = DEFAULT_OUTPUT_PATH) -> list[dict]:
     return json.loads(index_path.read_text(encoding="utf-8"))
 
 
-def download_file(url: str, destination: Path) -> None:
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with requests.get(url, stream=True, timeout=300) as response:
-        response.raise_for_status()
-        with destination.open("wb") as handle:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    handle.write(chunk)
+def get_search_index_operational_error() -> str:
+    return (
+        "Search index prerequisites missing: "
+        f"{SEARCH_SOURCE_CSV_PATH} must be prepared before startup or /api/suggest. "
+        "Prebuild the Madrid search index during deployment preparation; runtime CSV downloads are disabled."
+    )
 
 
 def generate_search_index(
@@ -387,9 +382,7 @@ def ensure_search_index() -> list[dict]:
         return entries
 
     if not SEARCH_SOURCE_CSV_PATH.exists():
-        filename = Path(urlparse(MADRID_OFFICIAL_STREET_CSV_URL).path).name
-        print(f"Descargando {filename} desde datos.madrid.es...")
-        download_file(MADRID_OFFICIAL_STREET_CSV_URL, SEARCH_SOURCE_CSV_PATH)
+        raise RuntimeError(get_search_index_operational_error())
 
     print("Generando indice de busqueda de Madrid...")
     generated_entries = generate_search_index(
@@ -485,7 +478,10 @@ def health_check():
 @app.get("/api/suggest")
 def suggest(q: str = "", limit: int = 8):
     if app_state.search_index is None:
-        app_state.search_index = ensure_search_index()
+        try:
+            app_state.search_index = ensure_search_index()
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
     return filter_search_index(app_state.search_index, q, limit)
 
 
