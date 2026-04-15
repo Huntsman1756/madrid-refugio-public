@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { AlertTriangle, Download, Play, Pause, MapPin } from "lucide-react";
-import { SearchBar, type SearchBarState } from "./SearchBar";
+import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -47,8 +47,9 @@ interface RoutingSectionProps {
 }
 
 export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
-  const [origin, setOrigin] = useState("Puerta del Sol, Madrid");
-  const [destination, setDestination] = useState("");
+  const [origin, setOrigin] = useState<ResolvedLocation | null>(null);
+  const [destination, setDestination] = useState<ResolvedLocation | null>(null);
+  const [useMyLocation, setUseMyLocation] = useState(true);
   const [hour, setHour] = useState(() => {
     const now = new Date().getHours();
     return Math.max(8, Math.min(20, now));
@@ -59,6 +60,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [routeResult, setRouteResult] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const lastPlaybackHourRef = useRef<number | null>(null);
 
   const formatSunSaved = (minutes: number | null | undefined) => (minutes == null ? "—" : `${minutes} min`);
   const formatExtraEffort = (minutes: number | null | undefined) => {
@@ -88,31 +90,43 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   }, [isPlaying]);
 
   // Auto-calculate route when hour changes during playback
-  const currentSearchState = { origin, destination, hour, preference, useMyLocation: false };
   useEffect(() => {
-    if (isPlaying && hasSearched) {
-      calculateRouteFromState(currentSearchState);
+    if (!isPlaying) {
+      lastPlaybackHourRef.current = null;
+      return;
     }
-  }, [hour, isPlaying]);
+
+    if (!hasSearched || !origin || !destination) {
+      return;
+    }
+
+    if (lastPlaybackHourRef.current === null) {
+      lastPlaybackHourRef.current = hour;
+      return;
+    }
+
+    if (lastPlaybackHourRef.current === hour) {
+      return;
+    }
+
+    lastPlaybackHourRef.current = hour;
+    doCalculate(origin, destination, hour, preference);
+  }, [hour, isPlaying, hasSearched, origin, destination, preference]);
 
   const isHeatHour = hour >= 12 && hour <= 17;
 
   const handleSearch = useCallback((state: SearchBarState) => {
     setOrigin(state.origin);
     setDestination(state.destination);
+    setUseMyLocation(state.useMyLocation);
     setHour(state.hour);
     setPreference(state.preference);
     savePreference(state.preference);
 
-    // Build the API request
-    const apiOrigin = state.useMyLocation && state.origin
-      ? state.origin // coordinates — API will need to handle this, fallback to geocoding
-      : state.origin;
-
-    doCalculate(apiOrigin, state.destination, state.hour, state.preference);
+    doCalculate(state.origin, state.destination, state.hour, state.preference);
   }, []);
 
-  const doCalculate = async (originVal: string, destVal: string, hourVal: number, prefVal: number) => {
+  const doCalculate = async (originVal: ResolvedLocation, destVal: ResolvedLocation, hourVal: number, prefVal: number) => {
     setLoading(true);
     setError(null);
     setHasSearched(true);
@@ -136,10 +150,6 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateRouteFromState = (state: { origin: string; destination: string; hour: number; preference: number }) => {
-    doCalculate(state.origin, state.destination, state.hour, state.preference);
   };
 
   const handleDownloadGPX = () => {
@@ -181,11 +191,11 @@ ${gpxPoints}
         <SearchBar
           onSearch={handleSearch}
           initialState={{
-            origin,
-            destination,
+            origin: origin ?? undefined,
+            destination: destination ?? undefined,
             hour,
             preference,
-            useMyLocation: true,
+            useMyLocation,
           }}
           loading={loading}
         />

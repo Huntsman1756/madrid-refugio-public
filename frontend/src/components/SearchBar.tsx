@@ -3,9 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Navigation } from "lucide-react";
 
+import { AddressAutocompleteField } from "./AddressAutocompleteField";
+import { getSearchOptions as getSearchSuggestions } from "@/lib/search-source";
+import type { SearchOption } from "@/lib/madrid-search";
+
+export interface ResolvedLocation {
+  label: string;
+  kind?: string | null;
+  lat: number;
+  lon: number;
+}
+
 export interface SearchBarState {
-  origin: string;
-  destination: string;
+  origin: ResolvedLocation;
+  destination: ResolvedLocation;
   hour: number;
   preference: number;
   useMyLocation: boolean;
@@ -48,32 +59,94 @@ function normalizePreference(val: number): number {
   , PREFERENCE_OPTIONS[1].value);
 }
 
+function toSearchOption(location?: ResolvedLocation): SearchOption | null {
+  if (!location) {
+    return null;
+  }
+
+  return {
+    id: `${location.label}-${location.lat}-${location.lon}-${location.kind ?? "place"}`,
+    label: location.label,
+    kind: (location.kind as SearchOption["kind"] | undefined) ?? "place",
+    lat: location.lat,
+    lon: location.lon,
+  };
+}
+
+function toResolvedLocation(option: SearchOption): ResolvedLocation {
+  return {
+    label: option.label,
+    kind: option.kind,
+    lat: option.lat,
+    lon: option.lon,
+  };
+}
+
+function getLocationDetail(location: ResolvedLocation | null): string {
+  if (!location) {
+    return "";
+  }
+
+  return `${location.lat.toFixed(6)}, ${location.lon.toFixed(6)}`;
+}
+
+function isSearchSourceError(error: unknown): error is { message: string } {
+  return typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    error.name === "SearchSourceError" &&
+    "message" in error &&
+    typeof error.message === "string";
+}
+
 export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
-  const [destination, setDestination] = useState(initialState?.destination || "");
-  const [origin, setOrigin] = useState(initialState?.origin || "");
+  const [destination, setDestination] = useState(initialState?.destination?.label || "");
+  const [selectedDestination, setSelectedDestination] = useState<SearchOption | null>(() => toSearchOption(initialState?.destination));
+  const [destinationOptions, setDestinationOptions] = useState<SearchOption[]>([]);
+  const [origin, setOrigin] = useState(initialState?.useMyLocation ? "" : initialState?.origin?.label || "");
+  const [selectedOrigin, setSelectedOrigin] = useState<SearchOption | null>(() => initialState?.useMyLocation ? null : toSearchOption(initialState?.origin));
+  const [originOptions, setOriginOptions] = useState<SearchOption[]>([]);
   const [hour, setHour] = useState(() => normalizeHour(initialState?.hour ?? new Date().getHours()));
   const [preference, setPreference] = useState(() => normalizePreference(initialState?.preference ?? 0.5));
   const [useMyLocation, setUseMyLocation] = useState(initialState?.useMyLocation ?? true);
   const [geolocationStatus, setGeolocationStatus] = useState<"idle" | "requesting" | "granted" | "denied" | "error">("idle");
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
+  const [searchSourceError, setSearchSourceError] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<ResolvedLocation | null>(() => initialState?.useMyLocation ? initialState.origin ?? null : null);
   const destinationRef = useRef<HTMLInputElement>(null);
   const originRef = useRef<HTMLInputElement>(null);
 
-  const isLocationReady = useMyLocation && geolocationStatus === "granted" && Boolean(origin);
-  const canSearch = destination.trim() && (useMyLocation ? isLocationReady : origin.trim());
+  const isLocationReady = useMyLocation && geolocationStatus === "granted" && Boolean(currentLocation);
+  const canSearch = Boolean(selectedDestination) && (useMyLocation ? isLocationReady : Boolean(selectedOrigin));
 
   useEffect(() => {
     if (useMyLocation && geolocationStatus === "idle") {
       requestGeolocation();
     }
-  }, []);
+  }, [geolocationStatus, useMyLocation]);
 
   useEffect(() => {
-    if (initialState?.destination !== undefined) setDestination(initialState.destination);
-    if (initialState?.origin !== undefined) setOrigin(initialState.origin);
+    if (initialState?.destination !== undefined) {
+      setDestination(initialState.destination?.label || "");
+      setSelectedDestination(toSearchOption(initialState.destination));
+    }
+
+    if (initialState?.origin !== undefined) {
+      if (initialState?.useMyLocation) {
+        setCurrentLocation(initialState.origin ?? null);
+        setOrigin("");
+        setSelectedOrigin(null);
+      } else {
+        setOrigin(initialState.origin?.label || "");
+        setSelectedOrigin(toSearchOption(initialState.origin));
+      }
+    }
+
     if (initialState?.hour !== undefined) setHour(normalizeHour(initialState.hour));
     if (initialState?.preference !== undefined) setPreference(normalizePreference(initialState.preference));
-    if (initialState?.useMyLocation !== undefined) setUseMyLocation(initialState.useMyLocation);
+    if (initialState?.useMyLocation !== undefined) {
+      setUseMyLocation(initialState.useMyLocation);
+    }
   }, [
     initialState?.destination,
     initialState?.origin,
@@ -81,6 +154,68 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     initialState?.preference,
     initialState?.useMyLocation,
   ]);
+
+  useEffect(() => {
+    if (selectedDestination?.label === destination || !destination.trim()) {
+      setDestinationOptions([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    getSearchSuggestions(destination)
+      .then((options) => {
+        if (!cancelled) {
+          setSearchSourceError(null);
+          setDestinationOptions(options);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setDestinationOptions([]);
+          setSearchSourceError(
+            isSearchSourceError(error)
+              ? error.message
+              : "No se pudieron cargar las sugerencias ahora mismo.",
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [destination, selectedDestination]);
+
+  useEffect(() => {
+    if (useMyLocation || selectedOrigin?.label === origin || !origin.trim()) {
+      setOriginOptions([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    getSearchSuggestions(origin)
+      .then((options) => {
+        if (!cancelled) {
+          setSearchSourceError(null);
+          setOriginOptions(options);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setOriginOptions([]);
+          setSearchSourceError(
+            isSearchSourceError(error)
+              ? error.message
+              : "No se pudieron cargar las sugerencias ahora mismo.",
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [origin, selectedOrigin, useMyLocation]);
 
   const requestGeolocation = () => {
     if (!navigator.geolocation) {
@@ -93,7 +228,11 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     setGeolocationStatus("requesting");
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setOrigin(`${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+        setCurrentLocation({
+          label: "Tu ubicación actual",
+          lat: Number(position.coords.latitude.toFixed(6)),
+          lon: Number(position.coords.longitude.toFixed(6)),
+        });
         setGeolocationStatus("granted");
         setGeolocationError(null);
       },
@@ -113,7 +252,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!destination.trim()) {
+    if (!selectedDestination) {
       destinationRef.current?.focus();
       return;
     }
@@ -123,14 +262,14 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
       return;
     }
 
-    if (!useMyLocation && !origin.trim()) {
+    if (!useMyLocation && !selectedOrigin) {
       originRef.current?.focus();
       return;
     }
 
     onSearch({
-      origin: useMyLocation ? origin : origin.trim(),
-      destination: destination.trim(),
+      origin: useMyLocation ? currentLocation! : toResolvedLocation(selectedOrigin!),
+      destination: toResolvedLocation(selectedDestination),
       hour,
       preference,
       useMyLocation: useMyLocation && geolocationStatus === "granted",
@@ -144,6 +283,8 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     } else {
       setUseMyLocation(false);
       setOrigin("");
+      setSelectedOrigin(null);
+      setCurrentLocation(null);
       setGeolocationError(null);
       setGeolocationStatus("idle");
       window.setTimeout(() => originRef.current?.focus(), 0);
@@ -160,7 +301,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
 
   const locationDetail = useMyLocation
     ? geolocationStatus === "granted"
-      ? origin
+      ? getLocationDetail(currentLocation)
     : geolocationStatus === "requesting"
         ? "Estamos buscando tu posición para calcular la salida."
         : ""
@@ -206,13 +347,17 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
                 </button>
               ) : (
                 <>
-                  <input
+                  <AddressAutocompleteField
                     ref={originRef}
-                    type="text"
+                    label="Origen"
+                    name="origin"
+                    options={originOptions}
                     value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
+                    selectedOption={selectedOrigin}
+                    onValueChange={setOrigin}
+                    onSelectedOptionChange={setSelectedOrigin}
+                    onSelect={setSelectedOrigin}
                     placeholder="Calle, lugar o coordenadas en Madrid"
-                    className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)]"
                   />
                   <p className="mt-1.5 text-xs text-[var(--ds-gray-500)]">
                     Usa una calle, un lugar o unas coordenadas.
@@ -226,16 +371,24 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--ds-black)]">Destino</label>
-              <input
+              <AddressAutocompleteField
                 ref={destinationRef}
-                type="text"
+                label="Destino"
+                name="destination"
+                options={destinationOptions}
                 value={destination}
-                onChange={(e) => setDestination(e.target.value)}
+                selectedOption={selectedDestination}
+                onValueChange={setDestination}
+                onSelectedOptionChange={setSelectedDestination}
+                onSelect={setSelectedDestination}
                 placeholder="¿A dónde quieres ir?"
-                className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-base font-medium text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)]"
-                autoFocus
               />
+
+              {searchSourceError && (
+                <p role="alert" className="mt-1.5 text-xs text-red-500">
+                  {searchSourceError}
+                </p>
+              )}
             </div>
           </div>
         </div>

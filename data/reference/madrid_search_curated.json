@@ -1,0 +1,29 @@
+[
+  {
+    "label": "Gomez Ulla",
+    "search_text": "gomez ulla",
+    "lat": 40.4211,
+    "lon": -3.6738,
+    "kind": "demo_destination",
+    "source": "curated",
+    "district": "Salamanca"
+  },
+  {
+    "label": "Nuevos Ministerios",
+    "search_text": "nuevos ministerios",
+    "lat": 40.446,
+    "lon": -3.6933,
+    "kind": "demo_destination",
+    "source": "curated",
+    "district": "Chamartin"
+  },
+  {
+    "label": "Plaza de Castilla",
+    "search_text": "plaza de castilla",
+    "lat": 40.466,
+    "lon": -3.6904,
+    "kind": "demo_origin",
+    "source": "curated",
+    "district": "Tetuan"
+  }
+]

@@ -2,33 +2,29 @@
 
 ## 1. Introducción y propuesta de valor
 
-**Madrid Refugio** es un motor de simulación climática urbana diseñado para proteger a la población más vulnerable de la capital frente a la temperatura superficial elevada y los episodios de calor extremo.
+**Madrid Refugio** es un motor de simulación climática urbana diseñado para proteger a la población más vulnerable de la capital frente al fenómeno de la isla de calor y los episodios de calor extremo.
 
-Su uso directo está pensado para cuidadores, familiares y personal municipal que planifican desplazamientos o priorizan intervenciones en apoyo de personas mayores. El beneficiario final es la población mayor de 65 años más expuesta al calor.
-
-A diferencia de los mapas estáticos de temperatura superficial, Madrid Refugio calcula rutas de confort térmico en tiempo real sobre 320.844 aristas y 13 franjas horarias.
+A diferencia de soluciones estáticas que simplemente muestran "islas de calor" históricas, nuestra plataforma ofrece una **operatividad real** mediante el cálculo de rutas de confort térmico en tiempo real.
 
 ## 2. Innovación tecnológica: motor de sombra dinámica proyectada
 
-Madrid Refugio calcula **sombra dinámica proyectada por edificación** y la combina con arbolado viario en el peso de cada tramo:
+La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cálculo de **Sombra Dinámica Proyectada por Edificación**. Mientras que otras propuestas se limitan a mapas de calor estáticos o históricos, nosotros hemos implementado:
 
-- **Modelo de alturas de edificación:** Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).
-- **Proyección geométrica solar:** Integración de la biblioteca `pvlib` y `pybdshadow` para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar en episodios de ola de calor en Madrid).
-- **Matriz de intersección calle-sombra:** Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00). El algoritmo ajusta el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
-- **Optimización de confort térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que suma sombra de edificación y arbolado con tope, permitiendo desvíos inteligentes hacia calles con mayor confort térmico.
+- **Modelo de Alturas de Edificación:** Procesamiento de 662.173 polígonos del Geoportal de Madrid con atributos de altura real (Z).
+- **Proyección Geométrica Solar:** Integración de la biblioteca `pvlib` y `pybdshadow` para el cálculo dinámico de la posición solar (azimut y elevación) basada en coordenadas geográficas y fecha de referencia (15 de julio, fecha representativa de máxima incidencia solar en episodios de ola de calor en Madrid).
+- **Matriz de Intersección Calle-Sombra:** Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.
+- **Optimización de Confort Térmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que penaliza la insolación directa, permitiendo desvíos inteligentes hacia calles en sombra que multiplican la protección frente al estrés térmico.
 
 ## 3. Reutilización de datos abiertos
 
-Hemos integrado conjuntos de datos del ecosistema de datos de Madrid con sus títulos oficiales en el portal:
-1. **Modelo digital 3D de edificios:** Geoportal del Ayuntamiento de Madrid. 662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.
-2. **Arbolado en parques y zonas verdes de Madrid (detalle):** 661.192 ejemplares geolocalizados reutilizados como sombra biológica. El dataset incluye arbolado viario y arbolado en zonas verdes municipales.
-3. **Padrón municipal:** Población por barrio, distrito y sección censal agregada por sexo y edad. Base para identificar mayores de 65 años.
-4. **Calidad del aire. Datos horarios desde 2001:** Series históricas de NO2 para análisis territorial.
-5. **Fuentes de agua para beber:** Puntos de apoyo hídrico integrados en el algoritmo de proximidad.
-6. **Bibliotecas de Madrid:** Equipamientos reutilizados como refugios climáticos sustitutos.
-7. **Deportes. Centros Deportivos Municipales (Polideportivos):** Equipamientos reutilizados como refugios climáticos sustitutos.
-8. **Barrios municipales de Madrid:** Geometría oficial para agregación territorial.
-9. **Distritos municipales de Madrid:** Geometría administrativa oficial de los 21 distritos.
+Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:
+1. **Modelo de Alturas de Edificación (2024):** Geoportal del Ayuntamiento de Madrid. 662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.
+2. **Inventario de Arbolado Viario:** 661.192 ejemplares geolocalizados para sombra biológica.
+3. **Padrón Municipal (Enero 2026):** Población por barrio segregada por edad (>65 años).
+4. **Calidad del Aire Horaria:** Series históricas de NO2 interpoladas mediante IDW (Inverse Distance Weighting).
+5. **Fuentes de Agua Potable:** Red de hidrantes públicos integrada en el algoritmo de proximidad.
+6. **Equipamientos Municipales:** Bibliotecas y centros deportivos mapeados como "refugios sustitutos".
+7. **Límites de Barrios y Distritos:** Geometría administrativa oficial.
 
 ## 4. Estructura del proyecto
 
@@ -39,11 +35,11 @@ Hemos integrado conjuntos de datos del ecosistema de datos de Madrid con sus tí
 
 ## 5. Datos precomputados
 
-Los archivos grandes no están en el repositorio y se publican como artefactos de release.
+Los archivos grandes no están en el repositorio (gestionados vía Git LFS).
 
 | Archivo | Descripción | Fuente |
 |---|---|---|
-| `madrid_shadow_graph.graphml` | Grafo de calles con sombra de edificación y arbolado integrada para el despliegue operativo actual | [Release v1.4](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4) |
+| `madrid_shadow_graph.graphml.gz` | Grafo de calles con pesos de sombra para el despliegue operativo actual | [Release v1.4](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4) |
 | `shadow_matrix.parquet` | Matriz de sombra precomputada por hora para el despliegue operativo actual | [Release v1.4](https://github.com/Huntsman1756/madrid-refugio/releases/tag/v1.4) |
 
 Colócalos en `data/processed/` antes de lanzar `uvicorn`.
@@ -57,32 +53,60 @@ pip install -r requirements.txt
 python api.py
 ```
 
+### Regenerar el índice de búsqueda de Madrid
+
+El autocompletado de origen y destino usa el índice canónico `data/processed/madrid_search_index.json`, con metadatos de tamaño en `data/processed/madrid_search_index.meta.json`.
+
+El backend ahora garantiza ese índice durante el arranque: si falta `data/processed/madrid_search_index.json`, reutiliza `data/processed/213605-4-callejero-oficial-madrid-csv.csv` cuando exista; si tampoco está presente, descarga automáticamente el CSV oficial del Callejero del Ayuntamiento de Madrid desde `datos.madrid.es` y vuelve a generar ambos artefactos antes de atender `/api/suggest`, mezclándolos con la fuente curada versionada.
+
+La demo del frontend lo sirve desde `/data/madrid_search_index.json`, por lo que tras regenerarlo conviene sincronizar la copia publicada en `frontend/public/data/madrid_search_index.json`.
+
+Comando base para regenerarlo:
+
+```bash
+python build_madrid_search_index.py
+```
+
+Si además quieres mezclar un CSV municipal con direcciones normalizadas, ejecuta:
+
+```bash
+python build_madrid_search_index.py --csv "ruta/al/fichero_municipal.csv"
+```
+
+Fuentes del índice:
+
+- `data/reference/madrid_search_curated.json`: entradas curadas versionadas para demos y destinos/orígenes prioritarios de Madrid.
+- `data/processed/213605-4-callejero-oficial-madrid-csv.csv`: descarga local del Callejero oficial usada por el backend cuando necesita reconstruir el índice en un checkout limpio.
+- `--csv`: fuente municipal opcional en CSV con columnas como `label` o `direccion`, coordenadas `lat`/`lon` o `LATITUD`/`LONGITUD`, y opcionalmente `district` o `distrito`.
+
+El builder prioriza las entradas curadas cuando hay colisiones y vuelve a escribir ambos artefactos generados en `data/processed/`. La fuente curada ya no vive en `data/processed/`, para que un checkout limpio conserve esas entradas aunque se limpie la carpeta de artefactos generados.
+
 Variables de entorno esperadas:
 
 - `GITHUB_TOKEN`: opcional, solo si quieres usar peticiones autenticadas a GitHub.
 
 ### Despliegue en Railway
 
-El backend de producción en Railway necesita estas condiciones para arrancar de forma estable:
+El backend de produccion en Railway necesita estas condiciones para arrancar de forma estable:
 
 - Volumen montado en `/mnt/data`
 - `DATA_DIR=/mnt/data/processed`
 - Recursos del servicio suficientes para cargar el grafo completo en memoria
 
-Configuración operativa validada en producción:
+Configuracion operativa validada en produccion:
 
 - `DATA_DIR=/mnt/data/processed`
 - volumen persistente con `madrid_shadow_graph.graphml` y `shadow_matrix.parquet`
-- límite del servicio en Railway de al menos `8 vCPU / 8 GB RAM`
+- limite del servicio en Railway de al menos `8 vCPU / 8 GB RAM`
 
-El archivo `railway.json` de la raíz deja fijados en código el `startCommand`, `healthcheckPath` y `healthcheckTimeout`.
+El archivo `railway.json` de la raiz deja fijados en codigo el `startCommand`, `healthcheckPath` y `healthcheckTimeout`.
 
 Si el servicio vuelve a responder `502` durante el arranque, lo primero que hay que revisar es:
 
 1. que el volumen sigue montado en `/mnt/data`
 2. que `DATA_DIR` apunta a `/mnt/data/processed`
 3. que el override de recursos del servicio no haya bajado de `8 GB`
-4. que `GET /health` llegue a `200` antes de dar por válido el deploy
+4. que `GET /health` llegue a `200` antes de dar por valido el deploy
 
 ## Nota sobre acceso y derechos
 

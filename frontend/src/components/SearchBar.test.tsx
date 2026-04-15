@@ -1,0 +1,235 @@
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { SearchOption } from "@/lib/madrid-search";
+
+const SEARCH_OPTIONS: SearchOption[] = [
+  {
+    id: "origin-1",
+    label: "Plaza Mayor, Madrid",
+    kind: "place",
+    lat: 40.4155,
+    lon: -3.7074,
+  },
+  {
+    id: "destination-1",
+    label: "Museo del Prado, Madrid",
+    kind: "place",
+    lat: 40.4138,
+    lon: -3.6921,
+  },
+];
+
+const fetchMock = vi.fn();
+const getSearchOptionsMock = vi.fn(async (query: string) => {
+  const normalizedQuery = query.trim().toLowerCase();
+  return SEARCH_OPTIONS.filter((option) => option.label.toLowerCase().includes(normalizedQuery));
+});
+const originalGeolocation = navigator.geolocation;
+
+vi.mock("next/dynamic", () => ({
+  default: () => {
+    const MockMapComponent = () => <div data-testid="map-component" />;
+    return MockMapComponent;
+  },
+}));
+
+vi.mock("@/lib/search-source", () => ({
+  getSearchOptions: (...args: Parameters<typeof getSearchOptionsMock>) => getSearchOptionsMock(...args),
+}));
+
+import { RoutingSection } from "./RoutingSection";
+
+describe("SearchBar integration", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: originalGeolocation,
+    });
+  });
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    getSearchOptionsMock.mockClear();
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        metrics: {
+          human: {
+            sun_time_saved_min: 12,
+            extra_effort_min: 3,
+          },
+          shortest: {
+            length: 1200,
+            tree_shade: 300,
+            building_shade: 100,
+            fuentes: 1,
+            refugios: 1,
+          },
+          comfort: {
+            length: 1400,
+            tree_shade: 500,
+            building_shade: 200,
+            fuentes: 2,
+            refugios: 2,
+          },
+        },
+        comfort_coords: [],
+      }),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
+  it("requires selected suggestions for manual origin and destination and posts resolved payloads", async () => {
+    render(<RoutingSection />);
+
+    fireEvent.click(screen.getByRole("button", { name: /escribir origen/i }));
+
+    const originInput = await screen.findByRole("combobox", { name: "Origen" });
+    const destinationInput = screen.getByRole("combobox", { name: "Destino" });
+    const submitButton = screen.getByRole("button", { name: /buscar ruta con sombra/i });
+
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.change(originInput, { target: { value: "plaza" } });
+    fireEvent.change(destinationInput, { target: { value: "prado" } });
+
+    await waitFor(() => {
+      expect(getSearchOptionsMock).toHaveBeenCalledWith("plaza");
+      expect(getSearchOptionsMock).toHaveBeenCalledWith("prado");
+    });
+
+    expect(screen.getByRole("button", { name: /plaza mayor, madrid/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /museo del prado, madrid/i })).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /plaza mayor, madrid/i }));
+    fireEvent.click(screen.getByRole("button", { name: /museo del prado, madrid/i }));
+
+    await waitFor(() => expect(submitButton).toBeEnabled());
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    const [url, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/route");
+    expect(request.method).toBe("POST");
+    expect(request.headers).toEqual({ "Content-Type": "application/json" });
+    expect(JSON.parse(String(request.body))).toMatchObject({
+      origin: {
+        label: "Plaza Mayor, Madrid",
+        kind: "place",
+        lat: 40.4155,
+        lon: -3.7074,
+      },
+      destination: {
+        label: "Museo del Prado, Madrid",
+        kind: "place",
+        lat: 40.4138,
+        lon: -3.6921,
+      },
+      hour: expect.any(Number),
+      preference: 0.5,
+    });
+  });
+
+  it("preserves geolocation mode after a successful search with a resolved current location", async () => {
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 40.4168,
+          longitude: -3.7038,
+        },
+      } as GeolocationPosition);
+    });
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+
+    render(<RoutingSection />);
+
+    expect(await screen.findByRole("button", { name: /tu ubicación actual/i })).toBeInTheDocument();
+
+    const destinationInput = screen.getByRole("combobox", { name: "Destino" });
+    fireEvent.change(destinationInput, { target: { value: "prado" } });
+
+    await waitFor(() => {
+      expect(getSearchOptionsMock).toHaveBeenCalledWith("prado");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /museo del prado, madrid/i }));
+
+    const submitButton = screen.getByRole("button", { name: /buscar ruta con sombra/i });
+    await waitFor(() => expect(submitButton).toBeEnabled());
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    expect(screen.getByRole("button", { name: /escribir origen/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /tu ubicación actual/i })).toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Origen" })).not.toBeInTheDocument();
+  });
+
+  it("recalculates during simulated playback only when the hour advances", async () => {
+    render(<RoutingSection />);
+
+    fireEvent.click(screen.getByRole("button", { name: /escribir origen/i }));
+
+    const originInput = await screen.findByRole("combobox", { name: "Origen" });
+    const destinationInput = screen.getByRole("combobox", { name: "Destino" });
+
+    fireEvent.change(originInput, { target: { value: "plaza" } });
+    fireEvent.change(destinationInput, { target: { value: "prado" } });
+
+    await waitFor(() => {
+      expect(getSearchOptionsMock).toHaveBeenCalledWith("plaza");
+      expect(getSearchOptionsMock).toHaveBeenCalledWith("prado");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /plaza mayor, madrid/i }));
+    fireEvent.click(screen.getByRole("button", { name: /museo del prado, madrid/i }));
+
+    const submitButton = screen.getByRole("button", { name: /buscar ruta con sombra/i });
+    await waitFor(() => expect(submitButton).toBeEnabled());
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    vi.useFakeTimers();
+
+    fireEvent.click(screen.getByRole("button", { name: /simular d[ií]a/i }));
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2500);
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows a clear error when the catalog cannot be loaded", async () => {
+    const error = new Error("No se pudo cargar el catalogo de lugares. Recarga la pagina e intentalo de nuevo.");
+    error.name = "SearchSourceError";
+
+    getSearchOptionsMock.mockRejectedValueOnce(error);
+
+    render(<RoutingSection />);
+
+    const destinationInput = screen.getByRole("combobox", { name: "Destino" });
+    fireEvent.change(destinationInput, { target: { value: "prado" } });
+
+    expect(
+      await screen.findByText("No se pudo cargar el catalogo de lugares. Recarga la pagina e intentalo de nuevo."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /museo del prado, madrid/i })).not.toBeInTheDocument();
+  });
+});
