@@ -159,7 +159,7 @@ export default function Home() {
           <span className="font-sans font-semibold text-[var(--ds-black)] tracking-tight text-sm sm:text-base">Madrid Refugio</span>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
-          <Link href="/metodologia"><Button variant="primary" className="hidden sm:inline-flex h-9 px-4 text-sm">Metodología</Button></Link>
+          <Link href="/metodologia"><Button variant="primary" className="max-sm:hidden h-9 px-4 text-sm sm:inline-flex">Metodología</Button></Link>
         </div>
       </nav>
 

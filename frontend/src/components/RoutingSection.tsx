@@ -49,7 +49,7 @@ interface RoutingSectionProps {
 export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [origin, setOrigin] = useState<ResolvedLocation | null>(null);
   const [destination, setDestination] = useState<ResolvedLocation | null>(null);
-  const [useMyLocation, setUseMyLocation] = useState(true);
+  const [useMyLocation, setUseMyLocation] = useState(false);
   const [hour, setHour] = useState(() => {
     const now = new Date().getHours();
     return Math.max(8, Math.min(20, now));

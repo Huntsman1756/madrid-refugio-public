@@ -108,9 +108,10 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   const [originOptions, setOriginOptions] = useState<SearchOption[]>([]);
   const [hour, setHour] = useState(() => normalizeHour(initialState?.hour ?? new Date().getHours()));
   const [preference, setPreference] = useState(() => normalizePreference(initialState?.preference ?? 0.5));
-  const [useMyLocation, setUseMyLocation] = useState(initialState?.useMyLocation ?? true);
+  const [useMyLocation, setUseMyLocation] = useState(initialState?.useMyLocation ?? false);
   const [geolocationStatus, setGeolocationStatus] = useState<"idle" | "requesting" | "granted" | "denied" | "error">("idle");
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
+  const [hasRequestedGeolocation, setHasRequestedGeolocation] = useState(Boolean(initialState?.useMyLocation && initialState?.origin));
   const [searchSourceError, setSearchSourceError] = useState<string | null>(null);
   const [currentLocation, setCurrentLocation] = useState<ResolvedLocation | null>(() => initialState?.useMyLocation ? initialState.origin ?? null : null);
   const destinationRef = useRef<HTMLInputElement>(null);
@@ -120,10 +121,10 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   const canSearch = Boolean(selectedDestination) && (useMyLocation ? isLocationReady : Boolean(selectedOrigin));
 
   useEffect(() => {
-    if (useMyLocation && geolocationStatus === "idle") {
+    if (useMyLocation && hasRequestedGeolocation && geolocationStatus === "idle") {
       requestGeolocation();
     }
-  }, [geolocationStatus, useMyLocation]);
+  }, [geolocationStatus, hasRequestedGeolocation, useMyLocation]);
 
   useEffect(() => {
     if (initialState?.destination !== undefined) {
@@ -218,6 +219,8 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   }, [origin, selectedOrigin, useMyLocation]);
 
   const requestGeolocation = () => {
+    setHasRequestedGeolocation(true);
+
     if (!navigator.geolocation) {
       setGeolocationStatus("error");
       setGeolocationError("Tu navegador no soporta geolocalización");
@@ -287,6 +290,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
       setCurrentLocation(null);
       setGeolocationError(null);
       setGeolocationStatus("idle");
+      setHasRequestedGeolocation(false);
       window.setTimeout(() => originRef.current?.focus(), 0);
     }
   };
@@ -328,7 +332,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
                 <button
                   type="button"
                   onClick={handleToggleMyLocation}
-                  className="shrink-0 text-xs font-medium text-emerald-700 transition-colors hover:text-emerald-800"
+                  className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-emerald-700 transition-colors hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
                 >
                   {useMyLocation ? "Escribir origen" : "Usar mi ubicación"}
                 </button>
@@ -350,6 +354,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
                   <AddressAutocompleteField
                     ref={originRef}
                     label="Origen"
+                    hideLabelVisually
                     name="origin"
                     options={originOptions}
                     value={origin}
@@ -400,7 +405,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
             <label className="text-sm font-medium text-[var(--ds-black)]">Hora de salida</label>
             <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{hour}:00</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-3 sm:gap-2">
             {HOUR_OPTIONS.map((option) => {
               const selected = option === hour;
               return (
@@ -408,7 +413,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
                   key={option}
                   type="button"
                   onClick={() => setHour(option)}
-                  className={`rounded-2xl border px-3 py-2 text-left transition-all ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                  className={`min-h-14 rounded-2xl border px-3 py-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
                 >
                   <div className="text-sm font-semibold">{option}:00</div>
                   <div className={`mt-0.5 text-[11px] ${selected ? "text-white/75" : "text-[var(--ds-gray-500)]"}`}>
@@ -425,7 +430,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
             <label className="text-sm font-medium text-[var(--ds-black)]">Tipo de ruta</label>
             <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-3 sm:gap-2">
             {PREFERENCE_OPTIONS.map((option) => {
               const selected = option.value === preference;
               return (
@@ -433,7 +438,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
                   key={option.value}
                   type="button"
                   onClick={() => setPreference(option.value)}
-                  className={`rounded-2xl border px-3 py-2 text-left transition-all ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                  className={`min-h-14 rounded-2xl border px-3 py-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
                 >
                   <div className="text-sm font-semibold">{option.label}</div>
                   <div className={`mt-0.5 text-[11px] ${selected ? "text-white/75" : "text-[var(--ds-gray-500)]"}`}>
@@ -449,7 +454,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
       <button
         type="submit"
         disabled={loading || !canSearch}
-        className="flex h-14 w-full items-center justify-center rounded-2xl bg-[#16a34a] px-6 text-base font-semibold text-white transition-all hover:bg-[#15803d] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-14 w-full items-center justify-center rounded-2xl bg-[#16a34a] px-6 text-base font-semibold text-white transition-all hover:bg-[#15803d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Calculando..." : "Buscar ruta con sombra"}
       </button>

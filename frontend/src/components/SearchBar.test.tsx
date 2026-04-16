@@ -85,8 +85,6 @@ describe("SearchBar integration", () => {
   it("requires selected suggestions for manual origin and destination and posts resolved payloads", async () => {
     render(<RoutingSection />);
 
-    fireEvent.click(screen.getByRole("button", { name: /escribir origen/i }));
-
     const originInput = await screen.findByRole("combobox", { name: "Origen" });
     const destinationInput = screen.getByRole("combobox", { name: "Destino" });
     const submitButton = screen.getByRole("button", { name: /buscar ruta con sombra/i });
@@ -153,6 +151,8 @@ describe("SearchBar integration", () => {
 
     render(<RoutingSection />);
 
+    fireEvent.click(screen.getByRole("button", { name: /usar mi ubicación/i }));
+
     expect(await screen.findByRole("button", { name: /tu ubicación actual/i })).toBeInTheDocument();
 
     const destinationInput = screen.getByRole("combobox", { name: "Destino" });
@@ -178,8 +178,6 @@ describe("SearchBar integration", () => {
 
   it("recalculates during simulated playback only when the hour advances", async () => {
     render(<RoutingSection />);
-
-    fireEvent.click(screen.getByRole("button", { name: /escribir origen/i }));
 
     const originInput = await screen.findByRole("combobox", { name: "Origen" });
     const destinationInput = screen.getByRole("combobox", { name: "Destino" });

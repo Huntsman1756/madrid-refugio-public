@@ -17,6 +17,7 @@ import {
 
 interface AddressAutocompleteFieldProps {
   label: string;
+  hideLabelVisually?: boolean;
   name: string;
   options: SearchOption[];
   onSelect: (option: SearchOption) => void;
@@ -35,6 +36,7 @@ const KIND_LABELS: Record<SearchKind, string> = {
 
 export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAutocompleteFieldProps>(function AddressAutocompleteField({
   label,
+  hideLabelVisually = false,
   name,
   options,
   onSelect,
@@ -167,9 +169,11 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
         setIsOpen(false);
       }}
     >
-      <label htmlFor={name} className="block text-sm font-medium text-[var(--ds-black)]">
-        {label}
-      </label>
+      {label ? (
+        <label htmlFor={name} className={hideLabelVisually ? "sr-only" : "block text-sm font-medium text-[var(--ds-black)]"}>
+          {label}
+        </label>
+      ) : null}
 
       <input
         ref={ref}
@@ -193,7 +197,7 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
           }
         }}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)]"
+        className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)] focus:ring-offset-2"
       />
 
       {isListOpen && (
@@ -216,7 +220,7 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
                   event.preventDefault();
                 }}
                 onClick={() => handleSelect(option)}
-                className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left hover:bg-[var(--ds-gray-50)] ${index === activeIndex ? "bg-[var(--ds-gray-50)]" : ""}`}
+                className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left hover:bg-[var(--ds-gray-50)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${index === activeIndex ? "bg-[var(--ds-gray-50)]" : ""}`}
               >
                 <span className="min-w-0 text-sm text-[var(--ds-black)]">{option.label}</span>
                 <span className="shrink-0 rounded-full bg-[var(--ds-gray-100)] px-2 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
