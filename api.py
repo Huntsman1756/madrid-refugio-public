@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import requests
 import socket
-import gzip
-import shutil
 import time
 from datetime import datetime
 
@@ -23,6 +22,7 @@ import osmnx as ox
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from pyproj import Transformer
 from shapely.geometry import LineString, Point
@@ -38,13 +38,27 @@ from build_madrid_search_index import (
 # --- Configuration & Paths ---
 BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data" / "processed")))
+APP_PROCESSED_DIR = BASE_DIR / "data" / "processed"
 GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
-REFUGIOS_PATH = PROCESSED_DIR / "refugios_sustitutos.geojson"
-FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
+GRAPH_RELEASE_MARKER_PATH = PROCESSED_DIR / ".graph_release_tag"
+REFUGIOS_PATH = APP_PROCESSED_DIR / "refugios_sustitutos.geojson"
+FUENTES_PATH = APP_PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
 SEARCH_INDEX_PATH = PROCESSED_DIR / DEFAULT_OUTPUT_PATH.name
 SEARCH_INDEX_META_PATH = PROCESSED_DIR / DEFAULT_META_OUTPUT_PATH.name
 SEARCH_SOURCE_CSV_PATH = PROCESSED_DIR / DEFAULT_MUNICIPAL_CSV_PATH.name
+GITHUB_REPO = "Huntsman1756/madrid-refugio"
+RELEASE_TAG = "v1.4"
+RELEASE_BASE_URL = f"https://github.com/{GITHUB_REPO}/releases/download/{RELEASE_TAG}"
+GRAPH_RELEASE_URL = f"{RELEASE_BASE_URL}/madrid_shadow_graph.graphml"
+SHADOW_MATRIX_RELEASE_URL = f"{RELEASE_BASE_URL}/shadow_matrix.parquet"
+
+logger = logging.getLogger("madrid_refugio")
+if not logger.handlers:
+    logging.basicConfig(
+        level=os.getenv("LOG_LEVEL", "INFO").upper(),
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
 
 GEOCODE_TIMEOUT_SECONDS = 8
 
@@ -81,6 +95,7 @@ class AppState:
     weather_cache: dict | None = None
     weather_last_update: float = 0
     search_index: list[dict] | None = None
+    startup_errors: list[str] = []
 
 
 app_state = AppState()
@@ -92,7 +107,14 @@ MADRID_MUNICIPIO_ID = "28079"
 
 def fetch_aemet_data():
     if not AEMET_API_KEY:
-        return {"error": "AEMET_API_KEY no configurada"}
+        return {
+            "municipio": "Madrid",
+            "temperatura": "N/D",
+            "estado_cielo": "AEMET no disponible",
+            "timestamp": "",
+            "fuente": "AEMET (OpenData)",
+            "error": "AEMET_API_KEY no configurada",
+        }
     if app_state.weather_cache and (time.time() - app_state.weather_last_update < 900):
         return app_state.weather_cache
     try:
@@ -141,6 +163,71 @@ def fetch_aemet_data():
         return {"error": f"Error conectando con AEMET: {str(e)}"}
 
 
+def get_allowed_origins() -> list[str]:
+    origins = {
+        "https://madrid-refugio.vercel.app",
+        "http://localhost:3000",
+    }
+    for env_key in ("FRONTEND_ORIGIN", "ADDITIONAL_ALLOWED_ORIGINS"):
+        raw = os.getenv(env_key, "")
+        if not raw:
+            continue
+        for origin in raw.split(","):
+            origin = origin.strip()
+            if origin:
+                origins.add(origin)
+    return sorted(origins)
+
+
+def resolve_release_asset_download(asset_name: str) -> tuple[str, dict]:
+    github_token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+    if not github_token:
+        if asset_name == "madrid_shadow_graph.graphml":
+            return GRAPH_RELEASE_URL, {}
+        if asset_name == "shadow_matrix.parquet":
+            return SHADOW_MATRIX_RELEASE_URL, {}
+        return f"{RELEASE_BASE_URL}/{asset_name}", {}
+
+    api_headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+    }
+    release_resp = requests.get(
+        f"https://api.github.com/repos/{GITHUB_REPO}/releases/tags/{RELEASE_TAG}",
+        headers=api_headers,
+        timeout=30,
+    )
+    release_resp.raise_for_status()
+    release_data = release_resp.json()
+
+    for asset in release_data.get("assets", []):
+        if asset.get("name") == asset_name:
+            return asset["url"], {
+                "Authorization": f"Bearer {github_token}",
+                "Accept": "application/octet-stream",
+            }
+
+    raise RuntimeError(
+        f"No se ha encontrado el asset '{asset_name}' en el release {RELEASE_TAG}."
+    )
+
+
+def should_refresh_release_asset(
+    path: Path,
+    min_size_bytes: int,
+    force_refresh: bool = False,
+    marker_path: Path | None = None,
+    expected_tag: str | None = None,
+) -> bool:
+    if force_refresh or not path.exists() or path.stat().st_size < min_size_bytes:
+        return True
+    if marker_path and expected_tag:
+        if not marker_path.exists():
+            return True
+        return marker_path.read_text(encoding="utf-8").strip() != expected_tag
+    return False
+
+
 # --- Utility Functions ---
 
 
@@ -153,6 +240,12 @@ def ensure_edge_geometry(graph: nx.MultiDiGraph) -> None:
                     (graph.nodes[v]["x"], graph.nodes[v]["y"]),
                 ]
             )
+
+
+def get_tree_shade_score(data: dict) -> float:
+    if "tree_shade_score" in data:
+        return float(data.get("tree_shade_score", 0.0) or 0.0)
+    return float(data.get("shade_score", 0.0) or 0.0)
 
 
 def route_edges_gdf(
@@ -463,7 +556,8 @@ def get_weather():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://madrid-refugio.vercel.app", "http://localhost:3000"],
+    allow_origins=get_allowed_origins(),
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -472,7 +566,19 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    return {
+        "status": "ok" if not app_state.startup_errors else "degraded",
+        "graph_loaded": app_state.graph is not None,
+        "shadow_matrix_loaded": app_state.shadow_dict is not None,
+        "weather_configured": bool(AEMET_API_KEY),
+        "release_tag": RELEASE_TAG,
+        "startup_errors": app_state.startup_errors,
+    }
+
+
+@app.get("/api/health")
+def api_health_check():
+    return health_check()
 
 
 @app.get("/api/suggest")
@@ -487,56 +593,76 @@ def suggest(q: str = "", limit: int = 8):
 
 @app.on_event("startup")
 def startup_event():
-    print(f"\n--- Madrid Refugio: Iniciando Backend ---")
+    logger.info("starting backend")
+    logger.info("processed data directory: %s", PROCESSED_DIR)
+    app_state.startup_errors = []
 
-    def download_and_prepare(path: Path, url: str, compressed: bool = False):
-        if not path.exists() or path.stat().st_size < 1000000:
-            target_path = (
-                path if not compressed else path.with_suffix(path.suffix + ".gz")
+    def download_release_file(
+        path: Path,
+        asset_name: str,
+        force_refresh: bool = False,
+        marker_path: Path | None = None,
+        expected_tag: str | None = None,
+    ) -> None:
+        refresh_needed = should_refresh_release_asset(
+            path,
+            min_size_bytes=1_000_000,
+            force_refresh=force_refresh,
+            marker_path=marker_path,
+            expected_tag=expected_tag,
+        )
+        if not refresh_needed:
+            logger.info(
+                "%s loaded from local volume (%.1f MB)",
+                path.name,
+                path.stat().st_size / 1e6,
             )
-            print(f"Descargando {target_path.name} desde GitHub...")
-            try:
-                r = requests.get(url, stream=True, timeout=300)
-                r.raise_for_status()
-                target_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(target_path, "wb") as f:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        f.write(chunk)
-                if compressed:
-                    print(f"Descomprimiendo {target_path.name}...")
-                    with gzip.open(target_path, "rb") as f_in:
-                        with open(path, "wb") as f_out:
-                            shutil.copyfileobj(f_in, f_out)
-                    target_path.unlink()
-                print(f"[OK] {path.name} listo ({path.stat().st_size / 1e6:.1f} MB)")
-            except Exception as e:
-                print(f"[ERROR] Error procesando {path.name}: {e}")
+            return
 
-    RAW_BASE_URL = (
-        "https://github.com/Huntsman1756/madrid-refugio/raw/main/data/processed"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        download_url, headers = resolve_release_asset_download(asset_name)
+        logger.info("downloading release asset %s", asset_name)
+        with requests.get(download_url, headers=headers, stream=True, timeout=300) as r:
+            r.raise_for_status()
+            with open(path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+
+        if marker_path and expected_tag:
+            marker_path.write_text(expected_tag, encoding="utf-8")
+        logger.info("%s ready (%.1f MB)", path.name, path.stat().st_size / 1e6)
+
+    download_release_file(
+        GRAPH_PATH,
+        "madrid_shadow_graph.graphml",
+        force_refresh=os.getenv("FORCE_REFRESH_GRAPH_FROM_RELEASE") == "1",
+        marker_path=GRAPH_RELEASE_MARKER_PATH,
+        expected_tag=RELEASE_TAG,
     )
-    download_and_prepare(
-        GRAPH_PATH, f"{RAW_BASE_URL}/madrid_shadow_graph.graphml.gz", compressed=True
-    )
-    download_and_prepare(SHADOW_MATRIX_PATH, f"{RAW_BASE_URL}/shadow_matrix.parquet")
+    download_release_file(SHADOW_MATRIX_PATH, "shadow_matrix.parquet")
     app_state.search_index = ensure_search_index()
 
     if not GRAPH_PATH.exists():
-        raise RuntimeError(f"ERROR: No se encuentra el grafo en {GRAPH_PATH}")
-    print(f"Cargando grafo en memoria ({GRAPH_PATH.stat().st_size / 1e6:.1f} MB)...")
+        error_message = f"Grafo no disponible en {GRAPH_PATH}"
+        app_state.startup_errors.append(error_message)
+        raise RuntimeError(error_message)
+
+    logger.info("loading graph into memory (%.1f MB)", GRAPH_PATH.stat().st_size / 1e6)
     t_start = time.time()
     try:
         graph = ox.load_graphml(GRAPH_PATH)
-        print(f"[OK] Grafo cargado en {time.time() - t_start:.1f} segundos.")
+        logger.info("graph loaded in %.1f seconds", time.time() - t_start)
     except Exception as e:
-        print(f"[ERROR] Error al cargar el grafo: {str(e)}")
+        logger.exception("error loading graph")
+        app_state.startup_errors.append(f"Error cargando el grafo: {e}")
         raise e
 
     ensure_edge_geometry(graph)
     app_state.refugios_utm = gpd.read_file(REFUGIOS_PATH).to_crs("EPSG:25830")
     app_state.fuentes_utm = gpd.read_file(FUENTES_PATH).to_crs("EPSG:25830")
 
-    print("Calculando proximidad a recursos...")
+    logger.info("computing resource proximity bonuses")
     fuentes_buffer = app_state.fuentes_utm.geometry.union_all().buffer(50.0)
     refugios_buffer = app_state.refugios_utm.geometry.union_all().buffer(150.0)
 
@@ -562,7 +688,11 @@ def startup_event():
         app_state.shadow_dict = shadow_df.set_index(["u", "v", "key"]).to_dict("index")
     else:
         app_state.shadow_dict = {}
-    print("Datos cargados correctamente.")
+    logger.info(
+        "backend started with %s nodes and %s edges",
+        graph.number_of_nodes(),
+        graph.number_of_edges(),
+    )
 
 
 class ResolvedLocation(BaseModel):

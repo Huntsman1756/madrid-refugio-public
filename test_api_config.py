@@ -32,7 +32,10 @@ class ApiConfigTests(unittest.TestCase):
             )
             self.assertEqual(
                 reloaded.REFUGIOS_PATH,
-                reloaded.BASE_DIR / "data" / "processed" / "refugios_sustitutos.geojson",
+                reloaded.BASE_DIR
+                / "data"
+                / "processed"
+                / "refugios_sustitutos.geojson",
             )
             self.assertEqual(
                 reloaded.FUENTES_PATH,
@@ -52,9 +55,22 @@ class ApiConfigTests(unittest.TestCase):
 
         self.assertTrue(api.GRAPH_RELEASE_URL.endswith("/madrid_shadow_graph.graphml"))
         self.assertFalse(api.GRAPH_RELEASE_URL.endswith(".gz"))
-        self.assertTrue(api.SHADOW_MATRIX_RELEASE_URL.endswith("/shadow_matrix.parquet"))
+        self.assertTrue(
+            api.SHADOW_MATRIX_RELEASE_URL.endswith("/shadow_matrix.parquet")
+        )
 
-    def test_release_asset_resolver_falls_back_to_public_urls_without_github_token(self):
+    def test_startup_does_not_download_graph_from_repo_raw_main(self):
+        import api
+        import inspect
+
+        startup_source = inspect.getsource(api.startup_event)
+
+        self.assertNotIn("/raw/main/data/processed", startup_source)
+        self.assertIn("resolve_release_asset_download", startup_source)
+
+    def test_release_asset_resolver_falls_back_to_public_urls_without_github_token(
+        self,
+    ):
         previous = os.environ.get("GITHUB_TOKEN")
         if previous is None:
             os.environ.pop("GITHUB_TOKEN", None)
@@ -64,7 +80,9 @@ class ApiConfigTests(unittest.TestCase):
             import api
 
             reloaded = importlib.reload(api)
-            url, headers = reloaded.resolve_release_asset_download("madrid_shadow_graph.graphml")
+            url, headers = reloaded.resolve_release_asset_download(
+                "madrid_shadow_graph.graphml"
+            )
             self.assertEqual(url, reloaded.GRAPH_RELEASE_URL)
             self.assertEqual(headers, {})
         finally:
@@ -127,7 +145,9 @@ class ApiConfigTests(unittest.TestCase):
         previous_frontend = os.environ.get("FRONTEND_ORIGIN")
         previous_additional = os.environ.get("ADDITIONAL_ALLOWED_ORIGINS")
         os.environ["FRONTEND_ORIGIN"] = "https://custom.madrid-refugio.es"
-        os.environ["ADDITIONAL_ALLOWED_ORIGINS"] = "https://preview.example.com, https://ops.example.com"
+        os.environ["ADDITIONAL_ALLOWED_ORIGINS"] = (
+            "https://preview.example.com, https://ops.example.com"
+        )
         try:
             import api
 

@@ -42,7 +42,14 @@ def test_point_in_madrid_rejects_outside_coordinates():
 
 def test_fetch_aemet_data_returns_error_without_key(monkeypatch):
     monkeypatch.setattr("api.AEMET_API_KEY", None)
-    assert fetch_aemet_data() == {"error": "AEMET_API_KEY no configurada"}
+    assert fetch_aemet_data() == {
+        "municipio": "Madrid",
+        "temperatura": "N/D",
+        "estado_cielo": "AEMET no disponible",
+        "timestamp": "",
+        "fuente": "AEMET (OpenData)",
+        "error": "AEMET_API_KEY no configurada",
+    }
 
 
 def test_suggest_endpoint_filters_and_limits_results(monkeypatch):
