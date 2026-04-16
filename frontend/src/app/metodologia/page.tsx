@@ -28,9 +28,9 @@ export default function MetodologiaPage() {
           <p className="text-[var(--ds-gray-600)] mb-4">
             <strong>Madrid Refugio</strong> no es solo un mapa; es un <strong>motor de simulación climática urbana</strong> diseñado para proteger a la población más vulnerable de la capital frente al fenómeno de la isla de calor. Aunque la interfaz es accesible, el sistema está concebido como una <strong>herramienta de apoyo a la decisión para gestores municipales y servicios sociales</strong>.
           </p>
-          <p className="text-[var(--ds-gray-600)]">
-            A diferencia de soluciones estáticas que simplemente muestran &quot;islas de calor&quot; históricas, nuestra plataforma ofrece una <strong>operatividad real</strong> mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una <strong>aplicación web (Next.js + FastAPI)</strong> de acceso público, diseñada para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda planificar su exposición térmica.
-          </p>
+            <p className="text-[var(--ds-gray-600)]">
+              A diferencia de soluciones estáticas que simplemente muestran &quot;islas de calor&quot; históricas, nuestra plataforma ofrece una <strong>operatividad real</strong> mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una <strong>aplicación web (Next.js + FastAPI)</strong> de acceso público, diseñada para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda planificar su exposición térmica sobre un catálogo oficial de calles y lugares de Madrid.
+            </p>
         </section>
 
         {/* 2. Innovación Tecnológica */}
@@ -67,7 +67,7 @@ export default function MetodologiaPage() {
         {/* 3. Reutilización de Datos Abiertos */}
         <section className="mb-12">
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Reutilización de datos abiertos</h2>
-          <p className="text-[var(--ds-gray-600)] mb-6">Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:</p>
+          <p className="text-[var(--ds-gray-600)] mb-6">Hemos integrado 8 datasets críticos del ecosistema de datos de Madrid:</p>
           <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden">
             <table className="w-full text-sm text-left">
               <thead className="bg-[var(--ds-gray-50)] text-[var(--ds-gray-500)] border-b border-[var(--ds-gray-100)]">
@@ -79,12 +79,13 @@ export default function MetodologiaPage() {
               </thead>
               <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
                 <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Arbolado viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados integrados como factor de sombra biológica base.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">3</td><td className="px-4 py-3 font-medium">Padrón municipal (2026)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Población por barrio segregada por edad (&gt;65 años).</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Calidad del aire horaria</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Series históricas de NO₂ interpoladas mediante IDW (Inverse Distance Weighting).</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">5</td><td className="px-4 py-3 font-medium">Fuentes de agua potable</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Red de hidrantes integrada en el algoritmo de proximidad.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">6</td><td className="px-4 py-3 font-medium">Equipamientos Municipales</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Bibliotecas y centros deportivos como &quot;refugios sustitutos&quot;.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">7</td><td className="px-4 py-3 font-medium">Límites administrativos</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Geometría oficial de barrios y distritos.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Callejero oficial de Madrid</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Vías y portales municipales reutilizados para el autocompletado cerrado y la resolución fiable de origen y destino.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">3</td><td className="px-4 py-3 font-medium">Arbolado viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados integrados como factor de sombra biológica base.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Padrón municipal (2026)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Población por barrio segregada por edad (&gt;65 años).</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">5</td><td className="px-4 py-3 font-medium">Calidad del aire horaria</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Series históricas de NO₂ interpoladas mediante IDW (Inverse Distance Weighting).</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">6</td><td className="px-4 py-3 font-medium">Fuentes de agua potable</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Red de hidrantes integrada en el algoritmo de proximidad.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">7</td><td className="px-4 py-3 font-medium">Equipamientos Municipales</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Bibliotecas y centros deportivos como &quot;refugios sustitutos&quot;.</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">8</td><td className="px-4 py-3 font-medium">Límites administrativos</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Geometría oficial de barrios y distritos.</td></tr>
               </tbody>
             </table>
           </div>

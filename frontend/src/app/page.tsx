@@ -525,7 +525,7 @@ export default function Home() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card level={1} className="p-5">
               <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">1. Integramos capas urbanas oficiales</p>
-              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Combinamos información geoespacial sobre calles, arbolado, edificios, fuentes y refugios climáticos para construir una base única de análisis peatonal.</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Combinamos información geoespacial sobre el callejero oficial, arbolado, edificios, fuentes y refugios climáticos para construir una base única de análisis peatonal.</p>
             </Card>
             <Card level={1} className="p-5">
               <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">2. Estimamos la sombra disponible</p>
