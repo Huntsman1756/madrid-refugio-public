@@ -167,20 +167,28 @@ export default function Home() {
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-8 sm:pb-16">
         {/* Hero search — the single focus of the page */}
         <div id="routing" className="text-center">
-          {/* Alert badges */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-6 fade-in-up">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-gray-50)] text-[var(--ds-gray-600)] text-xs sm:text-sm font-medium shadow-sm">
-              Madrid 2026 Data Open
-            </div>
-          </div>
-
-          {/* Headline — shorter, action-oriented */}
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ds-gray-500)] mb-4 fade-in-up">Planificador peatonal climático</p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--ds-black)] leading-tight mb-4 fade-in-up">
-            Encuentra tu ruta con <span className="gradient-text">sombra</span>
+            Camina por Madrid con menos calor
           </h1>
-          <p className="text-base sm:text-lg text-[var(--ds-gray-600)] mb-8 max-w-2xl mx-auto fade-in-up">
-            Calcula la ruta más fresca caminando por Madrid. Sombra de edificios (LiDAR) y árboles en tiempo real.
+          <p className="text-base sm:text-lg text-[var(--ds-gray-600)] mb-8 max-w-3xl mx-auto fade-in-up">
+            Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
           </p>
+
+          <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mb-8 stagger-children text-left fade-in-up">
+            <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3">
+              <div className="text-2xl" aria-hidden="true">🌳</div>
+              <p className="text-sm text-[var(--ds-black)] font-medium leading-relaxed">Sombra calculada con LiDAR y 661.000 árboles del inventario municipal</p>
+            </Card>
+            <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3">
+              <div className="text-2xl" aria-hidden="true">🗺️</div>
+              <p className="text-sm text-[var(--ds-black)] font-medium leading-relaxed">Compara la ruta directa con la ruta Eco-Refugio en tiempo real</p>
+            </Card>
+            <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3">
+              <div className="text-2xl" aria-hidden="true">💧</div>
+              <p className="text-sm text-[var(--ds-black)] font-medium leading-relaxed">Visualiza fuentes y refugios climáticos a lo largo del camino</p>
+            </Card>
+          </div>
 
           {/* Search bar embedded in hero */}
           <div className="fade-in-up">
@@ -191,6 +199,36 @@ export default function Home() {
 
       {/* Secondary content — below the fold */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <section className="mb-16 fade-in-up">
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-6">Cómo funciona</h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card level={1} className="p-4">
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">1. Elige origen y destino</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Selecciona dos puntos reales de Madrid desde el catálogo oficial o usa tu ubicación actual como origen.</p>
+            </Card>
+            <Card level={1} className="p-4">
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">2. Calculamos la ruta</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Comparamos el trayecto directo con una alternativa Eco-Refugio usando sombra urbana, arbolado, fuentes y refugios climáticos.</p>
+            </Card>
+            <Card level={1} className="p-4">
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">3. Compara y decide</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Visualiza ambas rutas en el mapa y elige cómo moverte con menos exposición al calor.</p>
+            </Card>
+          </div>
+        </section>
+
+        <section className="mb-16 fade-in-up">
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">Por qué es distinto</h2>
+          <div className="max-w-3xl space-y-4 text-[var(--ds-gray-600)] leading-relaxed">
+            <p>
+              Madrid Refugio no es solo un mapa de refugios ni un visor climático. Es una herramienta operativa que reutiliza datos abiertos del Ayuntamiento para ayudarte a caminar por Madrid con menos calor.
+            </p>
+            <p>
+              Calcula rutas concretas, compara alternativas y muestra los recursos disponibles a lo largo del camino para convertir información urbana compleja en una decisión útil.
+            </p>
+          </div>
+        </section>
+
         {/* Workflow / Pillars — kept but smaller */}
         <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16 stagger-children">
           <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3 fade-in-up">
@@ -478,6 +516,31 @@ export default function Home() {
             </Card>
           </div>
         </div>
+
+        <section className="mb-16 fade-in-up">
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">Metodología</h2>
+          <div className="max-w-3xl mb-6 text-[var(--ds-gray-600)] leading-relaxed">
+            <p>Madrid Refugio reutiliza datos abiertos del Ayuntamiento de Madrid para estimar el confort de una ruta peatonal tramo a tramo.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card level={1} className="p-5">
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">1. Integramos capas urbanas oficiales</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Combinamos información geoespacial sobre calles, arbolado, edificios, fuentes y refugios climáticos para construir una base única de análisis peatonal.</p>
+            </Card>
+            <Card level={1} className="p-5">
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">2. Estimamos la sombra disponible</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Calculamos la exposición solar de cada tramo usando sombra urbana derivada de edificios y arbolado, con apoyo de datos LiDAR e inventario municipal.</p>
+            </Card>
+            <Card level={1} className="p-5">
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">3. Evaluamos el recorrido</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Para cada trayecto, comparamos una ruta directa con una alternativa Eco-Refugio incorporando sombra, recursos próximos y confort térmico.</p>
+            </Card>
+            <Card level={1} className="p-5">
+              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">4. Devolvemos una decisión útil</p>
+              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Presentamos el resultado como minutaje concreto de exposición evitada y recursos disponibles en el camino, no como análisis territorial.</p>
+            </Card>
+          </div>
+        </section>
 
         {/* Data Sources Section */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">

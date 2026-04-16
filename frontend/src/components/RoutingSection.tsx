@@ -181,11 +181,6 @@ ${gpxPoints}
   return (
     <div className="mb-24">
       {/* Header — simplified */}
-      <div className="mb-6">
-        <h2 className="sub-heading-large text-[var(--ds-black)]">Navegador de rutas climáticas</h2>
-        <p className="text-[var(--ds-gray-600)] mt-2">Planifica tu trayecto priorizando la sombra y la proximidad a fuentes y refugios.</p>
-      </div>
-
       {/* Search Bar — primary interaction */}
       <Card level={2} className="p-5 sm:p-6 border border-[var(--ds-gray-100)] shadow-xl mb-8">
         <SearchBar
@@ -324,7 +319,7 @@ ${gpxPoints}
 
       {/* Placeholder map when no search yet */}
       {!hasSearched && (
-        <div className="h-[300px] md:h-[400px] rounded-2xl overflow-hidden border border-[var(--ds-gray-100)] shadow-lg relative">
+        <div className="h-[220px] md:h-[260px] rounded-2xl overflow-hidden border border-[var(--ds-gray-100)] shadow-lg relative">
           <MapComponent
             mergedData={null}
             refugios={null}
@@ -333,7 +328,7 @@ ${gpxPoints}
             routeResult={null}
             showAreaLegend={false}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent pointer-events-none flex items-end justify-center pb-8">
+          <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent pointer-events-none flex items-end justify-center pb-5">
             <div className="text-center">
               <MapPin className="w-6 h-6 text-[var(--ds-gray-400)] mx-auto mb-2" />
               <p className="text-sm text-[var(--ds-gray-500)]">Busca una ruta para ver el mapa interactivo</p>
