@@ -37,14 +37,14 @@ from build_madrid_search_index import (
 
 # --- Configuration & Paths ---
 BASE_DIR = Path(__file__).resolve().parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+PROCESSED_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data" / "processed")))
 GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
 REFUGIOS_PATH = PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = PROCESSED_DIR / "fuentes.geojson"
 SHADOW_MATRIX_PATH = PROCESSED_DIR / "shadow_matrix.parquet"
-SEARCH_INDEX_PATH = DEFAULT_OUTPUT_PATH
-SEARCH_INDEX_META_PATH = DEFAULT_META_OUTPUT_PATH
-SEARCH_SOURCE_CSV_PATH = DEFAULT_MUNICIPAL_CSV_PATH
+SEARCH_INDEX_PATH = PROCESSED_DIR / DEFAULT_OUTPUT_PATH.name
+SEARCH_INDEX_META_PATH = PROCESSED_DIR / DEFAULT_META_OUTPUT_PATH.name
+SEARCH_SOURCE_CSV_PATH = PROCESSED_DIR / DEFAULT_MUNICIPAL_CSV_PATH.name
 
 GEOCODE_TIMEOUT_SECONDS = 8
 

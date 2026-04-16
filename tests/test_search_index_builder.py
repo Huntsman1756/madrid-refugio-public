@@ -44,6 +44,19 @@ def test_builder_defaults_to_versioned_curated_data_file():
     assert module.CURATED_PATH == CURATED_PATH
 
 
+def test_builder_processed_dir_uses_data_dir_env(monkeypatch):
+    with tempfile.TemporaryDirectory(dir=ROOT) as temp_dir:
+        monkeypatch.setenv("DATA_DIR", temp_dir)
+        module = load_builder_module()
+
+    assert module.PROCESSED_DIR == Path(temp_dir)
+    assert module.DEFAULT_OUTPUT_PATH == Path(temp_dir) / "madrid_search_index.json"
+    assert (
+        module.DEFAULT_MUNICIPAL_CSV_PATH
+        == Path(temp_dir) / "213605-4-callejero-oficial-madrid-csv.csv"
+    )
+
+
 def test_build_address_entry_normalizes_search_text_and_keeps_kind():
     module = load_builder_module()
 

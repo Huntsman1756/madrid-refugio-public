@@ -57,13 +57,15 @@ python api.py
 
 El autocompletado de origen y destino usa el índice canónico `data/processed/madrid_search_index.json`, con metadatos de tamaño en `data/processed/madrid_search_index.meta.json`.
 
-El backend puede reconstruir ese índice durante el arranque o al atender `/api/suggest` solo si ya existe `data/processed/213605-4-callejero-oficial-madrid-csv.csv` en disco. Si faltan tanto el índice como ese CSV oficial, el servicio falla con un error operativo claro: no intenta descargar el fichero municipal en runtime ni durante el startup.
+En producción, el despliegue prepara esos artefactos antes de arrancar el backend ejecutando `python prepare_search_data.py`. Ese script descarga el CSV oficial del callejero solo si no existe todavía en `DATA_DIR` y genera el índice antes de levantar `uvicorn`.
 
 En producción debes preparar antes del deploy estos artefactos en `data/processed/`:
 
 - `213605-4-callejero-oficial-madrid-csv.csv`
 - `madrid_search_index.json`
 - `madrid_search_index.meta.json`
+
+Si usas Railway con volumen persistente, deja esos ficheros en `DATA_DIR` para que sobrevivan entre despliegues y el prestart no tenga que regenerarlos en cada arranque.
 
 Si despliegas sin ellos, `/api/suggest` responderá `503 Service Unavailable` hasta que el CSV oficial y/o el índice precomputado estén presentes.
 
@@ -100,6 +102,14 @@ El backend de produccion en Railway necesita estas condiciones para arrancar de 
 - Volumen montado en `/mnt/data`
 - `DATA_DIR=/mnt/data/processed`
 - Recursos del servicio suficientes para cargar el grafo completo en memoria
+
+El arranque en Railway usa ahora:
+
+```bash
+python prepare_search_data.py && uvicorn api:app --host 0.0.0.0 --port $PORT
+```
+
+Eso mueve la descarga/generación del CSV e índice al prestart del despliegue, no al runtime de `/api/suggest`.
 
 Configuracion operativa validada en produccion:
 

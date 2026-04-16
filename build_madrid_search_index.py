@@ -4,13 +4,16 @@ import argparse
 import csv
 import gzip
 import json
+import os
 import re
 import unicodedata
 from pathlib import Path
 
+import requests
+
 
 BASE_DIR = Path(__file__).resolve().parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+PROCESSED_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data" / "processed")))
 REFERENCE_DIR = BASE_DIR / "data" / "reference"
 CURATED_PATH = REFERENCE_DIR / "madrid_search_curated.json"
 DEFAULT_OUTPUT_PATH = PROCESSED_DIR / "madrid_search_index.json"
@@ -225,6 +228,20 @@ def write_json(path: Path, payload: list[dict] | dict) -> None:
     path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+
+
+def download_official_street_csv(
+    destination: Path = DEFAULT_MUNICIPAL_CSV_PATH,
+    url: str = OFFICIAL_STREET_CSV_URL,
+) -> Path:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with requests.get(url, stream=True, timeout=300) as response:
+        response.raise_for_status()
+        with destination.open("wb") as handle:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    handle.write(chunk)
+    return destination
 
 
 def build_search_index(

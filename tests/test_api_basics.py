@@ -1,7 +1,10 @@
-from pathlib import Path
+import importlib
+import importlib.util
 import sys
 import tempfile
 from unittest.mock import Mock
+import os
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -12,6 +15,14 @@ from api import app, app_state, fetch_aemet_data, normalize_address, point_in_ma
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def load_isolated_api_module(module_name: str = "api_isolated_test"):
+    spec = importlib.util.spec_from_file_location(module_name, ROOT / "api.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_normalize_address_lowercases_and_trims():
@@ -192,6 +203,23 @@ def test_suggest_endpoint_returns_503_when_search_prerequisites_are_missing(
     assert response.json() == {
         "detail": "Search index prerequisites missing: data/processed/213605-4-callejero-oficial-madrid-csv.csv must be prepared before startup or /api/suggest."
     }
+
+
+def test_api_processed_dir_uses_data_dir_env(monkeypatch):
+    with tempfile.TemporaryDirectory(dir=ROOT) as temp_dir:
+        monkeypatch.setenv("DATA_DIR", temp_dir)
+        api_isolated = load_isolated_api_module()
+
+        assert api_isolated.PROCESSED_DIR == Path(temp_dir)
+        assert (
+            api_isolated.SEARCH_SOURCE_CSV_PATH
+            == Path(temp_dir) / "213605-4-callejero-oficial-madrid-csv.csv"
+        )
+        assert (
+            api_isolated.SEARCH_INDEX_PATH
+            == Path(temp_dir) / "madrid_search_index.json"
+        )
+        monkeypatch.delenv("DATA_DIR", raising=False)
 
 
 def test_route_endpoint_accepts_latlon_origin(monkeypatch):
