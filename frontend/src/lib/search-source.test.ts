@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { SearchOption } from "./madrid-search";
 import {
+  getApiBaseUrl,
+  getSuggestApiUrl,
   getSearchOptions,
   resetSearchSourceCacheForTests,
   SearchSourceError,
@@ -39,8 +41,23 @@ const STATIC_INDEX_FIXTURE = [
 
 describe("getSearchOptions", () => {
   afterEach(() => {
+    vi.unstubAllEnvs();
     resetSearchSourceCacheForTests();
     vi.restoreAllMocks();
+  });
+
+  it("uses relative api routes by default", () => {
+    vi.unstubAllEnvs();
+
+    expect(getApiBaseUrl()).toBe("");
+    expect(getSuggestApiUrl()).toBe("/api/suggest");
+  });
+
+  it("uses NEXT_PUBLIC_API_URL when configured", () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "https://web-production-1f04a.up.railway.app/");
+
+    expect(getApiBaseUrl()).toBe("https://web-production-1f04a.up.railway.app");
+    expect(getSuggestApiUrl()).toBe("https://web-production-1f04a.up.railway.app/api/suggest");
   });
 
   it("calls the backend suggest API for each query", async () => {

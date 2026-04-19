@@ -6,6 +6,7 @@ import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { AlertTriangle, Download, Play, Pause, MapPin } from "lucide-react";
 import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
+import { getApiBaseUrl } from "@/lib/search-source";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -147,7 +148,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     setError(null);
     setHasSearched(true);
     try {
-      const response = await fetch(`/api/route`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/route`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ origin: originVal, destination: destVal, hour: hourVal, preference: prefVal }),

@@ -1,6 +1,22 @@
 import { filterSearchOptions, type SearchKind, type SearchOption } from "./madrid-search";
 
-const SUGGEST_API_URL = "/api/suggest";
+function trimTrailingSlash(value: string): string {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
+export function getApiBaseUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (!baseUrl) {
+    return "";
+  }
+
+  return trimTrailingSlash(baseUrl);
+}
+
+export function getSuggestApiUrl(): string {
+  return `${getApiBaseUrl()}/api/suggest`;
+}
+
 const SEARCH_SOURCE_ERROR_MESSAGE = "No se pudo cargar el catalogo de lugares. Recarga la pagina e intentalo de nuevo.";
 
 interface StaticSearchEntry {
@@ -55,7 +71,7 @@ function toSearchOption(entry: StaticSearchEntry): SearchOption {
 }
 
 async function loadSearchOptions(): Promise<SearchOption[]> {
-  const response = await fetch(SUGGEST_API_URL);
+  const response = await fetch(getSuggestApiUrl());
   if (!response.ok) {
     throw new Error(`Failed to load search index: ${response.status}`);
   }
@@ -94,7 +110,7 @@ export async function getSearchOptions(
   });
 
   try {
-    const response = await fetch(`${SUGGEST_API_URL}?${searchParams.toString()}`);
+    const response = await fetch(`${getSuggestApiUrl()}?${searchParams.toString()}`);
     if (!response.ok) {
       throw new Error(`Failed to load search index: ${response.status}`);
     }

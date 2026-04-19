@@ -111,11 +111,13 @@ python prepare_search_data.py && uvicorn api:app --host 0.0.0.0 --port $PORT
 
 Eso mueve la descarga/generación del CSV e índice al prestart del despliegue, no al runtime de `/api/suggest`.
 
+El motor pesado de routing ya no se carga completo durante `startup`. El backend publica `/health` nada más arrancar y difiere la carga del grafo, refugios, fuentes y matriz de sombra hasta la primera petición real a `/api/route`. Esto reduce el pico de memoria del deploy y evita bucles de reinicio cuando el servicio se ajusta a `3 GB RAM`.
+
 Configuracion operativa validada en produccion:
 
 - `DATA_DIR=/mnt/data/processed`
 - volumen persistente con `madrid_shadow_graph.graphml` y `shadow_matrix.parquet`
-- limite del servicio en Railway de al menos `8 vCPU / 8 GB RAM`
+- limite del servicio en Railway de al menos `3 GB RAM`; subirlo si el runtime vuelve a entrar en OOM bajo carga real
 
 El archivo `railway.json` de la raiz deja fijados en codigo el `startCommand`, `healthcheckPath` y `healthcheckTimeout`.
 
