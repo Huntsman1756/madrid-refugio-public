@@ -195,6 +195,49 @@ class ApiConfigTests(unittest.TestCase):
         finally:
             api.app_state.startup_errors = previous_errors
 
+    def test_startup_event_loads_runtime_before_marking_service_ready(self):
+        import api
+
+        previous_graph = api.app_state.graph
+        previous_refugios = api.app_state.refugios_utm
+        previous_fuentes = api.app_state.fuentes_utm
+        previous_shadow = api.app_state.shadow_dict
+        previous_search_index = api.app_state.search_index
+        previous_errors = list(api.app_state.startup_errors)
+        called = []
+
+        def fake_load_runtime_assets(download_release_file):
+            called.append(download_release_file)
+            api.app_state.graph = object()
+            api.app_state.refugios_utm = object()
+            api.app_state.fuentes_utm = object()
+            api.app_state.shadow_dict = {}
+
+        try:
+            api.app_state.graph = None
+            api.app_state.refugios_utm = None
+            api.app_state.fuentes_utm = None
+            api.app_state.shadow_dict = None
+            api.app_state.search_index = []
+            api.app_state.startup_errors = []
+            from unittest.mock import patch
+
+            with patch.object(api, "load_runtime_assets", side_effect=fake_load_runtime_assets):
+                api.startup_event()
+
+            self.assertEqual(len(called), 1)
+            self.assertIsNotNone(api.app_state.graph)
+            self.assertIsNotNone(api.app_state.refugios_utm)
+            self.assertIsNotNone(api.app_state.fuentes_utm)
+            self.assertEqual(api.app_state.shadow_dict, {})
+        finally:
+            api.app_state.graph = previous_graph
+            api.app_state.refugios_utm = previous_refugios
+            api.app_state.fuentes_utm = previous_fuentes
+            api.app_state.shadow_dict = previous_shadow
+            api.app_state.search_index = previous_search_index
+            api.app_state.startup_errors = previous_errors
+
     def test_fetch_aemet_data_without_key_returns_degraded_payload(self):
         previous_key = os.environ.get("AEMET_API_KEY")
         try:

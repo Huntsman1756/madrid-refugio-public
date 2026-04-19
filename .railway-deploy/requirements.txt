@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+osmnx
+geopandas
+pandas
+pyarrow
+pyproj
+shapely
+networkx
+scipy
+requests
