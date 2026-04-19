@@ -52,14 +52,40 @@ def test_fetch_aemet_data_returns_error_without_key(monkeypatch):
     }
 
 
-def test_suggest_endpoint_returns_gone_after_frontend_static_migration():
+def test_suggest_endpoint_returns_filtered_results_from_backend_index(monkeypatch):
+    app_state.search_index = [
+        {
+            "label": "Plaza de Castilla",
+            "search_text": "plaza de castilla",
+            "lat": 40.466,
+            "lon": -3.6904,
+            "kind": "demo_origin",
+            "district": "Tetuan",
+        },
+        {
+            "label": "Museo del Prado",
+            "search_text": "museo del prado",
+            "lat": 40.4138,
+            "lon": -3.6921,
+            "kind": "place",
+            "district": "Retiro",
+        },
+    ]
+
     client = TestClient(app)
     response = client.get("/api/suggest", params={"q": "plaza", "limit": 1})
 
-    assert response.status_code == 410
-    assert response.json() == {
-        "detail": "Autocomplete suggestions are now served from the frontend static index."
-    }
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": "plaza-de-castilla-40.466--3.6904-demo_origin",
+            "label": "Plaza de Castilla",
+            "kind": "place",
+            "lat": 40.466,
+            "lon": -3.6904,
+            "district": "Tetuan",
+        }
+    ]
 
 
 def test_ensure_search_index_requires_prepared_csv_when_index_missing(monkeypatch):
@@ -172,40 +198,21 @@ def test_health_endpoint_reports_ok_without_loaded_runtime(monkeypatch):
     response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json() == {
+        "status": "ok",
+        "graph_loaded": False,
+        "shadow_matrix_loaded": False,
+        "weather_configured": bool(api.AEMET_API_KEY),
+        "release_tag": api.RELEASE_TAG,
+        "startup_errors": [],
+    }
 
 
-def test_route_endpoint_lazy_loads_runtime_when_not_initialized(monkeypatch):
+def test_route_endpoint_returns_backend_unavailable_when_not_initialized(monkeypatch):
     app_state.graph = None
     app_state.refugios_utm = None
     app_state.fuentes_utm = None
     app_state.shadow_dict = None
-
-    runtime_graph = object()
-    runtime_refugios = object()
-    runtime_fuentes = object()
-
-    def fake_ensure_runtime_loaded():
-        app_state.graph = runtime_graph
-        app_state.refugios_utm = runtime_refugios
-        app_state.fuentes_utm = runtime_fuentes
-        app_state.shadow_dict = {}
-
-    monkeypatch.setattr("api.ensure_runtime_loaded", fake_ensure_runtime_loaded)
-    monkeypatch.setattr(
-        "api.nearest_node",
-        lambda graph, lat, lon: 1 if (lat, lon) == (40.4168, -3.7038) else 2,
-    )
-    monkeypatch.setattr(
-        "api.route_metrics", lambda *args, **kwargs: (100.0, 50.0, 25.0)
-    )
-    monkeypatch.setattr("api.route_edges_gdf", lambda *args, **kwargs: object())
-    monkeypatch.setattr("api.get_points_near_route", lambda *args, **kwargs: [])
-    monkeypatch.setattr(
-        "api.extract_wgs84_coords",
-        lambda graph, route: [(40.4168, -3.7038), (40.4170, -3.7040)],
-    )
-    monkeypatch.setattr("api.nx.shortest_path", lambda *args, **kwargs: [1, 2])
 
     client = TestClient(app)
     response = client.post(
@@ -228,11 +235,12 @@ def test_route_endpoint_lazy_loads_runtime_when_not_initialized(monkeypatch):
         },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 503
     payload = response.json()
-    assert payload["origin_label"] == "Plaza Mayor, Madrid"
-    assert payload["destination_label"] == "Museo del Prado, Madrid"
-    assert app_state.graph is runtime_graph
+    assert payload == {
+        "detail": "backend_unavailable",
+        "error_code": "backend_unavailable",
+    }
 
 
 def test_route_endpoint_accepts_latlon_origin(monkeypatch):
