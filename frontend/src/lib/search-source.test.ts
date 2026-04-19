@@ -60,40 +60,19 @@ describe("getSearchOptions", () => {
     expect(getSuggestApiUrl()).toBe("https://web-production-1f04a.up.railway.app/api/suggest");
   });
 
-  it("calls the backend suggest API for each query", async () => {
+  it("loads the static index once and filters queries locally", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => [
-        {
-          label: "Gomez Ulla",
-          lat: 40.4211,
-          lon: -3.6738,
-          kind: "demo_destination",
-          district: "Salamanca",
-        },
-      ],
+      json: async () => STATIC_INDEX_FIXTURE,
     });
 
     vi.stubGlobal("fetch", fetchMock);
 
     const firstResult = await getSearchOptions("gomez");
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        {
-          label: "Plaza de Castilla",
-          lat: 40.466,
-          lon: -3.6904,
-          kind: "demo_origin",
-          district: "Tetuan",
-        },
-      ],
-    });
     const secondResult = await getSearchOptions("plaza", 1);
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/suggest?q=gomez&limit=8");
-    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/suggest?q=plaza&limit=1");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith("/data/madrid_search_index.json");
     expect(firstResult).toEqual<SearchOption[]>([
       {
         id: "gomez-ulla-40.4211--3.6738-demo_destination",
@@ -116,7 +95,7 @@ describe("getSearchOptions", () => {
     ]);
   });
 
-  it("retries loading after an initial fetch failure", async () => {
+  it("retries loading after an initial static index fetch failure", async () => {
     const fetchMock = vi
       .fn()
       .mockRejectedValueOnce(new Error("network down"))
@@ -169,7 +148,7 @@ describe("getSearchOptions", () => {
     });
   });
 
-  it("returns an empty list without calling the backend for blank queries", async () => {
+  it("returns an empty list without loading the index for blank queries", async () => {
     const fetchMock = vi.fn();
 
     vi.stubGlobal("fetch", fetchMock);

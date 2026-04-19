@@ -36,6 +36,7 @@ vi.mock("next/dynamic", () => ({
 
 vi.mock("@/lib/search-source", () => ({
   getSearchOptions: (...args: Parameters<typeof getSearchOptionsMock>) => getSearchOptionsMock(...args),
+  getApiBaseUrl: () => "",
 }));
 
 import { RoutingSection } from "./RoutingSection";

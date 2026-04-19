@@ -52,58 +52,14 @@ def test_fetch_aemet_data_returns_error_without_key(monkeypatch):
     }
 
 
-def test_suggest_endpoint_filters_and_limits_results(monkeypatch):
-    app_state.search_index = [
-        {
-            "label": "Plaza de Castilla",
-            "search_text": "plaza de castilla",
-            "lat": 40.466,
-            "lon": -3.6904,
-            "kind": "demo_origin",
-            "district": "Tetuan",
-        },
-        {
-            "label": "Museo del Prado",
-            "search_text": "museo del prado",
-            "lat": 40.4138,
-            "lon": -3.6921,
-            "kind": "place",
-            "district": "Retiro",
-        },
-        {
-            "label": "Plaza Mayor",
-            "search_text": "plaza mayor",
-            "lat": 40.4155,
-            "lon": -3.7074,
-            "kind": "area",
-            "district": "Centro",
-        },
-    ]
-
+def test_suggest_endpoint_returns_gone_after_frontend_static_migration():
     client = TestClient(app)
     response = client.get("/api/suggest", params={"q": "plaza", "limit": 1})
 
-    assert response.status_code == 200
-    assert response.json() == [
-        {
-            "id": "plaza-de-castilla-40.466--3.6904-demo_origin",
-            "label": "Plaza de Castilla",
-            "kind": "place",
-            "lat": 40.466,
-            "lon": -3.6904,
-            "district": "Tetuan",
-        }
-    ]
-
-
-def test_suggest_endpoint_returns_empty_list_for_blank_queries():
-    app_state.search_index = []
-
-    client = TestClient(app)
-    response = client.get("/api/suggest", params={"q": "   "})
-
-    assert response.status_code == 200
-    assert response.json() == []
+    assert response.status_code == 410
+    assert response.json() == {
+        "detail": "Autocomplete suggestions are now served from the frontend static index."
+    }
 
 
 def test_ensure_search_index_requires_prepared_csv_when_index_missing(monkeypatch):
@@ -187,29 +143,6 @@ def test_ensure_search_index_builds_from_downloaded_csv_with_versioned_curated_d
         assert "Gomez Ulla" in labels
         assert index_path.exists()
         assert meta_path.exists()
-
-
-def test_suggest_endpoint_returns_503_when_search_prerequisites_are_missing(
-    monkeypatch,
-):
-    app_state.search_index = None
-
-    monkeypatch.setattr(
-        "api.ensure_search_index",
-        Mock(
-            side_effect=RuntimeError(
-                "Search index prerequisites missing: data/processed/213605-4-callejero-oficial-madrid-csv.csv must be prepared before startup or /api/suggest."
-            )
-        ),
-    )
-
-    client = TestClient(app)
-    response = client.get("/api/suggest", params={"q": "plaza"})
-
-    assert response.status_code == 503
-    assert response.json() == {
-        "detail": "Search index prerequisites missing: data/processed/213605-4-callejero-oficial-madrid-csv.csv must be prepared before startup or /api/suggest."
-    }
 
 
 def test_api_processed_dir_uses_data_dir_env(monkeypatch):

@@ -17,6 +17,8 @@ export function getSuggestApiUrl(): string {
   return `${getApiBaseUrl()}/api/suggest`;
 }
 
+const STATIC_INDEX_URL = "/data/madrid_search_index.json";
+
 const SEARCH_SOURCE_ERROR_MESSAGE = "No se pudo cargar el catalogo de lugares. Recarga la pagina e intentalo de nuevo.";
 
 interface StaticSearchEntry {
@@ -26,6 +28,8 @@ interface StaticSearchEntry {
   kind: string;
   district?: string;
 }
+
+let staticSearchOptionsPromise: Promise<SearchOption[]> | null = null;
 
 export class SearchSourceError extends Error {
   override cause: unknown;
@@ -71,13 +75,24 @@ function toSearchOption(entry: StaticSearchEntry): SearchOption {
 }
 
 async function loadSearchOptions(): Promise<SearchOption[]> {
-  const response = await fetch(getSuggestApiUrl());
+  const response = await fetch(STATIC_INDEX_URL);
   if (!response.ok) {
     throw new Error(`Failed to load search index: ${response.status}`);
   }
 
   const payload = (await response.json()) as StaticSearchEntry[];
   return payload.map(toSearchOption);
+}
+
+async function getCachedSearchOptions(): Promise<SearchOption[]> {
+  if (!staticSearchOptionsPromise) {
+    staticSearchOptionsPromise = loadSearchOptions().catch((error: unknown) => {
+      staticSearchOptionsPromise = null;
+      throw error;
+    });
+  }
+
+  return staticSearchOptionsPromise;
 }
 
 function toSearchSourceError(error: unknown): SearchSourceError {
@@ -90,7 +105,7 @@ function toSearchSourceError(error: unknown): SearchSourceError {
 
 export async function getAllSearchOptions(): Promise<SearchOption[]> {
   try {
-    return await loadSearchOptions();
+    return await getCachedSearchOptions();
   } catch (error: unknown) {
     throw toSearchSourceError(error);
   }
@@ -104,24 +119,14 @@ export async function getSearchOptions(
     return [];
   }
 
-  const searchParams = new URLSearchParams({
-    q: query,
-    limit: String(limit),
-  });
-
   try {
-    const response = await fetch(`${getSuggestApiUrl()}?${searchParams.toString()}`);
-    if (!response.ok) {
-      throw new Error(`Failed to load search index: ${response.status}`);
-    }
-
-    const payload = (await response.json()) as StaticSearchEntry[];
-    return filterSearchOptions(payload.map(toSearchOption), query, limit);
+    const options = await getCachedSearchOptions();
+    return filterSearchOptions(options, query, limit);
   } catch (error: unknown) {
     throw toSearchSourceError(error);
   }
 }
 
 export function resetSearchSourceCacheForTests(): void {
-  return;
+  staticSearchOptionsPromise = null;
 }
