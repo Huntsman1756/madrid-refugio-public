@@ -121,6 +121,23 @@ Configuracion operativa validada en produccion:
 
 El archivo `railway.json` de la raiz deja fijados en codigo el `startCommand`, `healthcheckPath` y `healthcheckTimeout`.
 
+El flujo manual soportado para Railway no debe usar `railway up` desde la raiz del repo. Este proyecto puede tener artefactos locales grandes en `data/processed/` y el upload completo puede fallar con `413 Payload Too Large` aunque produccion ya lea esos ficheros desde el volumen persistente.
+
+El comando oficial de deploy manual es:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/deploy_railway.ps1
+```
+
+Ese script regenera `.railway-deploy/` como snapshot minimo del backend y ejecuta `railway up ".railway-deploy" --path-as-root`. `.railway-deploy/` es un artefacto generado e ignorado por git, no una fuente de verdad.
+
+Prerequisitos del flujo manual:
+
+- Railway CLI instalado y autenticado
+- proyecto, entorno y servicio enlazados con `railway link`
+- volumen persistente montado en `/mnt/data`
+- `DATA_DIR=/mnt/data/processed`
+
 Si el servicio vuelve a responder `502` durante el arranque, lo primero que hay que revisar es:
 
 1. que el volumen sigue montado en `/mnt/data`
