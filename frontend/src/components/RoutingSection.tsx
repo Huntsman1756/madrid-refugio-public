@@ -79,22 +79,6 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     setHour(Math.max(8, Math.min(20, now)));
   }, []);
 
-  const formatSunSaved = (minutes: number | null | undefined) => (minutes == null ? "—" : `${minutes} min`);
-  const formatExtraEffort = (minutes: number | null | undefined) => {
-    if (minutes == null) return "—";
-    if (minutes === 0) return "0 min";
-    return `+${minutes} min`;
-  };
-
-  useEffect(() => {
-    const savedPreference = loadSavedPreference();
-    if (savedPreference !== null) {
-      setPreference(savedPreference);
-    }
-    const now = new Date().getHours();
-    setHour(Math.max(8, Math.min(20, now)));
-  }, []);
-
   // Time slider automation
   useEffect(() => {
     let interval: NodeJS.Timeout;
