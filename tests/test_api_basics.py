@@ -214,6 +214,8 @@ def test_route_endpoint_returns_backend_unavailable_when_not_initialized(monkeyp
     app_state.fuentes_utm = None
     app_state.shadow_dict = None
 
+    monkeypatch.setattr("api.ensure_runtime_assets_loaded", lambda: None)
+
     client = TestClient(app)
     response = client.post(
         "/api/route",
@@ -241,6 +243,62 @@ def test_route_endpoint_returns_backend_unavailable_when_not_initialized(monkeyp
         "detail": "backend_unavailable",
         "error_code": "backend_unavailable",
     }
+
+
+def test_route_endpoint_loads_runtime_assets_on_first_request(monkeypatch):
+    app_state.graph = None
+    app_state.refugios_utm = None
+    app_state.fuentes_utm = None
+    app_state.shadow_dict = None
+
+    loaded = []
+
+    def fake_ensure_runtime_assets_loaded():
+        loaded.append(True)
+        app_state.graph = object()
+        app_state.refugios_utm = object()
+        app_state.fuentes_utm = object()
+        app_state.shadow_dict = {}
+
+    monkeypatch.setattr("api.ensure_runtime_assets_loaded", fake_ensure_runtime_assets_loaded)
+    monkeypatch.setattr(
+        "api.nearest_node",
+        lambda graph, lat, lon: 1 if (lat, lon) == (40.4168, -3.7038) else 2,
+    )
+    monkeypatch.setattr(
+        "api.route_metrics", lambda *args, **kwargs: (100.0, 50.0, 25.0)
+    )
+    monkeypatch.setattr("api.route_edges_gdf", lambda *args, **kwargs: object())
+    monkeypatch.setattr("api.get_points_near_route", lambda *args, **kwargs: [])
+    monkeypatch.setattr(
+        "api.extract_wgs84_coords",
+        lambda graph, route: [(40.4168, -3.7038), (40.4170, -3.7040)],
+    )
+    monkeypatch.setattr("api.nx.shortest_path", lambda *args, **kwargs: [1, 2])
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/route",
+        json={
+            "origin": {
+                "label": "Plaza Mayor, Madrid",
+                "kind": "place",
+                "lat": 40.4168,
+                "lon": -3.7038,
+            },
+            "destination": {
+                "label": "Museo del Prado, Madrid",
+                "kind": "place",
+                "lat": 40.4170,
+                "lon": -3.7040,
+            },
+            "hour": 14,
+            "preference": 1.0,
+        },
+    )
+
+    assert response.status_code == 200
+    assert loaded == [True]
 
 
 def test_route_endpoint_accepts_latlon_origin(monkeypatch):

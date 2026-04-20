@@ -63,10 +63,10 @@ class ApiConfigTests(unittest.TestCase):
         import api
         import inspect
 
-        startup_source = inspect.getsource(api.startup_event)
+        download_source = inspect.getsource(api.download_release_file)
 
-        self.assertNotIn("/raw/main/data/processed", startup_source)
-        self.assertIn("resolve_release_asset_download", startup_source)
+        self.assertNotIn("/raw/main/data/processed", download_source)
+        self.assertIn("resolve_release_asset_download", download_source)
 
     def test_release_asset_resolver_falls_back_to_public_urls_without_github_token(
         self,
@@ -195,7 +195,7 @@ class ApiConfigTests(unittest.TestCase):
         finally:
             api.app_state.startup_errors = previous_errors
 
-    def test_startup_event_loads_runtime_before_marking_service_ready(self):
+    def test_startup_event_does_not_block_on_runtime_loading(self):
         import api
 
         previous_graph = api.app_state.graph
@@ -225,11 +225,11 @@ class ApiConfigTests(unittest.TestCase):
             with patch.object(api, "load_runtime_assets", side_effect=fake_load_runtime_assets):
                 api.startup_event()
 
-            self.assertEqual(len(called), 1)
-            self.assertIsNotNone(api.app_state.graph)
-            self.assertIsNotNone(api.app_state.refugios_utm)
-            self.assertIsNotNone(api.app_state.fuentes_utm)
-            self.assertEqual(api.app_state.shadow_dict, {})
+            self.assertEqual(len(called), 0)
+            self.assertIsNone(api.app_state.graph)
+            self.assertIsNone(api.app_state.refugios_utm)
+            self.assertIsNone(api.app_state.fuentes_utm)
+            self.assertIsNone(api.app_state.shadow_dict)
         finally:
             api.app_state.graph = previous_graph
             api.app_state.refugios_utm = previous_refugios

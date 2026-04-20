@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import socket
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -97,7 +98,7 @@ class AppState:
 if "app_state" not in globals():
     app_state = AppState()
 if "runtime_lock" not in globals():
-    runtime_lock = None
+    runtime_lock = threading.Lock()
 
 AEMET_API_KEY = os.getenv("AEMET_API_KEY")
 MADRID_MUNICIPIO_ID = "28079"
@@ -655,6 +656,63 @@ def load_runtime_assets(download_release_file) -> None:
         record_startup_error(f"Error cargando el runtime: {exc}")
 
 
+def download_release_file(
+    path: Path,
+    asset_name: str,
+    force_refresh: bool = False,
+    marker_path: Path | None = None,
+    expected_tag: str | None = None,
+) -> None:
+    refresh_needed = should_refresh_release_asset(
+        path,
+        min_size_bytes=1_000_000,
+        force_refresh=force_refresh,
+        marker_path=marker_path,
+        expected_tag=expected_tag,
+    )
+    if not refresh_needed:
+        logger.info(
+            "%s loaded from local volume (%.1f MB)",
+            path.name,
+            path.stat().st_size / 1e6,
+        )
+        return
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    download_url, headers = resolve_release_asset_download(asset_name)
+    logger.info("downloading release asset %s", asset_name)
+    with requests.get(download_url, headers=headers, stream=True, timeout=300) as r:
+        r.raise_for_status()
+        with open(path, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+    if marker_path and expected_tag:
+        marker_path.write_text(expected_tag, encoding="utf-8")
+    logger.info("%s ready (%.1f MB)", path.name, path.stat().st_size / 1e6)
+
+
+def ensure_runtime_assets_loaded() -> None:
+    if (
+        app_state.graph is not None
+        and app_state.refugios_utm is not None
+        and app_state.fuentes_utm is not None
+        and app_state.shadow_dict is not None
+    ):
+        return
+
+    with runtime_lock:
+        if (
+            app_state.graph is not None
+            and app_state.refugios_utm is not None
+            and app_state.fuentes_utm is not None
+            and app_state.shadow_dict is not None
+        ):
+            return
+        load_runtime_assets(download_release_file)
+
+
 app = FastAPI(title="Madrid Refugio API")
 
 
@@ -712,47 +770,11 @@ def startup_event():
         except RuntimeError as exc:
             record_startup_error(str(exc))
 
-    def download_release_file(
-        path: Path,
-        asset_name: str,
-        force_refresh: bool = False,
-        marker_path: Path | None = None,
-        expected_tag: str | None = None,
-    ) -> None:
-        refresh_needed = should_refresh_release_asset(
-            path,
-            min_size_bytes=1_000_000,
-            force_refresh=force_refresh,
-            marker_path=marker_path,
-            expected_tag=expected_tag,
-        )
-        if not refresh_needed:
-            logger.info(
-                "%s loaded from local volume (%.1f MB)",
-                path.name,
-                path.stat().st_size / 1e6,
-            )
-            return
-
-        path.parent.mkdir(parents=True, exist_ok=True)
-        download_url, headers = resolve_release_asset_download(asset_name)
-        logger.info("downloading release asset %s", asset_name)
-        with requests.get(download_url, headers=headers, stream=True, timeout=300) as r:
-            r.raise_for_status()
-            with open(path, "wb") as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-
-        if marker_path and expected_tag:
-            marker_path.write_text(expected_tag, encoding="utf-8")
-        logger.info("%s ready (%.1f MB)", path.name, path.stat().st_size / 1e6)
-
-    load_runtime_assets(download_release_file)
-
 
 @app.post("/api/route")
 def calculate_route(req: RouteRequest):
+    ensure_runtime_assets_loaded()
+
     graph = app_state.graph
     refugios_utm = app_state.refugios_utm
     fuentes_utm = app_state.fuentes_utm
