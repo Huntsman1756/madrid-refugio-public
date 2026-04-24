@@ -18,30 +18,24 @@ class RenderTimelineTest(unittest.TestCase):
     def test_scene_timeline_matches_audio_length(self):
         module = load_module()
 
-        total_frames = sum(beat["frames"] for beat in module.BEATS)
-        beat_keys = [beat["key"] for beat in module.BEATS]
+        total_frames = sum(section["frames"] for section in module.SECTIONS)
+        section_keys = [section["key"] for section in module.SECTIONS]
 
         self.assertEqual(total_frames, 3322)
-        self.assertEqual(module.TOTAL_BEAT_FRAMES, 3322)
+        self.assertEqual(module.TOTAL_FRAMES, 3322)
         self.assertGreater(module.AUDIO_DURATION_SECONDS, 132.8)
         self.assertLess(module.AUDIO_DURATION_SECONDS, 132.9)
-        self.assertEqual(module.BEAT_FRAMES, [beat["frames"] for beat in module.BEATS])
         self.assertEqual(
-            beat_keys,
+            section_keys,
             [
-                "human-problem",
-                "unequal-routes",
-                "vulnerable-person",
-                "product-introduction",
-                "real-time-routing",
-                "not-just-a-map",
-                "dynamic-shadow",
-                "solar-position",
-                "better-routing",
-                "open-data-intro",
-                "dataset-list",
-                "public-value",
-                "closing-impact",
+                "home",
+                "search",
+                "route-result",
+                "metrics",
+                "simulation",
+                "methodology",
+                "diagnostic",
+                "closing",
             ],
         )
 

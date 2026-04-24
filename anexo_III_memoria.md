@@ -1,50 +1,88 @@
-﻿# Anexo III: memoria tÃ©cnica - Madrid Refugio
+# Memoria del proyecto
 
-## 1. IntroducciÃ³n y propuesta de valor
+**Madrid Refugio: rutas de confort térmico urbano basadas en datos abiertos**
 
-**Madrid Refugio** no es solo un mapa; es un **motor de simulaciÃ³n climÃ¡tica urbana** diseÃ±ado para proteger a la poblaciÃ³n mÃ¡s vulnerable de la capital â€”los mÃ¡s de 430.000 ciudadanos mayores de 65 aÃ±osâ€” frente al fenÃ³meno de la isla de calor y los episodios de calor extremo.
+## 1. Resumen ejecutivo
 
-A diferencia de soluciones estÃ¡ticas que simplemente muestran "islas de calor" histÃ³ricas, nuestra plataforma ofrece una **operatividad real** mediante el cÃ¡lculo de rutas de confort tÃ©rmico en tiempo real. Aunque la interfaz es accesible para cualquier ciudadano, Madrid Refugio estÃ¡ diseÃ±ado primordialmente como una **herramienta de apoyo a la decisiÃ³n para gestores municipales y servicios sociales**, permitiendo identificar dÃ³nde es mÃ¡s urgente desplegar nueva infraestructura de protecciÃ³n climÃ¡tica basÃ¡ndose en el comportamiento real de la sombra y la densidad demogrÃ¡fica.
-## 2. InnovaciÃ³n tecnolÃ³gica: motor de sombra dinÃ¡mica proyectada
+Madrid Refugio es una herramienta de simulación climática urbana que calcula rutas peatonales de confort térmico en el momento de la consulta, combinando datos abiertos del Ayuntamiento de Madrid con un grafo de calles de OpenStreetMap. El proyecto responde a un problema público acreditado: el 64,1% de los barrios de Madrid no dispone de un refugio climático operativo en un radio de 300 metros, mientras que la cobertura actual de refugios oficiales resulta claramente insuficiente en comparación con otras grandes ciudades españolas.
 
-La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cÃ¡lculo de **Sombra DinÃ¡mica Proyectada por EdificaciÃ³n**. Mientras que otras propuestas se limitan a mapas de calor estÃ¡ticos o histÃ³ricos, nosotros hemos implementado:
+Ante esa brecha de infraestructura, Madrid Refugio propone una solución operativa e inmediata: ayudar a que cada desplazamiento a pie sea más seguro durante episodios de calor extremo, maximizando la sombra disponible, la proximidad a fuentes de agua y el acceso a equipamientos climatizados que pueden funcionar como refugios sustitutos.
 
-- **Modelo de Alturas de EdificaciÃ³n:** Procesamiento de 662.173 polÃ­gonos del Geoportal de Madrid con atributos de altura real (Z).
-- **ProyecciÃ³n GeomÃ©trica Solar:** IntegraciÃ³n de las bibliotecas `pvlib` y `pybdshadow` para el cÃ¡lculo dinÃ¡mico de la posiciÃ³n solar (azimut y elevaciÃ³n) basada en coordenadas geogrÃ¡ficas y fecha de referencia (15 de julio, fecha representativa de mÃ¡xima incidencia solar).
-- **Matriz de IntersecciÃ³n Calle-Sombra:** GeneraciÃ³n offline de una matriz de 320.844 aristas Ã— 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos segÃºn la hora seleccionada por el usuario.
-- **OptimizaciÃ³n de Confort TÃ©rmico:** El grafo urbano utiliza un peso combinado (`comfort_weight`) que penaliza la insolaciÃ³n directa, permitiendo desvÃ­os inteligentes hacia calles en sombra que multiplican la protecciÃ³n frente al estrÃ©s tÃ©rmico.
+## 2. Problema y oportunidad publica
 
-### SimulaciÃ³n temporal de sombras
+Las olas de calor son ya uno de los principales riesgos climáticos para la salud urbana. En Madrid, las temperaturas extremas afectan de forma desproporcionada a las personas mayores de 65 anos, especialmente en barrios con menor cobertura de arbolado, mayor distancia a equipamientos de resguardo y peor acceso a recursos de alivio inmediato.
 
-La posiciÃ³n del sol se calcula mediante geometrÃ­a esfÃ©rica estÃ¡ndar (azimut y elevaciÃ³n solar) en funciÃ³n de la hora del dÃ­a y las coordenadas de Madrid (40,4Â° N). No se consultan APIs meteorolÃ³gicas externas: el sistema es completamente determinista y reproducible, lo que garantiza su funcionamiento offline y sin coste operativo.
+El analisis territorial realizado sobre 131 barrios pone de manifiesto tres conclusiones relevantes. En primer lugar, 84 barrios, el 64,1% del total, no cuentan con un refugio climático operativo a menos de 300 metros. En segundo lugar, Aluche concentra la mayor vulnerabilidad absoluta en volumen de población mayor expuesta, con 19.121 personas mayores de 65 anos sin refugio próximo. En tercer lugar, Villaverde Alto - Casco Historico de Villaverde obtiene la máxima prioridad relativa de intervención en el modelo territorial.
 
-Los pesos de sombra se precomputan para 13 franjas horarias (08:00 a 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecuciÃ³n, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
+Durante el desarrollo se detecto, ademas, una carencia relevante del ecosistema de datos: no existe en el portal municipal un dataset específico y reutilizable de refugios climáticos oficiales. El proyecto documenta esa ausencia y la compensa de forma trazable mediante una capa operativa de equipamientos municipales climatizados.
 
-## 3. ReutilizaciÃ³n de datos abiertos
+## 3. Objetivo del proyecto
 
-Hemos integrado 7 datasets crÃ­ticos del ecosistema de datos de Madrid:
-1. **Modelo de Alturas de EdificaciÃ³n (2024):** Geoportal del Ayuntamiento de Madrid. 662.173 polÃ­gonos con atributo Z (altura real). Base para la simulaciÃ³n de sombras.
-2. **Inventario de Arbolado Viario:** 661.192 ejemplares geolocalizados para sombra biolÃ³gica.
-3. **PadrÃ³n Municipal (Enero 2026):** PoblaciÃ³n por barrio segregada por edad (>65 aÃ±os).
-4. **Calidad del Aire Horaria:** Series histÃ³ricas de NO2 interpoladas mediante IDW (Inverse Distance Weighting).
-5. **Fuentes de Agua Potable:** Red de hidrantes pÃºblicos integrada en el algoritmo de proximidad.
-6. **Equipamientos Municipales:** Bibliotecas y centros deportivos mapeados como "refugios sustitutos".
-7. **LÃ­mites de Barrios y Distritos:** GeometrÃ­a administrativa oficial.
+**Objetivo ciudadano.** Ofrecer una herramienta gratuita y accesible desde cualquier navegador que permita calcular rutas peatonales optimizadas para el confort térmico entre dos puntos de Madrid, teniendo en cuenta sombra urbana, proximidad a fuentes de agua potable y acceso a refugios sustitutos climatizados.
 
-### Datos de NOâ‚‚
+**Objetivo de politica publica.** Generar una base territorial de evidencia que ayude a priorizar la ampliación de la red de refugios climáticos, la plantación de arbolado viario y otras medidas de adaptación en los barrios con mayor vulnerabilidad.
 
-Los valores de contaminaciÃ³n por diÃ³xido de nitrÃ³geno provienen del dataset histÃ³rico de la Red de Vigilancia de la Calidad del Aire del Ayuntamiento de Madrid (datos.madrid.es). Se utilizan medias anuales por estaciÃ³n, suficientes para identificar patrones estructurales de exposiciÃ³n crÃ³nica en los barrios. La integraciÃ³n de lecturas en tiempo real es una extensiÃ³n prevista del sistema.
+## 4. Publico beneficiario
 
-## 4. Impacto social y justicia tÃ©rmica
+- Ciudadania en general, especialmente personas mayores de 65 anos que necesitan desplazarse a pie en episodios de calor extremo.
+- Servicios sociales, sanitarios y de emergencia municipal, para orientar recursos y actuaciones preventivas durante alertas térmicas.
+- Gestores públicos y técnicos municipales responsables de planificación urbana, adaptación climática y salud ambiental.
 
-El anÃ¡lisis territorial ha revelado realidades crÃ­ticas: **Villaverde y Aluche** emergen como zonas de mÃ¡xima prioridad por su combinaciÃ³n de poblaciÃ³n envejecida y dÃ©ficit de infraestructura de refugio. Madrid Refugio proporciona a los planificadores urbanos una hoja de ruta basada en datos para la creaciÃ³n de la red oficial de refugios climÃ¡ticos.
+## 5. Conjuntos de datos utilizados
 
-## 5. Escalabilidad y arquitectura
+| Conjunto de datos | Fuente | Formato | Uso en el proyecto |
+| --- | --- | --- | --- |
+| Modelo de alturas de edificación (2024) | Geoportal del Ayuntamiento de Madrid | Capa geoespacial / GeoJSON procesado | Base para el calculo de sombra proyectada por edificios |
+| Arbolado viario detallado | datos.madrid.es | XLSX | Sombra biológica, peso de tramo y analisis territorial |
+| Zonas verdes por distrito | datos.madrid.es | CSV | Contexto territorial complementario |
+| Bibliotecas municipales | datos.madrid.es | GEO | Refugios sustitutos operativos |
+| Centros culturales | datos.madrid.es | GEO | Refugios sustitutos operativos |
+| Polideportivos municipales | datos.madrid.es | GEO | Refugios sustitutos operativos |
+| Fuentes de agua potable | datos.madrid.es | CSV | Puntos de alivio en ruta y analisis de proximidad |
+| Calidad del aire historica 2024 | datos.madrid.es | ZIP CSV | Series horarias de NO2 para el indice de confort |
+| Estaciones de calidad del aire | datos.madrid.es | CSV | Coordenadas para interpolación espacial |
+| Padron municipal por edad | datos.madrid.es | CSV | Población mayor de 65 anos por barrio |
+| Limites administrativos de barrios | Geoportal del Ayuntamiento de Madrid | ZIP Shapefile | Unidad territorial oficial de analisis |
+| Red peatonal urbana | OpenStreetMap | Grafo OSM | Base de routing peatonal |
 
-Madrid Refugio nace con vocaciÃ³n de producto estable y exportable. La arquitectura modular (Frontend, Backend y Motor AlgorÃ­tmico) estÃ¡ diseÃ±ada para ser replicable por otros consistorios que deseen implementar sistemas similares de protecciÃ³n climÃ¡tica.
-AdemÃ¡s, la arquitectura algorÃ­tmica expuesta en este demostrador estÃ¡ diseÃ±ada para escalar: el salto a una cobertura metropolitana completa abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (**PostgreSQL + PostGIS con `pgRouting`**), permitiendo cÃ¡lculos de millones de aristas con sombra dinÃ¡mica en apenas milisegundos gracias al pre-cÃ¡lculo masivo en formato Parquet.
+**Nota sobre datos no disponibles.** No existe en el portal municipal un dataset específico de refugios climáticos oficiales reutilizable en formato operativo. Por ello, el proyecto trabaja con una sustitución defensiva basada en 261 equipamientos con coordenadas verificadas, manteniendo trazabilidad completa de la decisión.
 
-## 6. ConclusiÃ³n
+**Fuente comparativa externa.** El informe de Greenpeace de 2025 se utiliza como referencia de contexto y benchmarking sobre cobertura de refugios climáticos, no como dataset operativo del motor de calculo.
 
-Madrid Refugio representa la excelencia en la reutilizaciÃ³n de datos abiertos: transforma filas de bases de datos en una herramienta de salud pÃºblica proactiva, visualmente impecable y tÃ©cnicamente avanzada. **Es un demostrador funcional con infraestructura real, preparado para amortiguar el impacto del cambio climÃ¡tico en los ciudadanos que levantaron esta ciudad.**
+## 6. Innovacion que representa
 
+La principal innovación del proyecto es la incorporación de un modelo de sombra urbana por hora del dia aplicado al calculo de rutas peatonales. Frente a visores estáticos o mapas agregados de calor, Madrid Refugio estima el confort térmico tramo a tramo y compara una ruta directa con una alternativa más protegida.
+
+Esa estimación combina dos tipos de sombra. Por un lado, la sombra proyectada por edificios a partir del modelo de alturas de edificación y de la posición solar calculada con `pvlib` y `pybdshadow`. Por otro, la sombra biológica derivada del inventario municipal de arbolado viario, integrado sobre la red peatonal para modificar el peso de cada tramo.
+
+La segunda innovación es el indice territorial multicriterio por barrio, que combina cobertura de arbolado, proximidad a fuentes, cobertura de refugios sustitutos, calidad del aire y peso de la población vulnerable. El resultado no solo ayuda a caminar con menor exposición al calor, sino que genera evidencia útil para priorizar inversión publica.
+
+En el ejemplo operativo validado en el proyecto, una ruta de confort térmico incrementa la distancia un 4,3% respecto al trayecto mas corto, a cambio de multiplicar por 5,4 la sombra acumulada.
+
+## 7. Tecnologia utilizada
+
+**Procesamiento geoespacial.** Python con GeoPandas, Shapely, PyProj, Pandas y utilidades de análisis espacial sobre ETRS89 / UTM zona 30N (EPSG:25830). Para el modelo de sombra proyectada se utilizan `pvlib` y `pybdshadow`.
+
+**Modelo de routing.** OSMnx para construir el grafo peatonal desde OpenStreetMap y NetworkX para el calculo de rutas ponderadas por confort térmico.
+
+**Aplicación web.** Frontend en Next.js con React. API en Python con FastAPI. Visualización cartográfica con Leaflet y React-Leaflet. Despliegue web en Vercel y Railway.
+
+**Arquitectura de calculo.** El sistema combina precomputación offline de capas pesadas, como la matriz de sombra por franja horaria, con cálculo interactivo en el momento de la consulta. Este enfoque permite tiempos de respuesta operativos sin renunciar a detalle geoespacial.
+
+**Trazabilidad.** El proyecto conserva documentación técnica, scripts de generación y referencia directa a las fuentes originales utilizadas durante el procesamiento y la evaluación.
+
+## 8. Impacto esperado
+
+Madrid Refugio tiene un impacto potencial directo en salud urbana, adaptación climática y planificación territorial. En el plano ciudadano, facilita desplazamientos más seguros y mejor informados en periodos de calor extremo, especialmente para población vulnerable. En el plano institucional, sistematiza evidencias sobre barrios con mayor déficit de cobertura y ofrece un soporte objetivo para decidir dónde intervenir primero.
+
+El proyecto también contribuye a mejorar el propio ecosistema de datos abiertos, al visibilizar la ausencia de un dataset municipal de refugios climáticos y demostrar por qué ese recurso es relevante para la accion pública.
+
+Su arquitectura y su metodología son, ademas, replicables en otros municipios que dispongan de datos abiertos comparables sobre red viaria, arbolado, edificios y equipamientos.
+
+## 9. Conclusion
+
+Madrid Refugio transforma datos abiertos en protección climática concreta. Es una herramienta operativa, desplegada y funcional, que permite calcular hoy rutas peatonales más confortables en Madrid y, al mismo tiempo, producir evidencia territorial para orientar decisiones públicas de adaptación al calor.
+
+La combinación de reutilización de datos, modelización geoespacial y utilidad ciudadana convierte el proyecto en un ejemplo sólido de innovación aplicada al interés general.
+
+**URL pública de la herramienta:** <https://madrid-refugio.vercel.app/>

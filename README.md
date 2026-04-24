@@ -4,7 +4,7 @@
 
 **Madrid Refugio** es un motor de simulación climática urbana diseñado para proteger a la población más vulnerable de la capital frente al fenómeno de la isla de calor y los episodios de calor extremo.
 
-A diferencia de soluciones estáticas que simplemente muestran "islas de calor" históricas, nuestra plataforma ofrece una **operatividad real** mediante el cálculo de rutas de confort térmico en tiempo real.
+A diferencia de soluciones estáticas que simplemente muestran "islas de calor" históricas, nuestra plataforma ofrece una **operatividad real** mediante el cálculo interactivo de rutas de confort térmico sobre capas precomputadas.
 
 ## 2. Innovación tecnológica: motor de sombra dinámica proyectada
 
@@ -17,14 +17,15 @@ La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cá
 
 ## 3. Reutilización de datos abiertos
 
-Hemos integrado 7 datasets críticos del ecosistema de datos de Madrid:
+Hemos integrado 8 conjuntos de datos y fuentes críticas del ecosistema urbano de Madrid:
 1. **Modelo de Alturas de Edificación (2024):** Geoportal del Ayuntamiento de Madrid. 662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.
 2. **Inventario de Arbolado Viario:** 661.192 ejemplares geolocalizados para sombra biológica.
-3. **Padrón Municipal (Enero 2026):** Población por barrio segregada por edad (>65 años).
-4. **Calidad del Aire Horaria:** Series históricas de NO2 interpoladas mediante IDW (Inverse Distance Weighting).
-5. **Fuentes de Agua Potable:** Red de hidrantes públicos integrada en el algoritmo de proximidad.
-6. **Equipamientos Municipales:** Bibliotecas y centros deportivos mapeados como "refugios sustitutos".
-7. **Límites de Barrios y Distritos:** Geometría administrativa oficial.
+3. **Callejero oficial de Madrid:** Base municipal para autocompletado cerrado y resolución de direcciones.
+4. **Padrón Municipal (Enero 2026):** Población por barrio segregada por edad (>65 años).
+5. **Calidad del Aire Horaria:** Series históricas de NO2 interpoladas mediante IDW (Inverse Distance Weighting).
+6. **Fuentes de Agua Potable:** Red de hidrantes públicos integrada en el algoritmo de proximidad.
+7. **Equipamientos Municipales:** Bibliotecas y centros deportivos mapeados como "refugios sustitutos".
+8. **Límites de Barrios y Distritos:** Geometría administrativa oficial.
 
 ## 4. Estructura del proyecto
 

@@ -79,6 +79,7 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     setHour(Math.max(8, Math.min(20, now)));
   }, []);
 
+
   // Time slider automation
   useEffect(() => {
     let interval: NodeJS.Timeout;

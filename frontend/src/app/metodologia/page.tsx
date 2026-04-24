@@ -20,24 +20,24 @@ export default function MetodologiaPage() {
       </nav>
 
       <div className="max-w-[800px] mx-auto px-6 py-16 sm:py-24">
-        <h1 className="display-hero text-[var(--ds-black)] mb-8">Memoria técnica</h1>
+        <h1 className="display-hero text-[var(--ds-black)] mb-8">Memoria del proyecto</h1>
 
         {/* 1. Introducción */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">1. Introducción y propuesta de valor</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">1. Resumen ejecutivo</h2>
           <p className="text-[var(--ds-gray-600)] mb-4">
-            <strong>Madrid Refugio</strong> no es solo un mapa; es un <strong>motor de simulación climática urbana</strong> diseñado para proteger a la población más vulnerable de la capital frente al fenómeno de la isla de calor. Aunque la interfaz es accesible, el sistema está concebido como una <strong>herramienta de apoyo a la decisión para gestores municipales y servicios sociales</strong>.
+            <strong>Madrid Refugio</strong> es una herramienta de simulación climática urbana que calcula rutas peatonales de confort térmico en el momento de la consulta, combinando datos abiertos del Ayuntamiento de Madrid con un grafo de calles de OpenStreetMap.
           </p>
             <p className="text-[var(--ds-gray-600)]">
-              A diferencia de soluciones estáticas que simplemente muestran &quot;islas de calor&quot; históricas, nuestra plataforma ofrece una <strong>operatividad real</strong> mediante el cálculo de rutas de confort térmico en tiempo real. Todo este motor se ha encapsulado en una <strong>aplicación web (Next.js + FastAPI)</strong> de acceso público, diseñada para que cualquier ciudadano, sin necesidad de conocimientos técnicos o descargas previas, pueda planificar su exposición térmica sobre un catálogo oficial de calles y lugares de Madrid.
+              El proyecto responde a una brecha de infraestructura y cobertura: el 64,1% de los barrios de Madrid no dispone de un refugio climático operativo en un radio de 300 metros. Frente a ello, la aplicación ofrece una respuesta útil para ciudadanía y gestores públicos, priorizando sombra, agua y acceso a equipamientos climatizados.
             </p>
         </section>
 
         {/* 2. Innovación Tecnológica */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">2. Innovación tecnológica: motor de sombra dinámica proyectada</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">2. Innovación tecnológica</h2>
           <p className="text-[var(--ds-gray-600)] mb-6">
-            La principal ventaja competitiva de Madrid Refugio reside en su capacidad de cálculo de <strong>Sombra Dinámica Proyectada por Edificación</strong>. Mientras que otras propuestas se limitan a mapas de calor estáticos o históricos, nosotros hemos implementado:
+            La principal innovación de Madrid Refugio es la aplicación de un modelo de sombra urbana por hora del día al cálculo de rutas peatonales. Frente a visores estáticos o mapas agregados, el sistema estima el confort térmico tramo a tramo y compara una ruta directa con una alternativa más protegida.
           </p>
           <div className="space-y-4">
             <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef]">
@@ -50,7 +50,7 @@ export default function MetodologiaPage() {
             </Card>
             <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f]">
               <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Matriz de intersección calle-sombra</h4>
-              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de 320.844 aristas × 13 franjas horarias (08:00 a 20:00), que permite al algoritmo de routing ajustar el peso de cada tramo en microsegundos según la hora seleccionada por el usuario.</p>
+              <p className="text-sm text-[var(--ds-gray-600)]">Generación offline de una matriz de sombra por franjas horarias, que permite ajustar el peso de cada tramo de forma interactiva en el momento de la consulta.</p>
             </Card>
           </div>
           <div className="mt-8">
@@ -59,60 +59,60 @@ export default function MetodologiaPage() {
               La posición del sol se calcula mediante geometría esférica estándar (azimut y elevación solar) en función de la hora del día y las coordenadas de Madrid (40,4° N). No se consultan APIs meteorológicas externas para la geometría de sombras: el sistema es completamente determinista y reproducible.
             </p>
             <p className="text-[var(--ds-gray-600)]">
-              Los pesos de sombra se precomputan para 13 franjas horarias (08:00 a 20:00) y se almacenan en la matriz Parquet. En tiempo de ejecución, el backend inyecta los pesos correspondientes a la franja seleccionada por el usuario antes de ejecutar el algoritmo de Dijkstra.
+              Los pesos de sombra se precomputan por franjas horarias y se almacenan en una matriz Parquet. En ejecución, el backend inyecta los pesos correspondientes antes de calcular la ruta, combinando detalle geoespacial con tiempos de respuesta operativos.
             </p>
           </div>
         </section>
 
         {/* 3. Reutilización de Datos Abiertos */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Reutilización de datos abiertos</h2>
-          <p className="text-[var(--ds-gray-600)] mb-6">Hemos integrado 8 datasets críticos del ecosistema de datos de Madrid:</p>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Conjuntos de datos utilizados</h2>
+          <p className="text-[var(--ds-gray-600)] mb-6">El proyecto reutiliza datos abiertos municipales, cartografía oficial y OpenStreetMap para resolver el problema con trazabilidad completa:</p>
           <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden">
             <table className="w-full text-sm text-left">
               <thead className="bg-[var(--ds-gray-50)] text-[var(--ds-gray-500)] border-b border-[var(--ds-gray-100)]">
                 <tr>
-                  <th className="px-4 py-3 font-medium">#</th>
                   <th className="px-4 py-3 font-medium">Dataset</th>
-                  <th className="px-4 py-3 font-medium">Descripción</th>
+                  <th className="px-4 py-3 font-medium">Uso</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--ds-gray-100)] text-[var(--ds-black)]">
-                <tr><td className="px-4 py-3 font-mono text-xs">1</td><td className="px-4 py-3 font-medium">Modelo de alturas (2024)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">662.173 polígonos con atributo Z (altura real). Base para la simulación de sombras.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">2</td><td className="px-4 py-3 font-medium">Callejero oficial de Madrid</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Vías y portales municipales reutilizados para el autocompletado cerrado y la resolución fiable de origen y destino.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">3</td><td className="px-4 py-3 font-medium">Arbolado viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">661.192 ejemplares geolocalizados integrados como factor de sombra biológica base.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">4</td><td className="px-4 py-3 font-medium">Padrón municipal (2026)</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Población por barrio segregada por edad (&gt;65 años).</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">5</td><td className="px-4 py-3 font-medium">Calidad del aire horaria</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Series históricas de NO₂ interpoladas mediante IDW (Inverse Distance Weighting).</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">6</td><td className="px-4 py-3 font-medium">Fuentes de agua potable</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Red de hidrantes integrada en el algoritmo de proximidad.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">7</td><td className="px-4 py-3 font-medium">Equipamientos Municipales</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Bibliotecas y centros deportivos como &quot;refugios sustitutos&quot;.</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">8</td><td className="px-4 py-3 font-medium">Límites administrativos</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Geometría oficial de barrios y distritos.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Modelo de alturas de edificación</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Base para la sombra proyectada por edificios.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Callejero oficial de Madrid</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Autocompletado y resolución fiable de origen y destino.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Arbolado viario</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Sombra biológica y mejora del confort por tramo.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Padrón municipal por edad</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Identificación de población vulnerable por barrio.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Calidad del aire y estaciones</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Interpolación espacial de NO₂ y contexto ambiental.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Fuentes de agua potable</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Puntos de alivio y recursos de proximidad en ruta.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Equipamientos municipales</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Refugios sustitutos ante la ausencia de un dataset oficial específico.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">Límites administrativos</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Unidad territorial oficial de análisis.</td></tr>
+                <tr><td className="px-4 py-3 font-medium">OpenStreetMap</td><td className="px-4 py-3 text-[var(--ds-gray-600)]">Base de la red peatonal para el routing.</td></tr>
               </tbody>
             </table>
           </div>
           <div className="mt-8">
-            <h3 className="text-lg font-semibold text-[var(--ds-black)] mb-3">Datos de NO₂</h3>
+            <h3 className="text-lg font-semibold text-[var(--ds-black)] mb-3">Nota metodológica</h3>
             <p className="text-[var(--ds-gray-600)]">
-              Los valores de contaminación por dióxido de nitrógeno provienen del dataset histórico de la Red de Vigilancia de la Calidad del Aire del Ayuntamiento de Madrid (datos.madrid.es). Se utilizan medias anuales por estación, suficientes para identificar patrones estructurales de exposición crónica en los barrios. La integración de lecturas en tiempo real es una extensión prevista del sistema.
+              El proyecto documenta expresamente que no existe un dataset municipal reutilizable de refugios climáticos oficiales en formato operativo. Por ello, se emplea una sustitución defensiva basada en equipamientos municipales con climatización y coordenadas verificadas.
             </p>
           </div>
         </section>
 
         {/* 4. Impacto Social */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">4. Impacto social y justicia térmica</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">4. Impacto esperado</h2>
           <p className="text-[var(--ds-gray-600)]">
-            El análisis territorial ha revelado realidades críticas: <strong>Villaverde y Aluche</strong> emergen como zonas de máxima prioridad por su combinación de población envejecida y déficit de infraestructura de refugio. Madrid Refugio proporciona a los planificadores urbanos una hoja de ruta basada en datos para la creación de la red oficial de refugios climáticos.
+            Madrid Refugio tiene impacto potencial directo en salud urbana, adaptación climática y planificación territorial. Facilita desplazamientos más seguros para la ciudadanía y genera evidencia útil para priorizar inversiones en barrios con mayor déficit de cobertura y mayor exposición de población vulnerable.
           </p>
         </section>
 
         {/* 5. Escalabilidad */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Escalabilidad y arquitectura</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Tecnología utilizada</h2>
           <p className="text-[var(--ds-gray-600)] mb-4">
-            Madrid Refugio nace con vocación de producto estable y exportable. La arquitectura modular (Frontend, Backend y Motor Algorítmico) está diseñada para ser replicable por otros consistorios que deseen implementar sistemas similares de protección climática.
+            El procesamiento geoespacial se apoya en Python, GeoPandas, Shapely, PyProj, Pandas, <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pvlib</code> y <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pybdshadow</code>. El modelo de routing utiliza OSMnx y NetworkX sobre una red peatonal derivada de OpenStreetMap.
           </p>
           <p className="text-[var(--ds-gray-600)]">
-            La arquitectura algorítmica expuesta en este demostrador está diseñada para escalar: el salto a una cobertura metropolitana completa abandona los grafos en memoria (NetworkX) en favor de nodos espaciales en base de datos (<strong>PostgreSQL + PostGIS con pgRouting</strong>), permitiendo cálculos de millones de aristas con sombra dinámica en apenas milisegundos gracias al pre-cálculo masivo en formato Parquet.
+            La aplicación web utiliza Next.js, React, FastAPI, Leaflet y React-Leaflet. La arquitectura combina precomputación offline de capas pesadas con cálculo interactivo en el momento de la consulta, manteniendo trazabilidad sobre las fuentes y un despliegue operativo en Vercel y Railway.
           </p>
         </section>
 
@@ -120,7 +120,10 @@ export default function MetodologiaPage() {
         <section className="mb-12">
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">6. Conclusión</h2>
           <p className="text-[var(--ds-gray-600)]">
-            Madrid Refugio representa la excelencia en la reutilización de datos abiertos: transforma filas de bases de datos en una herramienta de salud pública proactiva, visualmente impecable y técnicamente avanzada. <strong>Es un demostrador funcional con infraestructura real, preparado para amortiguar el impacto del cambio climático en los ciudadanos que levantaron esta ciudad.</strong>
+            Madrid Refugio transforma datos abiertos en protección climática concreta. Es una herramienta operativa y funcional que permite calcular rutas peatonales más confortables en Madrid y, al mismo tiempo, producir evidencia territorial para orientar decisiones públicas de adaptación al calor.
+          </p>
+          <p className="text-[var(--ds-gray-600)] mt-4">
+            URL pública: <a href="https://madrid-refugio.vercel.app/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">https://madrid-refugio.vercel.app/</a>
           </p>
         </section>
 

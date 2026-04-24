@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import pickle
 import re
 import socket
 import threading
@@ -41,6 +42,7 @@ BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data" / "processed")))
 APP_PROCESSED_DIR = BASE_DIR / "data" / "processed"
 GRAPH_PATH = PROCESSED_DIR / "madrid_shadow_graph.graphml"
+GRAPH_PICKLE_PATH = PROCESSED_DIR / "madrid_shadow_graph.pkl"
 GRAPH_RELEASE_MARKER_PATH = PROCESSED_DIR / ".graph_release_tag"
 REFUGIOS_PATH = APP_PROCESSED_DIR / "refugios_sustitutos.geojson"
 FUENTES_PATH = APP_PROCESSED_DIR / "fuentes.geojson"
@@ -609,9 +611,30 @@ def load_runtime_assets(download_release_file) -> None:
             record_startup_error(f"Grafo no disponible en {GRAPH_PATH}")
             return
 
-        logger.info("loading graph into memory (%.1f MB)", GRAPH_PATH.stat().st_size / 1e6)
+        # Convert GraphML to pickle for memory-efficient loading
+        if not GRAPH_PICKLE_PATH.exists():
+            logger.info("converting graphml to pickle for memory optimization...")
+            t_convert = time.time()
+            graph_xml = ox.load_graphml(GRAPH_PATH)
+            with open(GRAPH_PICKLE_PATH, "wb") as pf:
+                pickle.dump(graph_xml, pf, protocol=pickle.HIGHEST_PROTOCOL)
+            logger.info(
+                "graph converted to pickle in %.1f seconds (%.1f MB on disk)",
+                time.time() - t_convert,
+                GRAPH_PICKLE_PATH.stat().st_size / 1e6,
+            )
+            del graph_xml
+            import gc
+            gc.collect()
+
+        # Load from pickle (uses ~3x less memory than GraphML XML)
+        logger.info(
+            "loading graph from pickle (%.1f MB)",
+            GRAPH_PICKLE_PATH.stat().st_size / 1e6,
+        )
         t_start = time.time()
-        graph = ox.load_graphml(GRAPH_PATH)
+        with open(GRAPH_PICKLE_PATH, "rb") as pf:
+            graph = pickle.load(pf)
         logger.info("graph loaded in %.1f seconds", time.time() - t_start)
 
         ensure_edge_geometry(graph)

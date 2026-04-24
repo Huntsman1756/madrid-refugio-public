@@ -13,7 +13,7 @@ export default function ProjectInfoSection() {
         <div className="md:col-span-1 space-y-6">
           <h3 className="text-xl font-semibold text-[var(--ds-black)] tracking-tight">Propuesta de Valor</h3>
           <p className="text-[var(--ds-gray-600)] leading-relaxed">
-            Madrid Refugio ayuda a decidir la ruta más fresca y segura en episodios de calor y mala calidad del aire. Usando 10 datasets del portal de datos abiertos del Ayuntamiento de Madrid, más OpenStreetMap y el informe Greenpeace 2025, calcula rutas peatonales que maximizan la sombra del arbolado viario y la proximidad a fuentes y refugios sustitutos.
+            Madrid Refugio ayuda a decidir la ruta más fresca y segura en episodios de calor. Reutiliza datos abiertos del Ayuntamiento de Madrid, cartografía oficial y OpenStreetMap para calcular rutas peatonales que maximizan la sombra urbana, la proximidad a fuentes y el acceso a refugios sustitutos.
           </p>
           <p className="text-[var(--ds-gray-600)] leading-relaxed">
             El resultado es doble: una herramienta ciudadana para caminar con menor disconfort y un mapa de intervención para orientar nuevas políticas de refugio climático.
@@ -28,7 +28,7 @@ export default function ProjectInfoSection() {
               </div>
               <div>
                 <span className="block font-semibold text-[var(--ds-black)] mb-1">Déficit de refugios</span>
-                <span className="block text-sm text-[var(--ds-gray-600)]">84 barrios (64.1%) no tienen ningún refugio a menos de 300m. 62 barrios a menos de 400m.</span>
+                <span className="block text-sm text-[var(--ds-gray-600)]">84 barrios (64,1%) no tienen ningún refugio climático operativo a menos de 300 m.</span>
               </div>
             </Card>
             
@@ -38,7 +38,7 @@ export default function ProjectInfoSection() {
               </div>
               <div>
                 <span className="block font-semibold text-[var(--ds-black)] mb-1">Vulnerabilidad Crítica</span>
-                <span className="block text-sm text-[var(--ds-gray-600)]">Aluche tiene 19.121 mayores de 65 años y 0 refugios. Villaverde Alto es el más vulnerable por escala.</span>
+                <span className="block text-sm text-[var(--ds-gray-600)]">Aluche concentra 19.121 mayores de 65 años sin refugio próximo. Villaverde Alto - Casco Histórico de Villaverde es la prioridad relativa más alta.</span>
               </div>
             </Card>
 
@@ -58,7 +58,7 @@ export default function ProjectInfoSection() {
               </div>
               <div>
                 <span className="block font-semibold text-[var(--ds-black)] mb-1">Contexto Global</span>
-                <span className="block text-sm text-[var(--ds-gray-600)]">Madrid ofrece 1 refugio oficial por cada 110.100 hab. Barcelona ofrece 1 por cada 4.200 (Greenpeace).</span>
+                <span className="block text-sm text-[var(--ds-gray-600)]">La cobertura actual de refugios oficiales en Madrid sigue siendo insuficiente frente a otras grandes ciudades españolas.</span>
               </div>
             </Card>
           </div>
@@ -83,7 +83,12 @@ export default function ProjectInfoSection() {
               <tr>
                 <td className="px-5 py-3 font-medium text-[var(--ds-black)]">Arbolado viario / detalle de arbolado</td>
                 <td className="px-5 py-3"><span className="mono-label">XLSX</span></td>
-                <td className="px-5 py-3">Base del shade routing y densidad arbórea por barrio</td>
+                <td className="px-5 py-3">Sombra biológica y confort térmico por tramo</td>
+              </tr>
+              <tr>
+                <td className="px-5 py-3 font-medium text-[var(--ds-black)]">Modelo de alturas de edificación</td>
+                <td className="px-5 py-3"><span className="mono-label">GeoJSON</span></td>
+                <td className="px-5 py-3">Cálculo de sombra proyectada por edificios</td>
               </tr>
               <tr>
                 <td className="px-5 py-3 font-medium text-[var(--ds-black)]">Bibliotecas, C. Culturales y Polideportivos</td>
@@ -109,11 +114,6 @@ export default function ProjectInfoSection() {
                 <td className="px-5 py-3 font-medium text-[var(--ds-black)]">Límites de barrios</td>
                 <td className="px-5 py-3"><span className="mono-label">Shapefile</span></td>
                 <td className="px-5 py-3">Unidad territorial de análisis, superando la escala de Distrito</td>
-              </tr>
-              <tr>
-                <td className="px-5 py-3 font-medium text-[var(--ds-black)]">Alturas de Edificios (LiDAR / Geoportal)</td>
-                <td className="px-5 py-3"><span className="mono-label">SHP</span></td>
-                <td className="px-5 py-3">Simulación física 4D de sombras proyectadas según posición solar</td>
               </tr>
               <tr>
                 <td className="px-5 py-3 font-medium text-[var(--ds-black)]">OpenStreetMap</td>

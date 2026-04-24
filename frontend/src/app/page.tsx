@@ -250,7 +250,7 @@ export default function Home() {
               <MapIcon className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-[var(--ds-black)]">Equidad</h3>
-            <p className="text-xs text-[var(--ds-gray-600)]">64,1% de barrios sin refugio a &lt;300 m. Justicia térmica con datos abiertos.</p>
+            <p className="text-xs text-[var(--ds-gray-600)]">64,1% de barrios sin refugio operativo a &lt;300 m. Evidencia para adaptación climática.</p>
           </Card>
         </div>
 
@@ -269,7 +269,7 @@ export default function Home() {
           </Card>
           <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
               <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas optimizadas</span>
-             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">unos metros</span> permite multiplicar por <span className="font-bold">10 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
+             <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">un 4,3% más de distancia</span> permite multiplicar por <span className="font-bold">5,4 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
           </Card>
         </div>
 
