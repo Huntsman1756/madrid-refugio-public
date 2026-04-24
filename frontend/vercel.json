@@ -21,7 +21,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://refugio-api.trycloudflare.com/api/:path*"
+      "destination": "https://treasury-mortgage-beach-forestry.trycloudflare.com/api/:path*"
     }
   ]
 }
