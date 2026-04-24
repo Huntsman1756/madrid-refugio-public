@@ -4,6 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import networkx as nx
+
 
 class ApiConfigTests(unittest.TestCase):
     def test_health_alias_is_registered(self):
@@ -104,6 +106,25 @@ class ApiConfigTests(unittest.TestCase):
             0.25,
         )
 
+    def test_route_edges_prefers_edge_with_higher_combined_shade(self):
+        import api
+
+        graph = nx.MultiDiGraph()
+        graph.add_node(1, x=0.0, y=0.0)
+        graph.add_node(2, x=1.0, y=0.0)
+        graph.add_edge(1, 2, key=0, length=100.0, tree_shade_score=0.4, resource_bonus=1.0)
+        graph.add_edge(1, 2, key=1, length=100.0, tree_shade_score=0.2, resource_bonus=1.0)
+
+        route_gdf = api.route_edges_gdf(
+            graph,
+            [1, 2],
+            hour_col="h14",
+            shadow_dict={(1, 2, 0): {"h14": 0.0}, (1, 2, 1): {"h14": 0.3}},
+            pref=1.0,
+        )
+
+        self.assertEqual(route_gdf.iloc[0]["key"], 1)
+
     def test_release_asset_refreshes_when_release_marker_is_missing_or_stale(self):
         import api
 
@@ -195,7 +216,7 @@ class ApiConfigTests(unittest.TestCase):
         finally:
             api.app_state.startup_errors = previous_errors
 
-    def test_startup_event_does_not_block_on_runtime_loading(self):
+    def test_startup_event_loads_runtime_assets(self):
         import api
 
         previous_graph = api.app_state.graph
@@ -225,11 +246,11 @@ class ApiConfigTests(unittest.TestCase):
             with patch.object(api, "load_runtime_assets", side_effect=fake_load_runtime_assets):
                 api.startup_event()
 
-            self.assertEqual(len(called), 0)
-            self.assertIsNone(api.app_state.graph)
-            self.assertIsNone(api.app_state.refugios_utm)
-            self.assertIsNone(api.app_state.fuentes_utm)
-            self.assertIsNone(api.app_state.shadow_dict)
+            self.assertEqual(len(called), 1)
+            self.assertIsNotNone(api.app_state.graph)
+            self.assertIsNotNone(api.app_state.refugios_utm)
+            self.assertIsNotNone(api.app_state.fuentes_utm)
+            self.assertIsNotNone(api.app_state.shadow_dict)
         finally:
             api.app_state.graph = previous_graph
             api.app_state.refugios_utm = previous_refugios

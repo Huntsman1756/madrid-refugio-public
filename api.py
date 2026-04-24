@@ -31,6 +31,7 @@ from build_madrid_search_index import (
     build_search_index_files,
     normalize_search_text,
 )
+from shade_model import combine_shade_scores
 
 try:
     from zoneinfo import ZoneInfo
@@ -303,7 +304,7 @@ def route_edges_gdf(
                 if shadow_dict and hour_col and (u, v, key) in shadow_dict
                 else 0.0
             )
-            combined_shade = max(t_shade, b_shade)
+            combined_shade = combine_shade_scores(t_shade, b_shade)
             res_bonus = float(data.get("resource_bonus", 1.0))
             weight = float(data.get("length", 1.0)) * max(
                 (1.0 - (combined_shade * 0.8 * pref))
@@ -358,7 +359,7 @@ def route_metrics(
                 if shadow_dict and hour_col and (u, v, key) in shadow_dict
                 else 0.0
             )
-            combined_shade = max(t_shade, b_shade)
+            combined_shade = combine_shade_scores(t_shade, b_shade)
             res_bonus = float(data.get("resource_bonus", 1.0))
             weight = float(data.get("length", 1.0)) * max(
                 (1.0 - (combined_shade * 0.8 * pref))
@@ -787,6 +788,17 @@ def startup_event():
     logger.info("processed data directory: %s", PROCESSED_DIR)
     app_state.startup_errors = []
 
+    if (
+        app_state.graph is None
+        or app_state.refugios_utm is None
+        or app_state.fuentes_utm is None
+        or app_state.shadow_dict is None
+    ):
+        try:
+            load_runtime_assets(download_release_file)
+        except Exception as exc:
+            record_startup_error(f"Error cargando el runtime: {exc}")
+
     if app_state.search_index is None:
         try:
             app_state.search_index = ensure_search_index()
@@ -822,7 +834,7 @@ def calculate_route(req: RouteRequest):
                     if app_state.shadow_dict and (u, v, key) in app_state.shadow_dict
                     else 0.0
                 )
-                combined_shade = max(t_shade, b_shade)
+                combined_shade = combine_shade_scores(t_shade, b_shade)
                 res_bonus = float(data.get("resource_bonus", 1.0))
                 shadow_factor = (1.0 - (combined_shade * 0.8 * pref)) * (
                     1.0 + (res_bonus - 1.0) * pref
