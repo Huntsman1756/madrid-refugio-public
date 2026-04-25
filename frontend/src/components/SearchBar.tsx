@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { MapPin, Navigation } from "lucide-react";
 
 import { AddressAutocompleteField } from "./AddressAutocompleteField";
@@ -26,6 +26,7 @@ interface SearchBarProps {
   onSearch: (state: SearchBarState) => void;
   initialState?: Partial<SearchBarState>;
   loading?: boolean;
+  footerNotice?: ReactNode;
 }
 
 const HOUR_OPTIONS = [10, 14, 18] as const;
@@ -94,7 +95,7 @@ function isSearchSourceError(error: unknown): error is { message: string } {
     typeof error.message === "string";
 }
 
-export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
+export function SearchBar({ onSearch, initialState, loading, footerNotice }: SearchBarProps) {
   const [destination, setDestination] = useState(initialState?.destination?.label || "");
   const [selectedDestination, setSelectedDestination] = useState<SearchOption | null>(() => toSearchOption(initialState?.destination));
   const [destinationOptions, setDestinationOptions] = useState<SearchOption[]>([]);
@@ -471,6 +472,12 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               </div>
             </div>
           </div>
+
+          {footerNotice ? (
+            <div className="mt-3 border-t border-[var(--ds-gray-200)] pt-3">
+              {footerNotice}
+            </div>
+          ) : null}
         </div>
       </div>
     </form>

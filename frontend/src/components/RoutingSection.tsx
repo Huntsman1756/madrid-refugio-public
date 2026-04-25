@@ -231,19 +231,17 @@ ${gpxPoints}
             useMyLocation,
           }}
           loading={loading}
+          footerNotice={isHeatHour && hasSearched ? (
+            <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-600" />
+              <div>
+                <p className="text-xs font-bold text-orange-800">Calor Extremo a las {hour}:00</p>
+                <p className="text-xs text-orange-700">La Ruta Refugio es prioritaria para minimizar el riesgo de golpe de calor.</p>
+              </div>
+            </div>
+          ) : null}
         />
       </div>
-
-      {/* Heat hour alert */}
-      {isHeatHour && hasSearched && (
-        <div className="mb-6 p-3 bg-orange-50 border border-orange-200 rounded-xl flex items-start gap-3">
-          <AlertTriangle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-bold text-orange-800">Calor Extremo a las {hour}:00</p>
-            <p className="text-xs text-orange-700">La Ruta Refugio es prioritaria para minimizar el riesgo de golpe de calor.</p>
-          </div>
-        </div>
-      )}
 
       {/* Simulate day control — only after search */}
       {hasSearched && (

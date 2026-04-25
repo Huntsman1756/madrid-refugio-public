@@ -316,4 +316,11 @@ describe("SearchBar integration", () => {
       preference: 1,
     });
   });
+
+  it("shows the heat warning inside the searched planner block", async () => {
+    render(<RoutingSection autoDemo />);
+
+    expect(await screen.findByText(/calor extremo a las 14:00/i)).toBeInTheDocument();
+    expect(screen.getByText(/La Ruta Refugio es prioritaria/i)).toBeInTheDocument();
+  });
 });
