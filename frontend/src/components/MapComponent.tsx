@@ -314,7 +314,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
   };
 
   return (
-    <div className="relative z-0 h-full w-full overflow-hidden rounded-[26px] border border-[rgba(91,84,74,0.08)] bg-[#f6f1e8]">
+    <div className="relative z-0 h-full w-full overflow-hidden rounded-[26px] border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]">
       {/* NO key prop — never unmount the map, controllers handle view changes */}
       <MapContainer
         center={[40.4168, -3.7038]}
@@ -344,22 +344,22 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
             {/* Shortest route — grey dashed, renders first (below) */}
             <Polyline
               positions={routeResult.shortest_coords}
-              color="#9ca3af"
+              color="var(--ds-gray-400)"
               weight={4}
               opacity={0.6}
               dashArray="8 12"
             />
-            {/* Comfort (Eco-Refugio) route — emerald solid, renders on top */}
+            {/* Comfort (Eco-Refugio) route — green solid, renders on top */}
             <Polyline
               positions={routeResult.comfort_coords}
-              color="#10b981"
+              color="var(--climate-green)"
               weight={7}
               opacity={0.9}
             />
-            {/* Inner line for Emerald route to give it a "path" feel */}
+            {/* Inner line for Green route to give it a "path" feel */}
             <Polyline
               positions={routeResult.comfort_coords}
-              color="#ecfdf5"
+              color="var(--ds-white)"
               weight={2}
               opacity={0.8}
             />

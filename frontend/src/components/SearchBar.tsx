@@ -340,7 +340,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="rounded-[34px] border border-[rgba(91,84,74,0.08)] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(249,245,238,0.95))] px-4 py-4 shadow-[0_28px_72px_rgba(31,26,23,0.10)] sm:px-5 sm:py-5">
+      <div className="rounded-[34px] border border-[var(--ds-gray-100)] bg-[var(--ds-white)] px-4 py-4 shadow-[0_20px_52px_rgba(31,26,23,0.06)] sm:px-5 sm:py-5">
         <div className="mb-4 flex flex-col gap-2 border-b border-[rgba(91,84,74,0.08)] pb-4 text-left sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Planifica tu recorrido</p>
@@ -349,9 +349,9 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
           <p className="rounded-full bg-[rgba(255,255,255,0.72)] px-3 py-1 text-xs font-medium text-[var(--ds-gray-500)] shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]">Sin búsqueda libre fuera de Madrid</p>
         </div>
 
-        <div className="rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[linear-gradient(180deg,rgba(250,247,241,0.92),rgba(243,238,230,0.78))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] sm:p-3">
+          <div className="rounded-[28px] border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] p-2.5 sm:p-3">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px] lg:items-start">
-            <div className="min-w-0 rounded-[24px] bg-[rgba(255,253,250,0.92)] px-3 py-3 shadow-[0_10px_24px_rgba(31,26,23,0.06)]">
+            <div className="min-w-0 rounded-[24px] bg-[var(--ds-white)] px-3 py-3 shadow-[0_6px_16px_rgba(31,26,23,0.04)]">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
                   <MapPin className="h-3.5 w-3.5 text-[var(--climate-green)]" />
@@ -372,7 +372,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                   onClick={() => {
                     if (!isLocationReady) requestGeolocation();
                   }}
-                  className="w-full rounded-[20px] bg-[rgba(243,239,232,0.9)] px-4 py-3 text-left transition-colors hover:bg-[rgba(227,221,211,0.95)]"
+                  className="w-full rounded-[20px] bg-[var(--ds-gray-50)] px-4 py-3 text-left transition-colors hover:bg-[var(--ds-gray-100)]"
                 >
                   <div className="text-sm font-medium text-[var(--ds-black)]">{locationTitle}</div>
                   {locationDetail && <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>}
@@ -398,7 +398,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
               )}
             </div>
 
-            <div className="min-w-0 rounded-[24px] bg-[rgba(255,253,250,0.92)] px-3 py-3 shadow-[0_10px_24px_rgba(31,26,23,0.06)]">
+              <div className="min-w-0 rounded-[24px] bg-[var(--ds-white)] px-3 py-3 shadow-[0_6px_16px_rgba(31,26,23,0.04)]">
               <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
                 <Navigation className="h-3.5 w-3.5 text-[var(--ds-black)]" />
                 Destino
@@ -428,7 +428,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
             <button
               type="submit"
               disabled={loading || !canSearch}
-              className="flex min-h-[64px] items-center justify-center rounded-[24px] bg-[var(--climate-green)] px-6 text-base font-semibold text-white shadow-[0_18px_32px_rgba(74,124,89,0.26)] transition-all hover:-translate-y-[1px] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
+              className="flex min-h-[64px] items-center justify-center rounded-[24px] bg-[var(--climate-terracotta)] px-6 text-base font-semibold text-white shadow-[0_18px_32px_rgba(212,140,78,0.26)] transition-all hover:-translate-y-[1px] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
             >
               {loading ? "Calculando..." : "Buscar ruta con sombra"}
             </button>

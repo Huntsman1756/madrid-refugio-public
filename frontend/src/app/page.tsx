@@ -234,7 +234,7 @@ export default function Home() {
         <section className="hero-atmosphere hero-grid hero-frame px-4 py-5 sm:px-5 sm:py-6 lg:px-6 lg:py-7">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-14">
             <div id="routing" className="text-left">
-              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(74,124,89,0.12)] bg-[rgba(255,252,247,0.86)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--climate-green)] shadow-[0_14px_28px_rgba(33,48,43,0.06)]">
+              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--climate-green)] shadow-[0_14px_28px_rgba(33,48,43,0.04)]">
                 <OrganicTree className="h-5 w-4" />
                 Madrid caminado con criterio climático
               </div>
@@ -318,7 +318,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="rounded-[28px] border border-[rgba(74,124,89,0.12)] bg-[linear-gradient(180deg,rgba(245,252,248,0.96),rgba(233,245,238,0.88))] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.06)]">
+              <div className="rounded-[28px] border border-[var(--climate-green)]/20 bg-[var(--ds-white)] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.04)]">
                 <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--climate-green)]">En una frase</p>
                 <p className="mt-3 text-[1.6rem] font-semibold leading-tight text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">No pide aprender un visor complejo. Pide elegir mejor un trayecto cuando el sol castiga.</p>
@@ -350,15 +350,15 @@ export default function Home() {
           <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico urbano</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-24 stagger-children">
-          <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/30 fade-in-up">
+          <Card level={1} className="p-5 border-l-4 border-l-[#ff5b4f] bg-[#fef2f2]/20 fade-in-up">
             <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Extremo Sur</span>
             <p className="text-sm text-[var(--ds-black)] font-medium">Villaverde presenta la mayor criticidad climática, con un <span className="font-bold">Índice de Prioridad de Intervención de <CountUp key={`c2-${clickStamp}`} end={1} decimals={2} /></span>, cruzando población mayor y déficit de sombras.</p>
           </Card>
-          <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/30 fade-in-up">
+          <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef] bg-[#ebf5ff]/20 fade-in-up">
               <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Déficit de proximidad</span>
              <p className="text-sm text-[var(--ds-black)] font-medium"><span className="font-bold">64,1% de los barrios</span> de Madrid no cuentan con un refugio climático operativo a menos de 300 metros caminables.</p>
           </Card>
-          <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/30 fade-in-up">
+          <Card level={1} className="p-5 border-l-4 border-l-[#16a34a] bg-[#f0fdf4]/20 fade-in-up">
               <span className="mono-label text-[var(--ds-gray-500)] mb-2 block">Rutas optimizadas</span>
              <p className="text-sm text-[var(--ds-black)] font-medium">Desviarse apenas <span className="font-bold">un 4,3% más de distancia</span> permite multiplicar por <span className="font-bold">5,4 la sombra acumulada</span> combinando arbolado y proyección geométrica de edificios.</p>
           </Card>
@@ -410,7 +410,7 @@ export default function Home() {
           
           <div className="h-[600px] md:h-[750px] flex flex-col min-h-0">
             <Card level={3} className="flex-1 p-6 flex flex-col relative overflow-y-auto min-h-0">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0a72ef] via-[#de1d8d] to-[#ff5b4f]" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-[var(--climate-green)]" />
 
               {selectedBarrio && barrioStats ? (() => {
                 const score = barrioStats.priority_score_norm || 0;
@@ -684,11 +684,11 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="mt-24 pb-12">
-          <div className="rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[linear-gradient(180deg,rgba(255,253,250,0.94),rgba(248,250,249,0.9))] p-6 shadow-[0_18px_42px_rgba(36,53,65,0.05)] sm:p-8">
+          <div className="rounded-[28px] border border-[var(--ds-gray-100)] bg-[var(--ds-white)] p-6 shadow-[0_18px_42px_rgba(36,53,65,0.04)] sm:p-8">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,242,233,0.92))] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[rgba(91,84,74,0.08)]">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[var(--ds-gray-50)] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[var(--ds-gray-100)]">
                     <AlcalaLogo className="h-8 w-8" />
                   </span>
                   <div>

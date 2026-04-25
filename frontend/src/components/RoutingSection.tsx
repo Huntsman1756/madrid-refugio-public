@@ -266,7 +266,7 @@ ${gpxPoints}
     <div className="mb-10 sm:mb-12">
       <div className="mb-8">
         {demoLoaded && !useMyLocation && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-[24px] border border-[var(--climate-green)]/20 bg-[linear-gradient(180deg,rgba(244,250,245,0.96),rgba(233,245,238,0.82))] px-4 py-3 text-left shadow-[0_10px_24px_rgba(74,124,89,0.10)]">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-[24px] border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-3 text-left shadow-[0_10px_24px_rgba(74,124,89,0.06)]">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--climate-green)]">Ejemplo cargado</p>
               <p className="text-sm font-medium text-[var(--climate-green)]">Hemos precargado una ruta Plaza Mayor → Museo del Prado a las 14:00 para mostrar el valor del producto desde el primer momento.</p>
@@ -284,7 +284,7 @@ ${gpxPoints}
           }}
           loading={loading}
           footerNotice={isHeatHour && hasSearched ? (
-            <div className="flex items-start gap-3 rounded-[22px] bg-[linear-gradient(180deg,rgba(255,247,237,0.98),rgba(255,237,213,0.88))] px-4 py-3 shadow-[0_10px_24px_rgba(249,115,22,0.10)]">
+            <div className="flex items-start gap-3 rounded-[22px] bg-[#fff7ed] px-4 py-3 shadow-[0_10px_24px_rgba(249,115,22,0.06)]">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-600" />
               <div>
                 <p className="text-xs font-bold text-orange-800">Calor Extremo a las {hour}:00</p>
@@ -315,7 +315,7 @@ ${gpxPoints}
 
       {/* Error */}
       {error && (
-        <div className="mb-6 rounded-[22px] border border-red-200 bg-[linear-gradient(180deg,rgba(254,242,242,0.98),rgba(254,226,226,0.90))] p-4 text-sm font-medium text-red-700 shadow-[0_10px_24px_rgba(239,68,68,0.08)]">
+        <div className="mb-6 rounded-[22px] border border-red-200 bg-[#fef2f2] p-4 text-sm font-medium text-red-700 shadow-[0_10px_24px_rgba(239,68,68,0.06)]">
           ⚠ {error}
         </div>
       )}
@@ -325,7 +325,7 @@ ${gpxPoints}
         <div className="space-y-6">
           {/* Map */}
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-            <div id="route-map" className="overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,255,255,0.9)] shadow-[0_24px_54px_rgba(31,26,23,0.08)]">
+            <div id="route-map" className="overflow-hidden rounded-[28px] border border-[var(--ds-gray-100)] bg-[var(--ds-white)] shadow-[0_24px_54px_rgba(31,26,23,0.06)]">
               <div className="h-[500px] md:h-[600px] overflow-hidden border-b border-[var(--ds-gray-100)]">
                 <MapComponent
                   mergedData={null}
@@ -341,13 +341,13 @@ ${gpxPoints}
               <div className={`grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-6 ${loading ? "opacity-70" : "opacity-100"} ${animateResults ? "results-refresh" : ""}`}>
                 <div>
                   <div className="mb-5 flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[var(--climate-green)]/10 px-3 py-1 text-xs font-bold text-[var(--climate-green)] shadow-[0_10px_18px_rgba(74,124,89,0.12)]">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[var(--climate-green)]/10 px-3 py-1 text-xs font-bold text-[var(--climate-green)] shadow-[0_10px_18px_rgba(74,124,89,0.08)]">
                       <ClimateRouteBadge className="h-4 w-7" /> Ruta recomendada
                     </span>
                     <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Equilibrada</div>
                   </div>
 
-                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(74,124,89,0.12)] bg-[rgba(255,252,247,0.9)] px-3 py-2 text-xs font-semibold text-[var(--climate-green)] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-3 py-2 text-xs font-semibold text-[var(--climate-green)] shadow-[0_10px_22px_rgba(31,26,23,0.04)]">
                     <OrganicTree testId="route-legend-tree" className="h-5 w-4" />
                     Ruta con alivio climático
                   </div>
@@ -412,7 +412,7 @@ ${gpxPoints}
 
                     <Card level={1} className="rounded-[20px] border border-[#fdebd0] p-4">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fdebd0] text-[#e67e22]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff7ed] text-[#e67e22]">
                           <ThermometerSun className="h-5 w-5" />
                         </span>
                         <div>
@@ -424,14 +424,14 @@ ${gpxPoints}
                   </div>
 
                   {isLongRoute ? (
-                    <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-[rgba(192,57,43,0.18)] bg-[linear-gradient(180deg,rgba(254,242,242,0.98),rgba(254,226,226,0.92))] px-4 py-3 text-sm text-[#8f2d23] shadow-[0_10px_24px_rgba(192,57,43,0.08)]">
+                    <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-red-200 bg-[#fef2f2] px-4 py-3 text-sm text-[#8f2d23] shadow-[0_10px_24px_rgba(192,57,43,0.06)]">
                       <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
                       <p className="font-medium">Ruta larga · Considera dividirla en tramos</p>
                     </div>
                   ) : null}
 
-                  <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--ds-gray-100)] bg-[rgba(250,250,248,0.9)]">
-                    <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-100)] bg-[rgba(238,237,233,0.55)] px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-[var(--ds-gray-400)] sm:px-5">
+                  <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]">
+                    <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-100)] bg-[var(--ds-gray-100)] px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-[var(--ds-gray-400)] sm:px-5">
                       <span>Comparativa</span>
                       <span className="text-center">Directa</span>
                       <span className="text-center text-[var(--climate-green)]">Equilibrada</span>
@@ -496,7 +496,7 @@ ${gpxPoints}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card level={1} className="overflow-hidden rounded-[28px] border border-[var(--climate-green)]/14 bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(240,247,242,0.95))] p-5 shadow-[0_14px_32px_rgba(74,124,89,0.08)]">
+            <Card level={1} className="overflow-hidden rounded-[28px] border border-[var(--climate-green)]/14 bg-[var(--ds-white)] p-5 shadow-[0_14px_32px_rgba(74,124,89,0.06)]">
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--climate-green)]">Lugares frescos a tu alrededor</p>
@@ -521,7 +521,7 @@ ${gpxPoints}
               aria-pressed={showHeatmap}
               aria-label="Ver mapa de calor"
               onClick={() => setShowHeatmap((current) => !current)}
-              className={`overflow-hidden rounded-[28px] border p-5 text-left shadow-[0_14px_32px_rgba(230,126,34,0.10)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[linear-gradient(180deg,rgba(255,247,237,0.98),rgba(253,235,208,0.92))]" : "border-[#fdebd0] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(255,247,237,0.96))] hover:border-[#e67e22]"}`}
+              className={`overflow-hidden rounded-[28px] border p-5 text-left shadow-[0_14px_32px_rgba(230,126,34,0.08)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[#fff7ed]" : "border-[#fdebd0] bg-[var(--ds-white)] hover:border-[#e67e22]"}`}
             >
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
@@ -534,7 +534,7 @@ ${gpxPoints}
               </div>
             </button>
 
-            <Card level={1} className="overflow-hidden rounded-[28px] border border-[rgba(74,124,89,0.14)] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(240,247,242,0.95))] p-5 shadow-[0_14px_32px_rgba(74,124,89,0.08)]">
+            <Card level={1} className="overflow-hidden rounded-[28px] border border-[rgba(74,124,89,0.14)] bg-[var(--ds-white)] p-5 shadow-[0_14px_32px_rgba(74,124,89,0.06)]">
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--climate-green)]">{routeHourLabel}</p>
