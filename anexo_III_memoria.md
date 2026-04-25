@@ -2,9 +2,7 @@
 
 **Madrid Refugio: rutas de confort térmico urbano basadas en datos abiertos**
 
-**Autor:** Daniel Romero Gil
-
-**URL del repositorio:** <https://github.com/Huntsman1756/madrid-refugio-public>
+**URL pública del proyecto:** <https://madridrefugio.es/>
 
 ## 1. Resumen ejecutivo
 

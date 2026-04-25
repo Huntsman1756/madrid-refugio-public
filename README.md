@@ -81,6 +81,8 @@ Si usas un volumen persistente, deja esos ficheros en `DATA_DIR` para que sobrev
 
 Si despliegas sin ellos, `/api/suggest` responderá `503 Service Unavailable` hasta que el CSV oficial y/o el índice precomputado estén presentes.
 
+El frontend ya no consume un JSON estático publicado en `frontend/public/data/`. Las sugerencias de origen y destino se resuelven contra `/api/suggest`, que usa este índice precomputado en el backend.
+
 Comando base para regenerarlo:
 
 ```bash
