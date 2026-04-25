@@ -83,7 +83,7 @@ describe("Home hero", () => {
 
     expect(screen.getAllByTestId("alcala-logo").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByTestId("hero-climate-art")).toBeInTheDocument();
-    expect(screen.getAllByTestId("organic-tree").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("img", { name: /Madrid Refugio/ })).toHaveLength(2);
     expect(screen.getByText("Una herramienta principal, tres pasos claros")).toBeInTheDocument();
     expect(screen.getByText("Fuentes de datos abiertos")).toBeInTheDocument();
   });
@@ -94,8 +94,8 @@ describe("Home hero", () => {
     await screen.findByText("Por que es distinto");
 
     expect(screen.queryByText("Valor inmediato")).not.toBeInTheDocument();
-    expect(container.querySelector('[data-testid="value-pillar-icon-salud"] .lucide-thermometer-sun')).toBeInTheDocument();
-    expect(container.querySelector('[data-testid="value-pillar-icon-clima"] .lucide-tree-pine')).toBeInTheDocument();
-    expect(container.querySelector('[data-testid="value-pillar-icon-equidad"] .lucide-users')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="value-pillar-icon-salud"] svg')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="value-pillar-icon-clima"] svg')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="value-pillar-icon-equidad"] svg')).toBeInTheDocument();
   });
 });
