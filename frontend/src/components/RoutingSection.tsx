@@ -212,9 +212,7 @@ ${gpxPoints}
 
   return (
     <div className="mb-10 sm:mb-12">
-      {/* Header — simplified */}
-      {/* Search Bar — primary interaction */}
-      <Card level={2} className="p-5 sm:p-6 border border-[var(--ds-gray-100)] shadow-xl mb-8">
+      <div className="mb-8">
         {demoLoaded && !useMyLocation && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left">
             <div>
@@ -234,7 +232,7 @@ ${gpxPoints}
           }}
           loading={loading}
         />
-      </Card>
+      </div>
 
       {/* Heat hour alert */}
       {isHeatHour && hasSearched && (

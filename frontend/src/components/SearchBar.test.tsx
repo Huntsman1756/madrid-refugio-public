@@ -152,7 +152,7 @@ describe("SearchBar integration", () => {
 
     render(<RoutingSection />);
 
-    fireEvent.click(screen.getByRole("button", { name: /usar mi ubicación/i }));
+    fireEvent.click(screen.getByRole("button", { name: /mi ubicación/i }));
 
     expect(await screen.findByRole("button", { name: /tu ubicación actual/i })).toBeInTheDocument();
 
@@ -172,7 +172,7 @@ describe("SearchBar integration", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
 
-    expect(screen.getByRole("button", { name: /escribir origen/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^escribir$/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /tu ubicación actual/i })).toBeInTheDocument();
     expect(screen.queryByRole("combobox", { name: "Origen" })).not.toBeInTheDocument();
   });
@@ -256,18 +256,37 @@ describe("SearchBar integration", () => {
   it("shows a single compact helper line instead of duplicated origin guidance", async () => {
     render(<RoutingSection />);
 
-    expect(await screen.findByText("Madrid solo: calle, lugar o coordenadas oficiales.")).toBeInTheDocument();
-    expect(screen.getAllByText("Madrid solo: calle, lugar o coordenadas oficiales.")).toHaveLength(1);
+    expect(await screen.findByText("Madrid solo: dos puntos reales, una hora concreta y el equilibrio que prefieras.")).toBeInTheDocument();
+    expect(screen.getAllByText("Sin búsqueda libre fuera de Madrid")).toHaveLength(1);
   });
 
   it("keeps the time and route type controls visible in the compact planner", async () => {
     render(<RoutingSection />);
 
-    expect(await screen.findByText("Hora de salida")).toBeInTheDocument();
-    expect(screen.getByText("Tipo de ruta")).toBeInTheDocument();
+    expect(await screen.findByText("Hora")).toBeInTheDocument();
+    expect(screen.getByText("Ruta")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /10:00/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /directa/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /buscar ruta con sombra/i })).toBeInTheDocument();
+  });
+
+  it("removes the pseudo-continuous solar track and keeps discrete time choices", async () => {
+    render(<RoutingSection />);
+
+    expect(await screen.findByRole("button", { name: /10:00/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /14:00/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /18:00/i })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/solar track/i)).not.toBeInTheDocument();
+  });
+
+  it("presents the planner as a single unified search surface", async () => {
+    render(<RoutingSection />);
+
+    expect(await screen.findByText("Planifica tu recorrido")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Origen" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Destino" })).toBeInTheDocument();
+    expect(screen.getByText("Hora")).toBeInTheDocument();
+    expect(screen.getByText("Ruta")).toBeInTheDocument();
   });
 
   it("can auto-load a demo route that showcases the product on first render", async () => {

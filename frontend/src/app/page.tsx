@@ -167,30 +167,19 @@ export default function Home() {
       </nav>
 
       {/* Hero — focused on search, not exposition */}
-      <div className="max-w-[980px] mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-8 sm:pb-12">
+      <div className="max-w-[1120px] mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-6 sm:pb-10">
         {/* Hero search — the single focus of the page */}
-        <div id="routing" className="text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--ds-black)] leading-tight mb-3 fade-in-up">
+        <div id="routing" className="text-left">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--ds-black)] leading-tight mb-3 fade-in-up max-w-4xl">
             Camina por Madrid con menos calor
           </h1>
-          <p className="text-base sm:text-lg text-[var(--ds-gray-600)] mb-6 max-w-3xl mx-auto fade-in-up">
+          <p className="text-base sm:text-lg text-[var(--ds-gray-600)] mb-5 max-w-3xl fade-in-up">
             Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
           </p>
 
-          <div className="grid gap-3 sm:grid-cols-3 mb-6 stagger-children text-left fade-in-up">
-            <div className="rounded-2xl border border-[var(--ds-gray-100)] bg-white/80 px-4 py-3 shadow-[var(--shadow-border)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ds-gray-500)] mb-1">Sombra real</p>
-              <p className="text-sm text-[var(--ds-black)] font-medium leading-relaxed">Edificios, arbolado y hora del día en una sola estimación.</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--ds-gray-100)] bg-white/80 px-4 py-3 shadow-[var(--shadow-border)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ds-gray-500)] mb-1">Comparación útil</p>
-              <p className="text-sm text-[var(--ds-black)] font-medium leading-relaxed">Ruta directa frente a alternativa más fresca, en tiempo real.</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--ds-gray-100)] bg-white/80 px-4 py-3 shadow-[var(--shadow-border)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ds-gray-500)] mb-1">Recursos en ruta</p>
-              <p className="text-sm text-[var(--ds-black)] font-medium leading-relaxed">Fuentes y refugios climáticos visibles justo donde hacen falta.</p>
-            </div>
-          </div>
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)] fade-in-up">
+            Sombra urbana real, comparación inmediata y recursos climáticos en ruta.
+          </p>
 
           {/* Search bar embedded in hero */}
           <div className="fade-in-up">

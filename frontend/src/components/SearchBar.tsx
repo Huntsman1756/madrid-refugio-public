@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Navigation, SunMedium } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 
 import { AddressAutocompleteField } from "./AddressAutocompleteField";
 import { getSearchOptions as getSearchSuggestions } from "@/lib/search-source";
@@ -122,11 +122,6 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
 
   const isLocationReady = useMyLocation && geolocationStatus === "granted" && Boolean(currentLocation);
   const canSearch = Boolean(selectedDestination) && (useMyLocation ? isLocationReady : Boolean(selectedOrigin));
-  const selectedHourIndex = HOUR_OPTIONS.indexOf(hour as (typeof HOUR_OPTIONS)[number]);
-  const sunPosition = selectedHourIndex >= 0
-    ? `${(selectedHourIndex / (HOUR_OPTIONS.length - 1)) * 100}%`
-    : "50%";
-
   useEffect(() => {
     if (useMyLocation && hasRequestedGeolocation && geolocationStatus === "idle") {
       requestGeolocation();
@@ -348,178 +343,146 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     : "Calle, lugar o coordenadas en Madrid";
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-3">
-      <div className="rounded-[30px] border border-black/5 bg-white p-4 shadow-[0_12px_32px_rgba(0,0,0,0.08)] sm:p-5">
-        <div className="grid gap-3 lg:grid-cols-2">
-          <div className="rounded-[24px] border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)]/85 p-3">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <label className="flex items-center gap-2 text-sm font-medium text-[var(--ds-black)]">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                  <MapPin className="h-3.5 w-3.5" />
-                </span>
-                Origen
-              </label>
-              <button
-                type="button"
-                onClick={handleToggleMyLocation}
-                className="shrink-0 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-medium text-emerald-700 transition-colors hover:border-emerald-300 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
-              >
-                {useMyLocation ? "Escribir origen" : "Usar mi ubicación"}
-              </button>
-            </div>
-
-            {useMyLocation ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (!isLocationReady) requestGeolocation();
-                }}
-                className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-white px-4 py-3 text-left transition-colors hover:border-[var(--ds-gray-300)]"
-              >
-                <div className="text-sm font-medium text-[var(--ds-black)]">{locationTitle}</div>
-                {locationDetail && <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>}
-              </button>
-            ) : (
-              <AddressAutocompleteField
-                ref={originRef}
-                label="Origen"
-                hideLabelVisually
-                name="origin"
-                options={originOptions}
-                value={origin}
-                selectedOption={selectedOrigin}
-                onValueChange={setOrigin}
-                onSelectedOptionChange={setSelectedOrigin}
-                onSelect={setSelectedOrigin}
-                placeholder="Calle, lugar o coordenadas en Madrid"
-              />
-            )}
-
-            {geolocationError && !useMyLocation && (
-              <p className="mt-1.5 text-xs text-red-500">{geolocationError}</p>
-            )}
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="rounded-[32px] border border-black/8 bg-white px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.10)] sm:px-5 sm:py-5">
+        <div className="mb-4 flex flex-col gap-2 border-b border-[var(--ds-gray-100)] pb-4 text-left sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Planifica tu recorrido</p>
+            <p className="mt-1 text-sm text-[var(--ds-gray-600)]">Madrid solo: dos puntos reales, una hora concreta y el equilibrio que prefieras.</p>
           </div>
-
-          <div className="rounded-[24px] border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)]/85 p-3">
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--ds-black)]">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--ds-gray-200)] text-[var(--ds-black)]">
-                <Navigation className="h-3.5 w-3.5" />
-              </span>
-              Destino
-            </div>
-
-            <AddressAutocompleteField
-              ref={destinationRef}
-              label="Destino"
-              hideLabelVisually
-              name="destination"
-              options={destinationOptions}
-              value={destination}
-              selectedOption={selectedDestination}
-              onValueChange={setDestination}
-              onSelectedOptionChange={setSelectedDestination}
-              onSelect={setSelectedDestination}
-              placeholder="¿A dónde quieres ir?"
-            />
-
-            {searchSourceError && (
-              <p role="alert" className="mt-1.5 text-xs text-red-500">
-                {searchSourceError}
-              </p>
-            )}
-          </div>
+          <p className="text-xs font-medium text-[var(--ds-gray-500)]">Sin búsqueda libre fuera de Madrid</p>
         </div>
 
-        <p className="mt-3 text-xs font-medium text-[var(--ds-gray-500)]">
-          Madrid solo: calle, lugar o coordenadas oficiales.
-        </p>
-      </div>
+        <div className="rounded-[28px] border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)]/70 p-2.5 sm:p-3">
+          <div className="grid gap-2 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(220px,0.8fr)_minmax(220px,0.8fr)_auto]">
+            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
+                  <MapPin className="h-3.5 w-3.5 text-emerald-700" />
+                  Origen
+                </label>
+                <button
+                  type="button"
+                  onClick={handleToggleMyLocation}
+                  className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
+                >
+                  {useMyLocation ? "Escribir" : "Mi ubicación"}
+                </button>
+              </div>
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded-[24px] border border-black/5 bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <label className="text-sm font-medium text-[var(--ds-black)]">Hora de salida</label>
-            <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{hour}:00</span>
-          </div>
-
-          <div className="mb-4 rounded-2xl border border-amber-100 bg-[linear-gradient(90deg,rgba(253,230,138,0.22),rgba(251,191,36,0.08),rgba(249,115,22,0.18))] px-4 py-3">
-            <div className="mb-2 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-700/80">
-              <span>Mañana</span>
-              <span>Más calor</span>
-              <span>Tarde</span>
-            </div>
-            <div className="relative h-8">
-              <div className="absolute left-0 right-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-amber-300/60" />
-              {HOUR_OPTIONS.map((option, index) => (
-                <span
-                  key={option}
-                  className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-300 bg-white"
-                  style={{ left: `${(index / (HOUR_OPTIONS.length - 1)) * 100}%` }}
+              {useMyLocation ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isLocationReady) requestGeolocation();
+                  }}
+                  className="w-full rounded-2xl bg-[var(--ds-gray-50)] px-3 py-3 text-left transition-colors hover:bg-[var(--ds-gray-100)]"
+                >
+                  <div className="text-sm font-medium text-[var(--ds-black)]">{locationTitle}</div>
+                  {locationDetail && <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>}
+                </button>
+              ) : (
+                <AddressAutocompleteField
+                  ref={originRef}
+                  label="Origen"
+                  hideLabelVisually
+                  name="origin"
+                  options={originOptions}
+                  value={origin}
+                  selectedOption={selectedOrigin}
+                  onValueChange={setOrigin}
+                  onSelectedOptionChange={setSelectedOrigin}
+                  onSelect={setSelectedOrigin}
+                  placeholder="Calle, lugar o coordenadas"
                 />
-              ))}
-              <span
-                className="absolute top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-amber-300 text-amber-900 shadow-[0_6px_16px_rgba(245,158,11,0.28)] transition-all duration-300"
-                style={{ left: sunPosition }}
-                aria-hidden="true"
-              >
-                <SunMedium className="h-4 w-4" />
-              </span>
+              )}
+
+              {geolocationError && !useMyLocation && (
+                <p className="mt-1.5 text-xs text-red-500">{geolocationError}</p>
+              )}
             </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-2.5">
-            {HOUR_OPTIONS.map((option) => {
-              const selected = option === hour;
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setHour(option)}
-                  className={`min-h-16 rounded-2xl border px-3 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
-                >
-                  <div className="text-sm font-semibold">{option}:00</div>
-                  <div className={`mt-1 text-[11px] ${selected ? "text-white/75" : "text-[var(--ds-gray-500)]"}`}>
-                    {HOUR_LABELS[option]}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
+              <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
+                <Navigation className="h-3.5 w-3.5 text-[var(--ds-black)]" />
+                Destino
+              </div>
 
-        <div className="rounded-[24px] border border-black/5 bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <label className="text-sm font-medium text-[var(--ds-black)]">Tipo de ruta</label>
-            <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            {PREFERENCE_OPTIONS.map((option) => {
-              const selected = option.value === preference;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setPreference(option.value)}
-                  className={`min-h-16 rounded-2xl border px-3 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
-                >
-                  <div className="text-sm font-semibold">{option.label}</div>
-                  <div className={`mt-1 text-[11px] ${selected ? "text-white/75" : "text-[var(--ds-gray-500)]"}`}>
-                    {option.detail}
-                  </div>
-                </button>
-              );
-            })}
+              <AddressAutocompleteField
+                ref={destinationRef}
+                label="Destino"
+                hideLabelVisually
+                name="destination"
+                options={destinationOptions}
+                value={destination}
+                selectedOption={selectedDestination}
+                onValueChange={setDestination}
+                onSelectedOptionChange={setSelectedDestination}
+                onSelect={setSelectedDestination}
+                placeholder="¿A dónde quieres ir?"
+              />
+
+              {searchSourceError && (
+                <p role="alert" className="mt-1.5 text-xs text-red-500">
+                  {searchSourceError}
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Hora</label>
+                <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{hour}:00</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {HOUR_OPTIONS.map((option) => {
+                  const selected = option === hour;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setHour(option)}
+                      className={`min-h-16 rounded-2xl border px-2.5 py-3 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                    >
+                      <div className="text-sm font-semibold">{option}:00</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Ruta</label>
+                <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {PREFERENCE_OPTIONS.map((option) => {
+                  const selected = option.value === preference;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setPreference(option.value)}
+                      className={`min-h-16 rounded-2xl border px-2.5 py-3 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                    >
+                      <div className="text-sm font-semibold">{option.label}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !canSearch}
+              className="flex min-h-[148px] items-center justify-center rounded-[24px] bg-[#16a34a] px-6 text-base font-semibold text-white transition-all hover:bg-[#15803d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 xl:min-h-0"
+            >
+              {loading ? "Calculando..." : "Buscar ruta con sombra"}
+            </button>
           </div>
         </div>
       </div>
-
-      <button
-        type="submit"
-        disabled={loading || !canSearch}
-        className="flex h-14 w-full items-center justify-center rounded-2xl bg-[#16a34a] px-6 text-base font-semibold text-white transition-all hover:bg-[#15803d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? "Calculando..." : "Buscar ruta con sombra"}
-      </button>
     </form>
   );
 }
