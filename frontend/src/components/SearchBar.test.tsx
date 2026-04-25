@@ -405,13 +405,23 @@ describe("SearchBar integration", () => {
     expect(adviceLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("links the shelter card to the official CalorMad refuge listing", async () => {
+  it("uses an in-page shelter CTA instead of an external refuge link", async () => {
     render(<RoutingSection autoDemo />);
 
-    const shelterLink = await screen.findByRole("link", { name: /ver listado oficial de refugios climáticos del ayuntamiento de madrid/i });
-    expect(shelterLink).toHaveAttribute("href", "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Calormad/");
-    expect(shelterLink).toHaveAttribute("target", "_blank");
-    expect(shelterLink).toHaveAttribute("rel", "noopener noreferrer");
+    const shelterButton = await screen.findByRole("button", { name: /ver refugios en el mapa de la ruta/i });
+    expect(shelterButton).toBeInTheDocument();
+  });
+
+  it("scrolls to the route map when using the shelter card CTA", async () => {
+    const scrollIntoViewMock = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+
+    render(<RoutingSection autoDemo />);
+
+    const shelterButton = await screen.findByRole("button", { name: /ver refugios en el mapa de la ruta/i });
+    fireEvent.click(shelterButton);
+
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
   });
 
   it("uses the lower heatmap card as the heatmap toggle affordance", async () => {

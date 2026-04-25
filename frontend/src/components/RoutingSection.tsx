@@ -120,6 +120,10 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
       ? "Si sales en hora critica, reserva una pausa corta cada 10-15 minutos en sombra o junto a una fuente para bajar pulsaciones."
       : "Aprovecha las primeras horas para llenar agua y cubrir los tramos mas abiertos antes de que suba la temperatura.";
 
+  const scrollToRouteMap = () => {
+    document.getElementById("route-map")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   useEffect(() => {
     if (!routeResult) return;
 
@@ -320,7 +324,7 @@ ${gpxPoints}
         <div className="space-y-6">
           {/* Map */}
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-            <div className="overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,255,255,0.9)] shadow-[0_24px_54px_rgba(31,26,23,0.08)]">
+            <div id="route-map" className="overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,255,255,0.9)] shadow-[0_24px_54px_rgba(31,26,23,0.08)]">
               <div className="h-[500px] md:h-[600px] overflow-hidden border-b border-[var(--ds-gray-100)]">
                 <MapComponent
                   mergedData={null}
@@ -498,15 +502,14 @@ ${gpxPoints}
                   <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Refugios cercanos</h3>
                   <p className="mt-3 font-serif text-5xl font-semibold leading-none text-[#2d6a4f]">{routeResult.metrics.comfort.refugios}</p>
                   <p className="mt-3 text-sm text-[var(--ds-gray-500)]">La ruta recomendada conecta {routeResult.metrics.comfort.refugios} refugios y {routeResult.metrics.comfort.fuentes} puntos de agua para descansar o recargar.</p>
-                  <a
-                    href={OFFICIAL_SHELTER_LIST_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Ver listado oficial de refugios climáticos del Ayuntamiento de Madrid"
+                  <button
+                    type="button"
+                    onClick={scrollToRouteMap}
+                    aria-label="Ver refugios en el mapa de la ruta"
                     className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f] transition-opacity hover:opacity-80"
                   >
                     Ver refugios <ArrowRight className="h-4 w-4" />
-                  </a>
+                  </button>
                 </div>
                 <MadridShelterBuildingArt className="h-28 w-28 flex-shrink-0 text-[#2d6a4f]" aria-hidden="true" />
               </div>
