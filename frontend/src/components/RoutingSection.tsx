@@ -214,7 +214,7 @@ ${gpxPoints}
     <div className="mb-10 sm:mb-12">
       <div className="mb-8">
         {demoLoaded && !useMyLocation && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-[24px] border border-emerald-200/80 bg-[linear-gradient(180deg,rgba(236,253,245,0.96),rgba(220,252,231,0.82))] px-4 py-3 text-left shadow-[0_10px_24px_rgba(22,163,74,0.10)]">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">Ejemplo cargado</p>
               <p className="text-sm font-medium text-emerald-900">Hemos precargado una ruta Plaza Mayor → Museo del Prado a las 14:00 para mostrar el valor del producto desde el primer momento.</p>
@@ -232,7 +232,7 @@ ${gpxPoints}
           }}
           loading={loading}
           footerNotice={isHeatHour && hasSearched ? (
-            <div className="rounded-2xl bg-orange-50 px-4 py-3 flex items-start gap-3">
+            <div className="flex items-start gap-3 rounded-[22px] bg-[linear-gradient(180deg,rgba(255,247,237,0.98),rgba(255,237,213,0.88))] px-4 py-3 shadow-[0_10px_24px_rgba(249,115,22,0.10)]">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-600" />
               <div>
                 <p className="text-xs font-bold text-orange-800">Calor Extremo a las {hour}:00</p>
@@ -248,7 +248,7 @@ ${gpxPoints}
         <div className="mb-6 flex items-center gap-3">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all ${isPlaying ? 'bg-red-500 text-white shadow' : 'bg-[var(--ds-gray-100)] text-[var(--ds-black)] border-[1.5px] border-[#333] hover:bg-[var(--ds-gray-200)]'}`}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${isPlaying ? 'bg-red-500 text-white shadow-[0_12px_20px_rgba(239,68,68,0.24)]' : 'bg-[rgba(255,253,250,0.92)] text-[var(--ds-black)] shadow-[0_10px_20px_rgba(31,26,23,0.08)] hover:bg-white'}`}
           >
             {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
             {isPlaying ? "DETENER SIMULACIÓN" : "SIMULAR DÍA"}
@@ -263,7 +263,7 @@ ${gpxPoints}
 
       {/* Error */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-200 font-medium">
+        <div className="mb-6 rounded-[22px] border border-red-200 bg-[linear-gradient(180deg,rgba(254,242,242,0.98),rgba(254,226,226,0.90))] p-4 text-sm font-medium text-red-700 shadow-[0_10px_24px_rgba(239,68,68,0.08)]">
           ⚠ {error}
         </div>
       )}
@@ -272,7 +272,7 @@ ${gpxPoints}
       {hasSearched && routeResult && (
         <div className="grid md:grid-cols-5 gap-10 items-start">
           {/* Map */}
-          <div className="md:col-span-2 h-[500px] md:h-[600px] rounded-2xl overflow-hidden border border-[var(--ds-gray-100)] shadow-lg">
+          <div className="md:col-span-2 h-[500px] md:h-[600px] overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] shadow-[0_28px_64px_rgba(31,26,23,0.12)]">
             <MapComponent
               mergedData={null}
               refugios={null}
@@ -287,23 +287,23 @@ ${gpxPoints}
           <div className="md:col-span-3">
             {/* Health impact */}
             <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="p-5 bg-orange-50 border border-orange-100 rounded-2xl flex flex-col">
-                <span className="text-xs font-bold text-orange-600 mb-2">Protección</span>
+              <div className="flex flex-col rounded-[24px] border border-orange-100 bg-[linear-gradient(180deg,rgba(255,247,237,0.98),rgba(255,237,213,0.86))] p-5 shadow-[0_16px_36px_rgba(249,115,22,0.10)]">
+                <span className="text-xs font-bold uppercase tracking-[0.14em] text-orange-600 mb-2">Protección</span>
                 <span className="text-3xl font-black text-orange-700">{formatSunSaved(routeResult.metrics.human.sun_time_saved_min)}</span>
-                <span className="text-xs font-bold text-orange-600 mt-1">bajo el sol directo</span>
+                <span className="mt-1 text-xs font-bold text-orange-600">bajo el sol directo</span>
               </div>
-              <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl flex flex-col">
-                <span className="text-xs font-bold text-blue-600 mb-2">Esfuerzo</span>
+              <div className="flex flex-col rounded-[24px] border border-sky-100 bg-[linear-gradient(180deg,rgba(239,246,255,0.98),rgba(224,242,254,0.88))] p-5 shadow-[0_16px_36px_rgba(14,165,233,0.10)]">
+                <span className="text-xs font-bold uppercase tracking-[0.14em] text-blue-600 mb-2">Esfuerzo</span>
                 <span className="text-3xl font-black text-blue-700">{formatExtraEffort(routeResult.metrics.human.extra_effort_min)}</span>
-                <span className="text-xs font-bold text-blue-600 mt-1">de caminata adicional</span>
+                <span className="mt-1 text-xs font-bold text-blue-600">de caminata adicional</span>
               </div>
             </div>
 
             {/* Comparison table */}
-            <div className="bg-white border border-[var(--ds-gray-100)] rounded-2xl overflow-hidden shadow-sm">
+            <div className="overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.96)] shadow-[0_24px_54px_rgba(31,26,23,0.08)]">
               <table className="w-full text-sm text-left">
                 <tbody className="divide-y divide-[var(--ds-gray-100)]">
-                  <tr className="bg-[var(--ds-gray-50)] text-[10px] font-black uppercase text-[var(--ds-gray-400)] tracking-widest">
+                  <tr className="bg-[rgba(243,239,232,0.82)] text-[10px] font-black uppercase tracking-widest text-[var(--ds-gray-400)]">
                     <td className="px-6 py-3">Variable</td>
                     <td className="px-6 py-3 text-center">Ruta Directa</td>
                     <td className="px-6 py-3 text-center text-[#16a34a]">Ruta Refugio</td>
@@ -337,11 +337,11 @@ ${gpxPoints}
               <Button
                 variant="secondary"
                 onClick={() => { setRouteResult(null); setHasSearched(false); setError(null); setIsPlaying(false); }}
-                className="h-10 font-bold"
+                className="h-10 rounded-full font-bold"
               >
                 Nueva búsqueda
               </Button>
-              <Button variant="secondary" onClick={handleDownloadGPX} className="h-10 font-bold">
+              <Button variant="secondary" onClick={handleDownloadGPX} className="h-10 rounded-full font-bold">
                 <Download className="w-4 h-4 mr-1.5" /> Exportar GPX
               </Button>
             </div>
@@ -355,7 +355,7 @@ ${gpxPoints}
 
       {/* Placeholder map when no search yet */}
       {!hasSearched && (
-        <div className="h-[220px] md:h-[260px] rounded-2xl overflow-hidden border border-[var(--ds-gray-100)] shadow-lg relative">
+        <div className="relative h-[220px] overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] shadow-[0_28px_64px_rgba(31,26,23,0.10)] md:h-[260px]">
           <MapComponent
             mergedData={null}
             refugios={null}

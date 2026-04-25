@@ -149,11 +149,25 @@ export default function Home() {
         .slice(0, 10)
     : [];
   const top10PanelState = getTop10PanelState(mergedData, mergedDataError);
+  const sourceCards = [
+    { icon: Building2, label: "Modelo 3D municipal", detail: "Fuente oficial de referencia no enlazada por falta de URL publica estable verificada", color: "#0a72ef" },
+    { icon: TreePine, label: "Arbolado detallado", detail: "Ficha oficial del dataset municipal", color: "#16a34a", href: "https://datos.madrid.es/dataset/300761-0-arbolado-especies" },
+    { icon: Users, label: "Padron municipal historico", detail: "Ficha oficial del dataset municipal", color: "#de1d8d", href: "https://datos.madrid.es/dataset/209163-0-padron-municipal-historico" },
+    { icon: Wind, label: "Calidad del aire", detail: "Ficha oficial del dataset municipal", color: "#f97316", href: "https://datos.madrid.es/dataset/201200-0-calidad-aire-horario" },
+    { icon: Database, label: "Estaciones de aire", detail: "Ficha oficial del dataset municipal", color: "#7c3aed", href: "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire" },
+    { icon: Droplets, label: "Fuentes de agua para beber", detail: "Ficha oficial del dataset municipal", color: "#0ea5e9", href: "https://datos.madrid.es/dataset/300051-0-fuentes" },
+    { icon: Landmark, label: "Bibliotecas municipales", detail: "Ficha oficial del dataset municipal", color: "#8b5cf6", href: "https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas" },
+    { icon: Landmark, label: "Centros culturales", detail: "Ficha oficial del dataset municipal", color: "#6d28d9", href: "https://datos.madrid.es/dataset/200304-0-centros-culturales" },
+    { icon: Landmark, label: "Polideportivos municipales", detail: "Ficha oficial del dataset municipal", color: "#9333ea", href: "https://datos.madrid.es/dataset/200186-0-polideportivos" },
+    { icon: MapPin, label: "Barrios municipales", detail: "Limites administrativos oficiales", color: "#ff5b4f", href: "https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/LIMITES_ADMINISTRATIVOS/Barrios/Barrios.zip" },
+    { icon: Database, label: "Portal datos.madrid.es", detail: "Catalogo oficial del Ayuntamiento", color: "#171717", href: "https://datos.madrid.es/portal/site/egob" },
+  ];
 
   return (
     <main ref={mainRef} className="min-h-screen bg-[var(--background)]">
       {/* Navbar — minimal */}
-      <nav className="sticky top-0 z-50 bg-[rgba(255,255,255,0.8)] backdrop-blur-md border-b shadow-[var(--shadow-border)] px-4 sm:px-6 py-3 flex justify-between items-center">
+      <nav className="sticky top-0 z-50 border-b border-[rgba(91,84,74,0.08)] bg-[rgba(248,244,238,0.72)] px-4 py-3 shadow-[0_10px_30px_rgba(31,26,23,0.04)] backdrop-blur-md sm:px-6">
+        <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <ThermometerSun className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--ds-black)]" />
           <div>
@@ -164,34 +178,75 @@ export default function Home() {
         <div className="flex items-center gap-2 sm:gap-4">
           <Link href="/metodologia"><Button variant="primary" className="max-sm:hidden h-9 px-4 text-sm sm:inline-flex">Metodología</Button></Link>
         </div>
+        </div>
       </nav>
 
       {/* Hero — focused on search, not exposition */}
-      <div className="max-w-[1120px] mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-6 sm:pb-10">
-        {/* Hero search — the single focus of the page */}
-        <div id="routing" className="text-left">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--ds-black)] leading-tight mb-3 fade-in-up max-w-4xl">
-            Camina por Madrid con menos calor
-          </h1>
-          <p className="text-base sm:text-lg text-[var(--ds-gray-600)] mb-5 max-w-3xl fade-in-up">
-            Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
-          </p>
+      <div className="max-w-[1200px] mx-auto px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
+        <section className="hero-atmosphere hero-grid rounded-[40px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:items-start">
+            <div id="routing" className="text-left">
+              <p className="editorial-kicker fade-in-up text-[var(--ds-gray-500)]">Madrid camina mejor a la sombra</p>
+              <h1 className="fade-in-up mb-4 mt-3 max-w-4xl text-4xl font-semibold leading-[0.98] text-[var(--ds-black)] sm:text-5xl md:text-6xl">
+                Camina por Madrid con menos calor y más criterio urbano.
+              </h1>
+              <p className="fade-in-up mb-6 max-w-3xl text-base text-[var(--ds-gray-600)] sm:text-lg">
+                Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
+              </p>
 
-          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)] fade-in-up">
-            Sombra urbana real, comparación inmediata y recursos climáticos en ruta.
-          </p>
+              <div className="fade-in-up mb-6 grid gap-3 sm:grid-cols-3">
+                <div className="soft-stat rounded-[24px] px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Sombra urbana</p>
+                  <p className="mt-2 text-2xl font-semibold text-[var(--ds-black)]">661k+</p>
+                  <p className="mt-1 text-sm text-[var(--ds-gray-600)]">arboles y capas urbanas integradas para comparar rutas reales.</p>
+                </div>
+                <div className="soft-stat rounded-[24px] px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Decision inmediata</p>
+                  <p className="mt-2 text-2xl font-semibold text-[var(--ds-black)]">2 rutas</p>
+                  <p className="mt-1 text-sm text-[var(--ds-gray-600)]">directa frente a refugio, con coste extra y minutos salvados del sol.</p>
+                </div>
+                <div className="soft-stat rounded-[24px] px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Ciudad operativa</p>
+                  <p className="mt-2 text-2xl font-semibold text-[var(--ds-black)]">Top 10</p>
+                  <p className="mt-1 text-sm text-[var(--ds-gray-600)]">barrios prioritarios para intervenir cuando el calor pega mas fuerte.</p>
+                </div>
+              </div>
 
-          {/* Search bar embedded in hero */}
-          <div className="fade-in-up">
-            <RoutingSection />
+              <div className="fade-in-up">
+                <RoutingSection />
+              </div>
+            </div>
+
+            <aside className="fade-in-up self-stretch rounded-[32px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.62)] p-5 shadow-[0_20px_48px_rgba(31,26,23,0.08)] backdrop-blur-sm">
+              <p className="editorial-kicker text-[var(--ds-gray-500)]">Lo que cambia</p>
+              <div className="mt-4 space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-[var(--ds-black)]">No es solo un mapa.</p>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--ds-gray-600)]">Convierte capas urbanas dispersas en una decisión peatonal concreta para días de calor intenso.</p>
+                </div>
+                <div className="rounded-[24px] bg-[rgba(243,239,232,0.82)] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Señal editorial</p>
+                  <p className="mt-2 text-lg font-semibold text-[var(--ds-black)]">Menos exposición, sin esconder el coste.</p>
+                  <p className="mt-2 text-sm text-[var(--ds-gray-600)]">La herramienta enseña el beneficio climático junto al desvío adicional para que la comparación sea honesta.</p>
+                </div>
+                <div className="flex items-start gap-3 rounded-[24px] bg-[rgba(255,250,240,0.86)] p-4">
+                  <ThermometerSun className="mt-0.5 h-5 w-5 text-[#f97316]" />
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--ds-black)]">Pensado para episodios de calor</p>
+                    <p className="mt-1 text-sm text-[var(--ds-gray-600)]">Especialmente util para mayores, trayectos a pie y decision rapida a mediodia.</p>
+                  </div>
+                </div>
+              </div>
+            </aside>
           </div>
-        </div>
+        </section>
       </div>
 
       {/* Secondary content — below the fold */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
-        <section className="mb-16 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-6">Cómo funciona</h2>
+        <section className="section-shell mb-16 rounded-[32px] p-6 fade-in-up sm:p-8">
+          <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Como funciona</p>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-6">Una herramienta principal, tres pasos claros</h2>
           <div className="grid gap-4 md:grid-cols-3">
             <Card level={1} className="p-4">
               <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">1. Elige origen y destino</p>
@@ -208,8 +263,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-16 fade-in-up">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">Por qué es distinto</h2>
+        <section className="mb-16 grid gap-6 fade-in-up lg:grid-cols-[minmax(0,1.1fr)_320px] lg:items-start">
+          <div className="section-shell rounded-[32px] p-6 sm:p-8">
+          <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Por que es distinto</p>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">El calor deja de ser contexto y pasa a ser variable de ruta</h2>
           <div className="max-w-3xl space-y-4 text-[var(--ds-gray-600)] leading-relaxed">
             <p>
               Madrid Refugio no es solo un mapa de refugios ni un visor climático. Es una herramienta operativa que reutiliza datos abiertos del Ayuntamiento para ayudarte a caminar por Madrid con menos calor.
@@ -217,6 +274,12 @@ export default function Home() {
             <p>
               Calcula rutas concretas, compara alternativas y muestra los recursos disponibles a lo largo del camino para convertir información urbana compleja en una decisión útil.
             </p>
+          </div>
+          </div>
+          <div className="section-shell rounded-[32px] p-6">
+            <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">En una frase</p>
+            <p className="text-xl font-semibold leading-snug text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">No pide aprender un visor complejo. Pide elegir mejor un trayecto cuando el sol castiga.</p>
           </div>
         </section>
 
@@ -247,6 +310,7 @@ export default function Home() {
 
         {/* Diagnóstico urbano (Insights) */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
+          <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Lectura territorial</p>
           <h2 className="sub-heading-large text-[var(--ds-black)]">Diagnóstico urbano</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-24 stagger-children">
@@ -265,9 +329,10 @@ export default function Home() {
         </div>
 
         {/* Map and Detail Section */}
-        <section className="mb-24 rounded-[28px] border border-[var(--ds-gray-100)] bg-white p-5 sm:p-6 shadow-[var(--shadow-card-subtle)] fade-in-up">
+        <section className="section-shell mb-24 rounded-[32px] p-5 fade-in-up sm:p-6">
           <div className="mb-6 flex flex-col gap-4 border-b border-[var(--ds-gray-100)] pb-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
+              <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Mapa de intervencion</p>
               <h2 className="sub-heading-large text-[var(--ds-black)]">Análisis de vulnerabilidad territorial</h2>
               <p className="text-[var(--ds-gray-600)] mt-2 max-w-2xl">Identificación de barrios prioritarios para la intervención climática, con el selector integrado en el propio bloque del mapa.</p>
             </div>
@@ -298,8 +363,8 @@ export default function Home() {
           <div className="md:col-span-2 h-[500px] md:h-[750px]">
           <MapComponent
               mergedData={mergedData}
-              refugios={null}
-              fuentes={null}
+              refugios={refugios}
+              fuentes={fuentes}
               onBarrioSelect={handleBarrioSelect}
               routeResult={null}
               flyTarget={flyTarget}
@@ -510,7 +575,8 @@ export default function Home() {
         </div>
         </section>
 
-        <section className="mb-16 fade-in-up">
+        <section className="section-shell mb-16 rounded-[32px] p-6 fade-in-up sm:p-8">
+          <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Metodologia</p>
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">Metodología</h2>
           <div className="max-w-3xl mb-6 text-[var(--ds-gray-600)] leading-relaxed">
             <p>Madrid Refugio reutiliza datos abiertos del Ayuntamiento de Madrid para estimar el confort de una ruta peatonal tramo a tramo.</p>
@@ -537,29 +603,18 @@ export default function Home() {
 
         {/* Data Sources Section */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
+          <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Trazabilidad publica</p>
           <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de datos abiertos</h2>
           <p className="text-[var(--ds-gray-600)] mt-2">Los enlaces de esta seccion abren la ficha oficial de cada fuente para consultar metadatos, licencia y opciones de descarga.</p>
           <p className="text-[var(--ds-gray-600)] mt-2">No existe un dataset municipal operativo de refugios climaticos oficiales; por eso la capa de sustitucion usa bibliotecas, centros culturales y polideportivos con trazabilidad explicita.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
-          {[
-            { icon: Building2, label: "Modelo 3D municipal", detail: "Fuente oficial de referencia no enlazada por falta de URL publica estable verificada", color: "#0a72ef" },
-            { icon: TreePine, label: "Arbolado detallado", detail: "Ficha oficial del dataset municipal", color: "#16a34a", href: "https://datos.madrid.es/dataset/300761-0-arbolado-especies" },
-            { icon: Users, label: "Padron municipal historico", detail: "Ficha oficial del dataset municipal", color: "#de1d8d", href: "https://datos.madrid.es/dataset/209163-0-padron-municipal-historico" },
-            { icon: Wind, label: "Calidad del aire", detail: "Ficha oficial del dataset municipal", color: "#f97316", href: "https://datos.madrid.es/dataset/201200-0-calidad-aire-horario" },
-            { icon: Database, label: "Estaciones de aire", detail: "Ficha oficial del dataset municipal", color: "#7c3aed", href: "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire" },
-            { icon: Droplets, label: "Fuentes de agua para beber", detail: "Ficha oficial del dataset municipal", color: "#0ea5e9", href: "https://datos.madrid.es/dataset/300051-0-fuentes" },
-            { icon: Landmark, label: "Bibliotecas municipales", detail: "Ficha oficial del dataset municipal", color: "#8b5cf6", href: "https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas" },
-            { icon: Landmark, label: "Centros culturales", detail: "Ficha oficial del dataset municipal", color: "#6d28d9", href: "https://datos.madrid.es/dataset/200304-0-centros-culturales" },
-            { icon: Landmark, label: "Polideportivos municipales", detail: "Ficha oficial del dataset municipal", color: "#9333ea", href: "https://datos.madrid.es/dataset/200186-0-polideportivos" },
-            { icon: MapPin, label: "Barrios municipales", detail: "Limites administrativos oficiales", color: "#ff5b4f", href: "https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/LIMITES_ADMINISTRATIVOS/Barrios/Barrios.zip" },
-            { icon: Database, label: "Portal datos.madrid.es", detail: "Catalogo oficial del Ayuntamiento", color: "#171717", href: "https://datos.madrid.es/portal/site/egob" },
-          ].map((src) => {
-            const cardClassName = `fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 transition-all group block ${src.href ? "hover:border-[var(--ds-gray-400)] hover:shadow-md" : "opacity-90"}`;
+          {sourceCards.map((src) => {
+            const cardClassName = `fade-in-up rounded-[24px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.8)] p-4 transition-all group block shadow-[0_12px_28px_rgba(31,26,23,0.05)] ${src.href ? "hover:-translate-y-[2px] hover:border-[var(--ds-gray-400)] hover:shadow-[0_20px_40px_rgba(31,26,23,0.09)]" : "opacity-90"}`;
 
             const content = (
               <>
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${src.color}12` }}>
                   <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
                 </div>
                 <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 group-hover:text-[var(--ds-black)] leading-tight">{src.label}</p>

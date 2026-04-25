@@ -194,14 +194,14 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
           }
         }}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-2xl border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)] focus:ring-offset-2"
+        className="w-full rounded-[20px] border border-transparent bg-[rgba(243,239,232,0.95)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)] focus:ring-offset-2"
       />
 
       {isListOpen && (
         <ul
           id={listboxId}
           role="listbox"
-          className="space-y-2 rounded-2xl border border-[var(--ds-gray-200)] bg-white p-2 shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+          className="space-y-2 rounded-[22px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.98)] p-2 shadow-[0_18px_40px_rgba(31,26,23,0.10)]"
         >
           {suggestions.map((option, index) => (
             <li

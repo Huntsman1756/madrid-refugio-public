@@ -85,20 +85,28 @@ const destIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
-// Custom markers for fountains and shelters
-const fountainIcon = L.divIcon({
-  html: `<div style="background-color: #0ea5e9; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 12px;">💧</div>`,
-  className: '',
-  iconSize: [22, 22],
-  iconAnchor: [11, 11],
-});
+function createResourceIcon(symbol: string, background: string, border: string) {
+  return L.divIcon({
+    html: `<div style="width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: ${background}; color: white; border: 2px solid ${border}; box-shadow: 0 8px 16px rgba(15,23,42,0.20); font-size: 11px; font-weight: 700;">${symbol}</div>`,
+    className: '',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+}
 
-const shelterIcon = L.divIcon({
-  html: `<div style="background-color: #f97316; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 12px;">🏠</div>`,
-  className: '',
-  iconSize: [22, 22],
-  iconAnchor: [11, 11],
-});
+const fountainIcon = createResourceIcon('F', '#0ea5e9', 'rgba(255,255,255,0.92)');
+const shelterIcon = createResourceIcon('R', '#f97316', 'rgba(255,255,255,0.92)');
+
+function resourcePointStyle(fillColor: string, radius: number) {
+  return {
+    radius,
+    fillColor,
+    color: '#fffdfa',
+    weight: 1.5,
+    opacity: 1,
+    fillOpacity: 0.92,
+  };
+}
 
 const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapComponent(
   { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget, viewMode = 'vulnerability', showAreaLegend = true },
@@ -157,7 +165,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
   };
 
   return (
-    <div className="h-full w-full rounded-xl overflow-hidden border border-[var(--ds-gray-100)] relative z-0">
+    <div className="relative z-0 h-full w-full overflow-hidden rounded-[26px] border border-[rgba(91,84,74,0.08)] bg-[#f6f1e8]">
       {/* NO key prop — never unmount the map, controllers handle view changes */}
       <MapContainer
         center={[40.4168, -3.7038]}
@@ -168,7 +176,12 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+        />
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+          pane="overlayPane"
         />
 
         {/* View controllers */}
@@ -234,12 +247,26 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
             data={refugios}
             pointToLayer={(_, latlng) =>
               L.circleMarker(latlng, {
-                radius: 4, fillColor: '#0a72ef', color: '#fff',
-                weight: 1, opacity: 1, fillOpacity: 0.85,
+                ...resourcePointStyle('#f97316', 4.5),
               })
             }
             onEachFeature={(feature, layer) =>
-              layer.bindPopup(feature.properties?.title || feature.properties?.nombre || 'Refugio')
+              layer.bindPopup(feature.properties?.title || feature.properties?.nombre || 'Refugio sustituto')
+            }
+          />
+        )}
+
+        {!routeResult && fuentes?.features && (
+          <GeoJSON
+            key="fuentes"
+            data={fuentes}
+            pointToLayer={(_, latlng) =>
+              L.circleMarker(latlng, {
+                ...resourcePointStyle('#0ea5e9', 3.8),
+              })
+            }
+            onEachFeature={(feature, layer) =>
+              layer.bindPopup(feature.properties?.title || feature.properties?.nombre || 'Fuente de agua potable')
             }
           />
         )}
@@ -247,7 +274,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
 
       {/* Map legend for vulnerability/shelter deficit */}
       {!routeResult && mergedData && showAreaLegend && (
-        <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-2 z-[1000] shadow-sm max-w-[180px]">
+        <div className="absolute bottom-3 left-3 z-[1000] max-w-[190px] space-y-2 rounded-2xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.92)] px-3 py-3 text-xs shadow-[0_14px_28px_rgba(31,26,23,0.10)] backdrop-blur-sm">
           <p className="font-bold text-[var(--ds-black)] mb-1">
             {viewMode === 'shelter_deficit' ? 'Acceso a refugios' : 'Vulnerabilidad climática'}
           </p>
@@ -271,12 +298,16 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
               </>
             )}
           </div>
+          <div className="border-t border-[rgba(91,84,74,0.08)] pt-2 text-[10px] text-[var(--ds-gray-500)]">
+            <div className="mb-1 flex items-center gap-2"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#0ea5e9]" /> Fuentes</div>
+            <div className="flex items-center gap-2"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#f97316]" /> Refugios sustitutos</div>
+          </div>
         </div>
       )}
 
       {/* Map legend for routes */}
       {routeResult && (
-        <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-[var(--ds-gray-100)] rounded-lg px-3 py-2 text-xs space-y-1 z-[1000] shadow-sm">
+        <div className="absolute bottom-3 left-3 z-[1000] space-y-2 rounded-2xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.92)] px-3 py-3 text-xs shadow-[0_14px_28px_rgba(31,26,23,0.10)] backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-1.5 bg-[#10b981] rounded-full" />
             <span className="text-[var(--ds-black)] font-semibold">Ruta eco-refugio</span>
@@ -284,6 +315,10 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-0.5 bg-[#9ca3af] border-t border-dashed border-[#9ca3af]" />
             <span className="text-[var(--ds-gray-500)]">Ruta estándar</span>
+          </div>
+          <div className="border-t border-[rgba(91,84,74,0.08)] pt-2 text-[10px] text-[var(--ds-gray-500)]">
+            <div className="mb-1 flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#0ea5e9] text-white">F</span> {routeResult.metrics?.comfort?.fuentes ?? 0} fuentes cerca</div>
+            <div className="flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f97316] text-white">R</span> {routeResult.metrics?.comfort?.refugios ?? 0} refugios cerca</div>
           </div>
         </div>
       )}
