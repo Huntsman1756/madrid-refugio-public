@@ -46,7 +46,6 @@ export default function Home() {
   const [mergedData, setMergedData] = useState<any>(null);
   const [mergedDataError, setMergedDataError] = useState<string | null>(null);
   const [refugios, setRefugios] = useState<any>(null);
-  const [fuentes, setFuentes] = useState<any>(null);
   const [selectedBarrio, setSelectedBarrio] = useState<string | null>(null);
   const [barrioStats, setBarrioStats] = useState<any>(null);
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lon: number } | null>(null);
@@ -76,7 +75,6 @@ export default function Home() {
   useEffect(() => {
     loadMergedData();
     fetch('/data/refugios_sustitutos.geojson').then(res => res.json()).then(setRefugios).catch(() => setRefugios(null));
-    fetch('/data/fuentes.geojson').then(res => res.json()).then(setFuentes).catch(() => setFuentes(null));
   }, []);
 
   // ── Scroll reveal observer ──
@@ -166,7 +164,7 @@ export default function Home() {
   return (
     <main ref={mainRef} className="min-h-screen bg-[var(--background)]">
       {/* Navbar — minimal */}
-      <nav className="sticky top-0 z-50 border-b border-[rgba(91,84,74,0.08)] bg-[rgba(248,244,238,0.72)] px-4 py-3 shadow-[0_10px_30px_rgba(31,26,23,0.04)] backdrop-blur-md sm:px-6">
+      <nav className="sticky top-0 z-50 border-b border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.82)] px-4 py-3 shadow-[0_8px_24px_rgba(36,53,65,0.04)] backdrop-blur-md sm:px-6">
         <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <ThermometerSun className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--ds-black)]" />
@@ -182,62 +180,58 @@ export default function Home() {
       </nav>
 
       {/* Hero — focused on search, not exposition */}
-      <div className="max-w-[1200px] mx-auto px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
-        <section className="hero-atmosphere hero-grid rounded-[40px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:items-start">
+      <div className="max-w-[1760px] mx-auto px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
+        <section className="hero-atmosphere hero-grid px-1 py-4 sm:px-2 sm:py-6 lg:px-3 lg:py-7">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-12">
             <div id="routing" className="text-left">
-              <p className="editorial-kicker fade-in-up text-[var(--ds-gray-500)]">Madrid camina mejor a la sombra</p>
-              <h1 className="fade-in-up mb-4 mt-3 max-w-4xl text-4xl font-semibold leading-[0.98] text-[var(--ds-black)] sm:text-5xl md:text-6xl">
-                Camina por Madrid con menos calor y más criterio urbano.
+              <h1 className="hero-title-serif fade-in-up mb-4 max-w-5xl text-[clamp(3rem,4.3vw,4.5rem)] text-[var(--ds-black)]">
+                Camina por Madrid con menos calor
               </h1>
-              <p className="fade-in-up mb-6 max-w-3xl text-base text-[var(--ds-gray-600)] sm:text-lg">
+              <p className="fade-in-up mb-0 max-w-4xl text-base font-semibold leading-[1.65] text-[var(--ds-gray-500)] sm:text-lg">
                 Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
               </p>
-
-              <div className="fade-in-up mb-6 grid gap-3 sm:grid-cols-3">
-                <div className="soft-stat rounded-[24px] px-4 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Sombra urbana</p>
-                  <p className="mt-2 text-2xl font-semibold text-[var(--ds-black)]">661k+</p>
-                  <p className="mt-1 text-sm text-[var(--ds-gray-600)]">arboles y capas urbanas integradas para comparar rutas reales.</p>
-                </div>
-                <div className="soft-stat rounded-[24px] px-4 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Decision inmediata</p>
-                  <p className="mt-2 text-2xl font-semibold text-[var(--ds-black)]">2 rutas</p>
-                  <p className="mt-1 text-sm text-[var(--ds-gray-600)]">directa frente a refugio, con coste extra y minutos salvados del sol.</p>
-                </div>
-                <div className="soft-stat rounded-[24px] px-4 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Ciudad operativa</p>
-                  <p className="mt-2 text-2xl font-semibold text-[var(--ds-black)]">Top 10</p>
-                  <p className="mt-1 text-sm text-[var(--ds-gray-600)]">barrios prioritarios para intervenir cuando el calor pega mas fuerte.</p>
-                </div>
-              </div>
-
-              <div className="fade-in-up">
-                <RoutingSection />
-              </div>
+              <p className="editorial-kicker fade-in-up mt-6 text-[#247b56]">Sombra urbana real, comparación inmediata y recursos climáticos en ruta.</p>
             </div>
 
-            <aside className="fade-in-up self-stretch rounded-[32px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.62)] p-5 shadow-[0_20px_48px_rgba(31,26,23,0.08)] backdrop-blur-sm">
-              <p className="editorial-kicker text-[var(--ds-gray-500)]">Lo que cambia</p>
-              <div className="mt-4 space-y-4">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--ds-black)]">No es solo un mapa.</p>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--ds-gray-600)]">Convierte capas urbanas dispersas en una decisión peatonal concreta para días de calor intenso.</p>
-                </div>
-                <div className="rounded-[24px] bg-[rgba(243,239,232,0.82)] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Señal editorial</p>
-                  <p className="mt-2 text-lg font-semibold text-[var(--ds-black)]">Menos exposición, sin esconder el coste.</p>
-                  <p className="mt-2 text-sm text-[var(--ds-gray-600)]">La herramienta enseña el beneficio climático junto al desvío adicional para que la comparación sea honesta.</p>
-                </div>
-                <div className="flex items-start gap-3 rounded-[24px] bg-[rgba(255,250,240,0.86)] p-4">
-                  <ThermometerSun className="mt-0.5 h-5 w-5 text-[#f97316]" />
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--ds-black)]">Pensado para episodios de calor</p>
-                    <p className="mt-1 text-sm text-[var(--ds-gray-600)]">Especialmente util para mayores, trayectos a pie y decision rapida a mediodia.</p>
-                  </div>
-                </div>
-              </div>
-            </aside>
+            <div className="hero-art-shell fade-in-up hidden lg:block" aria-hidden="true">
+              <svg width="100%" height="100%" viewBox="0 0 680 232" fill="none" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="wash" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stopColor="#edf4f0"/>
+                    <stop offset="1" stopColor="#d7e9df"/>
+                  </linearGradient>
+                  <linearGradient id="tree" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stopColor="#9fbea8"/>
+                    <stop offset="1" stopColor="#6d9d7b"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0 178c78-26 145-24 219-17 61 6 130-6 211-30 78-23 160-27 250-6v107H0Z" fill="url(#wash)" opacity=".72"/>
+                <circle cx="42" cy="55" r="25" fill="#dfeae4" opacity=".75"/>
+                <path d="M151 86h42v100h-42V86Zm54 34h32v66h-32v-66Zm74-46h38v112h-38V74Zm128-15h46v127h-46V59Zm178-16h48v143h-48V43Z" fill="#dfe8e6" opacity=".64"/>
+                <path d="M106 110h52v76h-52v-76Zm340-82h18v158h-18V28Zm35 51 27-32 27 32v107h-54V79Zm80 17h30v90h-30V96Z" fill="#e7eeee" opacity=".70"/>
+                <path d="M242 105c4-34 20-55 47-55s43 21 47 55v81H242v-81Z" fill="#dde9e8" opacity=".86"/>
+                <path d="M261 107c2-22 11-36 29-36 17 0 27 14 29 36v79h-58v-79Z" fill="#c8dbd7" opacity=".55"/>
+                <path d="M286 50V31M276 34h20" stroke="#c4d9d2" strokeWidth="4" strokeLinecap="round"/>
+                <g opacity=".62" stroke="#bacfc9" strokeWidth="3" strokeLinecap="round">
+                  <path d="M239 133h100M250 151h78M260 169h58"/>
+                  <path d="M284 72v-7M296 73v-7"/>
+                </g>
+                <g transform="translate(390 89)">
+                  <rect x="0" y="80" width="74" height="8" rx="4" fill="#98b8a4" opacity=".75"/>
+                  <path d="M9 88v21M63 88v21M11 72h51c7 0 12 5 12 12v2H0v-2c0-7 5-12 11-12Z" stroke="#7fa18c" strokeWidth="3" fill="none"/>
+                  <path d="M14 73v-13M61 73v-13" stroke="#7fa18c" strokeWidth="3" strokeLinecap="round"/>
+                </g>
+                <g opacity=".9">
+                  <path d="M348 119c-13-3-23-15-23-30 0-18 15-32 33-32 6 0 12 2 17 5 6-18 22-31 42-31 25 0 45 20 45 45 0 7-2 14-5 20 15 4 26 17 26 33 0 19-15 34-34 34H355c-17 0-31-14-31-31 0-16 12-29 28-31" fill="url(#tree)" opacity=".74"/>
+                  <path d="M413 161v36" stroke="#78977f" strokeWidth="8" strokeLinecap="round"/>
+                  <path d="M399 198h31" stroke="#78977f" strokeWidth="6" strokeLinecap="round"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <div className="fade-in-up mt-5">
+            <RoutingSection />
           </div>
         </section>
       </div>
@@ -363,8 +357,8 @@ export default function Home() {
           <div className="md:col-span-2 h-[500px] md:h-[750px]">
           <MapComponent
               mergedData={mergedData}
-              refugios={refugios}
-              fuentes={fuentes}
+              refugios={null}
+              fuentes={null}
               onBarrioSelect={handleBarrioSelect}
               routeResult={null}
               flyTarget={flyTarget}

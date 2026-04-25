@@ -240,36 +240,6 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
           <GeoJSON key="barrios" data={mergedData} style={style} onEachFeature={onEachFeature} />
         )}
 
-        {/* Refugios overlay */}
-        {!routeResult && refugios?.features && (
-          <GeoJSON
-            key="refugios"
-            data={refugios}
-            pointToLayer={(_, latlng) =>
-              L.circleMarker(latlng, {
-                ...resourcePointStyle('#f97316', 4.5),
-              })
-            }
-            onEachFeature={(feature, layer) =>
-              layer.bindPopup(feature.properties?.title || feature.properties?.nombre || 'Refugio sustituto')
-            }
-          />
-        )}
-
-        {!routeResult && fuentes?.features && (
-          <GeoJSON
-            key="fuentes"
-            data={fuentes}
-            pointToLayer={(_, latlng) =>
-              L.circleMarker(latlng, {
-                ...resourcePointStyle('#0ea5e9', 3.8),
-              })
-            }
-            onEachFeature={(feature, layer) =>
-              layer.bindPopup(feature.properties?.title || feature.properties?.nombre || 'Fuente de agua potable')
-            }
-          />
-        )}
       </MapContainer>
 
       {/* Map legend for vulnerability/shelter deficit */}
@@ -297,10 +267,6 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
                 <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{backgroundColor: '#1a9850'}} /><span>Baja prioridad</span></div>
               </>
             )}
-          </div>
-          <div className="border-t border-[rgba(91,84,74,0.08)] pt-2 text-[10px] text-[var(--ds-gray-500)]">
-            <div className="mb-1 flex items-center gap-2"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#0ea5e9]" /> Fuentes</div>
-            <div className="flex items-center gap-2"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#f97316]" /> Refugios sustitutos</div>
           </div>
         </div>
       )}
