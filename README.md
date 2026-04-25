@@ -44,7 +44,6 @@ Arquitectura principal hoy en producción:
 - Dominio público principal: `https://madridrefugio.es`
 - Backend público estable: `https://api.madridrefugio.es`
 
-`Railway` se mantiene documentado en este repositorio solo como alternativa opcional de despliegue del backend, no como infraestructura principal actual.
 
 ## 5. Datos precomputados
 
@@ -78,7 +77,7 @@ En producción debes preparar antes del deploy estos artefactos en `data/process
 - `madrid_search_index.json`
 - `madrid_search_index.meta.json`
 
-Si usas Railway con volumen persistente, deja esos ficheros en `DATA_DIR` para que sobrevivan entre despliegues y el prestart no tenga que regenerarlos en cada arranque.
+Si usas un volumen persistente, deja esos ficheros en `DATA_DIR` para que sobrevivan entre despliegues y el prestart no tenga que regenerarlos en cada arranque.
 
 Si despliegas sin ellos, `/api/suggest` responderá `503 Service Unavailable` hasta que el CSV oficial y/o el índice precomputado estén presentes.
 
@@ -141,13 +140,9 @@ El enfoque es reproducible porque separa claramente:
 
 La geometría solar usada para sombras es determinista y no depende de APIs meteorológicas externas.
 
-### Despliegue alternativo en Railway
+## Despliegue
 
-El backend también puede desplegarse en Railway como alternativa al servidor privado. Para ello necesita:
-
-- Volumen montado en `/mnt/data`
-- `DATA_DIR=/mnt/data/processed`
-- Recursos del servicio suficientes para cargar el grafo completo en memoria
+El backend puede desplegarse en cualquier servidor con Python 3.12+ y recursos suficientes para cargar el grafo completo en memoria (mínimo 3 GB RAM).
 
 El arranque usa:
 
@@ -155,41 +150,7 @@ El arranque usa:
 python prepare_search_data.py && uvicorn api:app --host 0.0.0.0 --port $PORT
 ```
 
-Eso mueve la descarga/generación del CSV e índice al prestart del despliegue, no al runtime de `/api/suggest`.
-
-El motor pesado de routing ya no se carga completo durante `startup`. El backend publica `/health` nada más arrancar y difiere la carga del grafo, refugios, fuentes y matriz de sombra hasta la primera petición real a `/api/route`. Esto reduce el pico de memoria del deploy y evita bucles de reinicio cuando el servicio se ajusta a `3 GB RAM`.
-
-Configuracion operativa:
-
-- `DATA_DIR=/mnt/data/processed`
-- volumen persistente con `madrid_shadow_graph.graphml` y `shadow_matrix.parquet`
-- limite del servicio en Railway de al menos `3 GB RAM`; subirlo si el runtime vuelve a entrar en OOM bajo carga real
-
-El archivo `railway.json` de la raiz deja fijados en codigo el `startCommand`, `healthcheckPath` y `healthcheckTimeout`.
-
-El flujo manual soportado para Railway no debe usar `railway up` desde la raiz del repo. Este proyecto puede tener artefactos locales grandes en `data/processed/` y el upload completo puede fallar con `413 Payload Too Large` aunque produccion ya lea esos ficheros desde el volumen persistente.
-
-El comando oficial de deploy manual es:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/deploy_railway.ps1
-```
-
-Ese script regenera `.railway-deploy/` como snapshot minimo del backend y ejecuta `railway up ".railway-deploy" --path-as-root`. `.railway-deploy/` es un artefacto generado e ignorado por git, no una fuente de verdad.
-
-Prerequisitos del flujo manual:
-
-- Railway CLI instalado y autenticado
-- proyecto, entorno y servicio enlazados con `railway link`
-- volumen persistente montado en `/mnt/data`
-- `DATA_DIR=/mnt/data/processed`
-
-Si el servicio vuelve a responder `502` durante el arranque, lo primero que hay que revisar es:
-
-1. que el volumen sigue montado en `/mnt/data`
-2. que `DATA_DIR` apunta a `/mnt/data/processed`
-3. que el override de recursos del servicio no haya bajado de `8 GB`
-4. que `GET /health` llegue a `200` antes de dar por valido el deploy
+El motor pesado de routing ya no se carga completo durante `startup`. El backend publica `/health` nada más arrancar y difiere la carga del grafo, refugios, fuentes y matriz de sombra hasta la primera petición real a `/api/route`. Esto reduce el pico de memoria del deploy.
 
 ## Nota sobre acceso y derechos
 
