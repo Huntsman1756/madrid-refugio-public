@@ -265,6 +265,8 @@ describe("SearchBar integration", () => {
 
     expect(await screen.findByText("Hora")).toBeInTheDocument();
     expect(screen.getByText("Ruta")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: /hora del recorrido/i })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: /preferencia de ruta/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /10:00/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /directa/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /buscar ruta con sombra/i })).toBeInTheDocument();

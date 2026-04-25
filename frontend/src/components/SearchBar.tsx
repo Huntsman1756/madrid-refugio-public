@@ -31,12 +31,6 @@ interface SearchBarProps {
 const HOUR_OPTIONS = [10, 14, 18] as const;
 const AUTOCOMPLETE_DEBOUNCE_MS = 180;
 
-const HOUR_LABELS: Record<number, string> = {
-  10: "Mañana",
-  14: "Más calor",
-  18: "Tarde",
-};
-
 const PREFERENCE_OPTIONS = [
   { value: 0.0, label: "Directa", detail: "Llega antes" },
   { value: 0.5, label: "Equilibrada", detail: "Buen balance" },
@@ -354,8 +348,8 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
         </div>
 
         <div className="rounded-[28px] border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)]/70 p-2.5 sm:p-3">
-          <div className="grid gap-2 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(220px,0.8fr)_minmax(220px,0.8fr)_auto]">
-            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px] lg:items-start">
+            <div className="min-w-0 rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
                   <MapPin className="h-3.5 w-3.5 text-emerald-700" />
@@ -376,7 +370,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
                   onClick={() => {
                     if (!isLocationReady) requestGeolocation();
                   }}
-                  className="w-full rounded-2xl bg-[var(--ds-gray-50)] px-3 py-3 text-left transition-colors hover:bg-[var(--ds-gray-100)]"
+                  className="w-full rounded-2xl bg-[var(--ds-gray-50)] px-4 py-3 text-left transition-colors hover:bg-[var(--ds-gray-100)]"
                 >
                   <div className="text-sm font-medium text-[var(--ds-black)]">{locationTitle}</div>
                   {locationDetail && <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>}
@@ -402,7 +396,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               )}
             </div>
 
-            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
+            <div className="min-w-0 rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
               <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
                 <Navigation className="h-3.5 w-3.5 text-[var(--ds-black)]" />
                 Destino
@@ -429,57 +423,65 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
               )}
             </div>
 
-            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Hora</label>
-                <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{hour}:00</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {HOUR_OPTIONS.map((option) => {
-                  const selected = option === hour;
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setHour(option)}
-                      className={`min-h-16 rounded-2xl border px-2.5 py-3 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
-                    >
-                      <div className="text-sm font-semibold">{option}:00</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="rounded-[22px] bg-white px-3 py-3 shadow-[var(--shadow-border)]">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Ruta</label>
-                <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {PREFERENCE_OPTIONS.map((option) => {
-                  const selected = option.value === preference;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setPreference(option.value)}
-                      className={`min-h-16 rounded-2xl border px-2.5 py-3 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
-                    >
-                      <div className="text-sm font-semibold">{option.label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={loading || !canSearch}
-              className="flex min-h-[148px] items-center justify-center rounded-[24px] bg-[#16a34a] px-6 text-base font-semibold text-white transition-all hover:bg-[#15803d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 xl:min-h-0"
+              className="flex min-h-[64px] items-center justify-center rounded-[22px] bg-[#16a34a] px-6 text-base font-semibold text-white transition-all hover:bg-[#15803d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
             >
               {loading ? "Calculando..." : "Buscar ruta con sombra"}
             </button>
+          </div>
+
+          <div className="mt-3 flex flex-col gap-3 border-t border-[var(--ds-gray-200)] pt-3 lg:flex-row lg:items-start lg:justify-between">
+            <p className="text-sm text-[var(--ds-gray-500)]">
+              Ajusta la hora y el equilibrio de la ruta sin perder espacio para buscar dos puntos reales.
+            </p>
+
+            <div className="flex flex-col gap-3 lg:min-w-0 lg:flex-row lg:justify-end">
+              <div role="group" aria-label="Hora del recorrido" className="min-w-0">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Hora</label>
+                  <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{hour}:00</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {HOUR_OPTIONS.map((option) => {
+                    const selected = option === hour;
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setHour(option)}
+                        className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                      >
+                        {option}:00
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div role="group" aria-label="Preferencia de ruta" className="min-w-0">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Ruta</label>
+                  <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {PREFERENCE_OPTIONS.map((option) => {
+                    const selected = option.value === preference;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setPreference(option.value)}
+                        className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
