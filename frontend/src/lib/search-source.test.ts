@@ -54,10 +54,10 @@ describe("getSearchOptions", () => {
   });
 
   it("uses NEXT_PUBLIC_API_URL when configured", () => {
-    vi.stubEnv("NEXT_PUBLIC_API_URL", "https://web-production-1f04a.up.railway.app/");
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.example.com/");
 
-    expect(getApiBaseUrl()).toBe("https://web-production-1f04a.up.railway.app");
-    expect(getSuggestApiUrl()).toBe("https://web-production-1f04a.up.railway.app/api/suggest");
+    expect(getApiBaseUrl()).toBe("https://api.example.com");
+    expect(getSuggestApiUrl()).toBe("https://api.example.com/api/suggest");
   });
 
   it("loads the static index once and filters queries locally", async () => {
