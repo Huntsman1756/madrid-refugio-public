@@ -7,6 +7,7 @@ import { Card } from "./ui/Card";
 import { AlertTriangle, Download, Play, Pause, MapPin, Clock3, TreePine, Droplets, Building2, ArrowRight, ThermometerSun } from "lucide-react";
 import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
 import { getApiBaseUrl } from "@/lib/search-source";
+import { ClimateRouteBadge, ClimateShelterIcon, OrganicTree, WaterFountainIcon } from "./branding/HomeVisuals";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -324,10 +325,15 @@ ${gpxPoints}
               <div className={`grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-6 ${loading ? "opacity-70" : "opacity-100"} ${animateResults ? "results-refresh" : ""}`}>
                 <div>
                   <div className="mb-5 flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#d4ead7] px-3 py-1 text-xs font-bold text-[#2d6a4f]">
-                      <TreePine className="h-3.5 w-3.5" /> Ruta recomendada
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#d4ead7] px-3 py-1 text-xs font-bold text-[#2d6a4f] shadow-[0_10px_18px_rgba(45,106,79,0.12)]">
+                      <ClimateRouteBadge className="h-4 w-7" /> Ruta recomendada
                     </span>
                     <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Equilibrada</div>
+                  </div>
+
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(45,106,79,0.12)] bg-[rgba(255,252,247,0.9)] px-3 py-2 text-xs font-semibold text-[#2d6a4f] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
+                    <OrganicTree testId="route-legend-tree" className="h-5 w-4" />
+                    Ruta con alivio climático
                   </div>
 
                   <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Recomendación de ruta calculada">
@@ -365,12 +371,26 @@ ${gpxPoints}
                     <Card level={1} className="rounded-[20px] border border-[#d4ead7] p-4">
                       <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4ead7] text-[#2d6a4f]">
-                          <TreePine className="h-5 w-5" />
+                          <OrganicTree className="h-7 w-5" />
                         </span>
                         <div>
                           <p className="text-lg font-bold text-[#2d6a4f]">{shadeCoverage ?? "—"}%</p>
                           <p className="text-xs text-[var(--ds-gray-500)]">Del recorrido con sombra</p>
                         </div>
+                      </div>
+                      <div
+                        className="mt-3 h-2.5 overflow-hidden rounded-full bg-[rgba(17,24,39,0.08)]"
+                        role="progressbar"
+                        aria-label="Cobertura de sombra del recorrido"
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={shadeCoverage ?? 0}
+                        data-testid="shade-progress"
+                      >
+                        <div
+                          className="h-full rounded-full bg-[linear-gradient(90deg,#52b788,#2d6a4f)] transition-[width] duration-700 ease-out"
+                          style={{ width: `${shadeCoverage ?? 0}%` }}
+                        />
                       </div>
                     </Card>
 
@@ -425,20 +445,20 @@ ${gpxPoints}
                     <p className="mt-2 text-sm text-[var(--ds-gray-500)]">Buen balance entre tiempo, sombra y acceso a puntos de alivio.</p>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
-                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><Droplets className="h-4 w-4 text-[#1a6fa8]" /> Fuentes de agua</span>
-                      <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.fuentes}</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
-                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><Building2 className="h-4 w-4 text-[#c0392b]" /> Refugios climáticos</span>
-                      <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.refugios}</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
-                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><TreePine className="h-4 w-4 text-[#2d6a4f]" /> Zonas arboladas</span>
-                      <span className="text-xs font-semibold text-[var(--ds-gray-500)]">A lo largo del recorrido</span>
-                    </div>
-                  </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><WaterFountainIcon className="h-4 w-4" /> Fuentes de agua</span>
+                       <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.fuentes}</span>
+                     </div>
+                     <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><ClimateShelterIcon className="h-4 w-4" /> Refugios climáticos</span>
+                       <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.refugios}</span>
+                     </div>
+                     <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><OrganicTree className="h-5 w-4" /> Zonas arboladas</span>
+                       <span className="text-xs font-semibold text-[var(--ds-gray-500)]">A lo largo del recorrido</span>
+                     </div>
+                   </div>
 
                   <Button variant="secondary" onClick={handleDownloadGPX} className="h-11 justify-between rounded-[18px] border-[1.5px] border-[var(--ds-gray-100)] px-4 font-semibold">
                     <span className="inline-flex items-center gap-2"><Download className="h-4 w-4" /> Exportar GPX</span>

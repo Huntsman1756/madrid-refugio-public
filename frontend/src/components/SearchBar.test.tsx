@@ -339,4 +339,12 @@ describe("SearchBar integration", () => {
     expect(heatmapToggle).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText(/capa térmica superpuesta/i)).toBeInTheDocument();
   });
+
+  it("renders a visual shade progress and a branded route legend after calculating a route", async () => {
+    render(<RoutingSection autoDemo />);
+
+    expect(await screen.findByTestId("shade-progress")).toHaveAttribute("aria-valuenow", "50");
+    expect(screen.getByTestId("route-legend-tree")).toBeInTheDocument();
+    expect(screen.getByText(/ruta con alivio clim[aá]tico/i, { selector: "div" })).toBeInTheDocument();
+  });
 });

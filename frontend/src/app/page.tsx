@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
+import { AlcalaLogo, HeroClimateArt, OrganicTree } from "@/components/branding/HomeVisuals";
 import { RoutingSection } from "@/components/RoutingSection";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { getTop10PanelState } from "./home-data-state";
@@ -147,6 +148,49 @@ export default function Home() {
         .slice(0, 10)
     : [];
   const top10PanelState = getTop10PanelState(mergedData, mergedDataError);
+  const journeySteps = [
+    {
+      step: "01",
+      title: "Define el trayecto",
+      detail: "Selecciona dos puntos reales de Madrid desde el catálogo oficial o usa tu ubicación actual como origen.",
+      icon: Navigation,
+      tone: "bg-[#ebf5ff] text-[#0a72ef]",
+    },
+    {
+      step: "02",
+      title: "Leemos la ciudad",
+      detail: "Contrastamos la ruta directa con una alternativa más fresca usando sombra urbana, arbolado, agua y refugios próximos.",
+      icon: TreePine,
+      tone: "bg-[#f0fdf4] text-[#2d6a4f]",
+    },
+    {
+      step: "03",
+      title: "Devuelve una decisión",
+      detail: "El resultado muestra el coste real del desvío, la sombra acumulada y los recursos climáticos del recorrido.",
+      icon: ThermometerSun,
+      tone: "bg-[#fff7ed] text-[#e67e22]",
+    },
+  ] as const;
+  const valuePillars = [
+    {
+      title: "Salud",
+      detail: "+432 m de sombra acumulada en la ruta óptima para reducir exposición directa en trayectos cotidianos.",
+      icon: Activity,
+      tone: "bg-[#ebf5ff] text-[#0a72ef]",
+    },
+    {
+      title: "Clima",
+      detail: "662.173 polígonos LiDAR y 661.192 árboles municipales convertidos en una señal útil para caminar mejor.",
+      icon: TreePine,
+      tone: "bg-[#f0fdf4] text-[#2d6a4f]",
+    },
+    {
+      title: "Equidad",
+      detail: "64,1% de barrios sin refugio operativo a menos de 300 metros: evidencia para priorizar adaptación climática.",
+      icon: MapIcon,
+      tone: "bg-[#fef2f2] text-[#ff5b4f]",
+    },
+  ] as const;
   const sourceCards = [
     { icon: Building2, label: "Modelo 3D municipal", detail: "Fuente oficial de referencia no enlazada por falta de URL publica estable verificada", color: "#0a72ef" },
     { icon: TreePine, label: "Arbolado detallado", detail: "Ficha oficial del dataset municipal", color: "#16a34a", href: "https://datos.madrid.es/dataset/300761-0-arbolado-especies" },
@@ -164,10 +208,12 @@ export default function Home() {
   return (
     <main ref={mainRef} className="min-h-screen bg-[var(--background)]">
       {/* Navbar — minimal */}
-      <nav className="sticky top-0 z-50 border-b border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.82)] px-4 py-3 shadow-[0_8px_24px_rgba(36,53,65,0.04)] backdrop-blur-md sm:px-6">
+      <nav className="sticky top-0 z-50 border-b border-[rgba(91,84,74,0.08)] bg-[rgba(255,251,246,0.82)] px-4 py-3 shadow-[0_12px_32px_rgba(36,53,65,0.05)] backdrop-blur-md sm:px-6">
         <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <ThermometerSun className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--ds-black)]" />
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,242,233,0.92))] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[rgba(91,84,74,0.08)]">
+            <AlcalaLogo className="h-8 w-8" />
+          </span>
           <div>
             <span className="block font-sans font-semibold text-[var(--ds-black)] tracking-tight text-sm sm:text-base">Madrid Refugio</span>
             <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Planificador peatonal climático</span>
@@ -181,52 +227,29 @@ export default function Home() {
 
       {/* Hero — focused on search, not exposition */}
       <div className="max-w-[1760px] mx-auto px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
-        <section className="hero-atmosphere hero-grid px-1 py-4 sm:px-2 sm:py-6 lg:px-3 lg:py-7">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-12">
+        <section className="hero-atmosphere hero-grid hero-frame px-4 py-5 sm:px-5 sm:py-6 lg:px-6 lg:py-7">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-14">
             <div id="routing" className="text-left">
+              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(45,106,79,0.12)] bg-[rgba(255,252,247,0.86)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#2d6a4f] shadow-[0_14px_28px_rgba(33,48,43,0.06)]">
+                <OrganicTree className="h-5 w-4" />
+                Madrid caminado con criterio climático
+              </div>
               <h1 className="hero-title-serif fade-in-up mb-4 max-w-5xl text-[clamp(3rem,4.3vw,4.5rem)] text-[var(--ds-black)]">
                 Camina por Madrid con menos calor
               </h1>
               <p className="fade-in-up mb-0 max-w-4xl text-base font-semibold leading-[1.65] text-[var(--ds-gray-500)] sm:text-lg">
                 Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
               </p>
+              <div className="fade-in-up mt-6 flex flex-wrap gap-3 text-sm font-semibold text-[var(--ds-gray-600)]">
+                <span className="hero-chip">Sombra urbana real</span>
+                <span className="hero-chip">Comparación inmediata</span>
+                <span className="hero-chip">Recursos climáticos en ruta</span>
+              </div>
               <p className="editorial-kicker fade-in-up mt-6 text-[#247b56]">Sombra urbana real, comparación inmediata y recursos climáticos en ruta.</p>
             </div>
 
-            <div className="hero-art-shell fade-in-up hidden lg:block" aria-hidden="true">
-              <svg width="100%" height="100%" viewBox="0 0 680 232" fill="none" preserveAspectRatio="xMidYMid meet">
-                <defs>
-                  <linearGradient id="wash" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0" stopColor="#edf4f0"/>
-                    <stop offset="1" stopColor="#d7e9df"/>
-                  </linearGradient>
-                  <linearGradient id="tree" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0" stopColor="#9fbea8"/>
-                    <stop offset="1" stopColor="#6d9d7b"/>
-                  </linearGradient>
-                </defs>
-                <path d="M0 178c78-26 145-24 219-17 61 6 130-6 211-30 78-23 160-27 250-6v107H0Z" fill="url(#wash)" opacity=".72"/>
-                <circle cx="42" cy="55" r="25" fill="#dfeae4" opacity=".75"/>
-                <path d="M151 86h42v100h-42V86Zm54 34h32v66h-32v-66Zm74-46h38v112h-38V74Zm128-15h46v127h-46V59Zm178-16h48v143h-48V43Z" fill="#dfe8e6" opacity=".64"/>
-                <path d="M106 110h52v76h-52v-76Zm340-82h18v158h-18V28Zm35 51 27-32 27 32v107h-54V79Zm80 17h30v90h-30V96Z" fill="#e7eeee" opacity=".70"/>
-                <path d="M242 105c4-34 20-55 47-55s43 21 47 55v81H242v-81Z" fill="#dde9e8" opacity=".86"/>
-                <path d="M261 107c2-22 11-36 29-36 17 0 27 14 29 36v79h-58v-79Z" fill="#c8dbd7" opacity=".55"/>
-                <path d="M286 50V31M276 34h20" stroke="#c4d9d2" strokeWidth="4" strokeLinecap="round"/>
-                <g opacity=".62" stroke="#bacfc9" strokeWidth="3" strokeLinecap="round">
-                  <path d="M239 133h100M250 151h78M260 169h58"/>
-                  <path d="M284 72v-7M296 73v-7"/>
-                </g>
-                <g transform="translate(390 89)">
-                  <rect x="0" y="80" width="74" height="8" rx="4" fill="#98b8a4" opacity=".75"/>
-                  <path d="M9 88v21M63 88v21M11 72h51c7 0 12 5 12 12v2H0v-2c0-7 5-12 11-12Z" stroke="#7fa18c" strokeWidth="3" fill="none"/>
-                  <path d="M14 73v-13M61 73v-13" stroke="#7fa18c" strokeWidth="3" strokeLinecap="round"/>
-                </g>
-                <g opacity=".9">
-                  <path d="M348 119c-13-3-23-15-23-30 0-18 15-32 33-32 6 0 12 2 17 5 6-18 22-31 42-31 25 0 45 20 45 45 0 7-2 14-5 20 15 4 26 17 26 33 0 19-15 34-34 34H355c-17 0-31-14-31-31 0-16 12-29 28-31" fill="url(#tree)" opacity=".74"/>
-                  <path d="M413 161v36" stroke="#78977f" strokeWidth="8" strokeLinecap="round"/>
-                  <path d="M399 198h31" stroke="#78977f" strokeWidth="6" strokeLinecap="round"/>
-                </g>
-              </svg>
+            <div className="hero-art-shell hero-art-stage fade-in-up hidden lg:block" aria-hidden="true">
+              <HeroClimateArt className="h-full w-full" />
             </div>
           </div>
 
@@ -242,65 +265,69 @@ export default function Home() {
           <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Como funciona</p>
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-6">Una herramienta principal, tres pasos claros</h2>
           <div className="grid gap-4 md:grid-cols-3">
-            <Card level={1} className="p-4">
-              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">1. Elige origen y destino</p>
-              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Selecciona dos puntos reales de Madrid desde el catálogo oficial o usa tu ubicación actual como origen.</p>
-            </Card>
-            <Card level={1} className="p-4">
-              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">2. Calculamos la ruta</p>
-              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Comparamos el trayecto directo con una alternativa Eco-Refugio usando sombra urbana, arbolado, fuentes y refugios climáticos.</p>
-            </Card>
-            <Card level={1} className="p-4">
-              <p className="text-sm font-semibold text-[var(--ds-black)] mb-2">3. Compara y decide</p>
-              <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">Visualiza ambas rutas en el mapa y elige cómo moverte con menos exposición al calor.</p>
-            </Card>
+            {journeySteps.map((step) => {
+              const Icon = step.icon;
+              return (
+                <Card key={step.step} level={1} className="rounded-[24px] border border-[rgba(91,84,74,0.08)] p-5">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-400)]">{step.step}</span>
+                    <span className={`flex h-10 w-10 items-center justify-center rounded-[14px] ${step.tone}`}>
+                      <Icon className="h-4 w-4" />
+                    </span>
+                  </div>
+                  <p className="text-base font-semibold text-[var(--ds-black)] mb-2">{step.title}</p>
+                  <p className="text-sm text-[var(--ds-gray-600)] leading-relaxed">{step.detail}</p>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
         <section className="mb-16 grid gap-6 fade-in-up lg:grid-cols-[minmax(0,1.1fr)_320px] lg:items-start">
           <div className="section-shell rounded-[32px] p-6 sm:p-8">
-          <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Por que es distinto</p>
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">El calor deja de ser contexto y pasa a ser variable de ruta</h2>
-          <div className="max-w-3xl space-y-4 text-[var(--ds-gray-600)] leading-relaxed">
-            <p>
-              Madrid Refugio no es solo un mapa de refugios ni un visor climático. Es una herramienta operativa que reutiliza datos abiertos del Ayuntamiento para ayudarte a caminar por Madrid con menos calor.
-            </p>
-            <p>
-              Calcula rutas concretas, compara alternativas y muestra los recursos disponibles a lo largo del camino para convertir información urbana compleja en una decisión útil.
-            </p>
-          </div>
+            <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Por que es distinto</p>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)] lg:items-start">
+              <div>
+                <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">El calor deja de ser contexto y pasa a ser variable de ruta</h2>
+                <div className="max-w-3xl space-y-4 text-[var(--ds-gray-600)] leading-relaxed">
+                  <p>
+                    Madrid Refugio no es solo un mapa de refugios ni un visor climático. Es una herramienta operativa que reutiliza datos abiertos del Ayuntamiento para ayudarte a caminar por Madrid con menos calor.
+                  </p>
+                  <p>
+                    Calcula rutas concretas, compara alternativas y muestra los recursos disponibles a lo largo del camino para convertir información urbana compleja en una decisión útil.
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-[28px] border border-[rgba(45,106,79,0.12)] bg-[linear-gradient(180deg,rgba(245,252,248,0.96),rgba(233,245,238,0.88))] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.06)]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#2d6a4f]">En una frase</p>
+                <p className="mt-3 text-[1.6rem] font-semibold leading-tight text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">No pide aprender un visor complejo. Pide elegir mejor un trayecto cuando el sol castiga.</p>
+                <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-xs font-semibold text-[#2d6a4f] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
+                  <OrganicTree className="h-5 w-4" /> Decisión peatonal con criterio climático
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {valuePillars.map((pillar) => {
+                const Icon = pillar.icon;
+                return (
+                  <Card key={pillar.title} level={1} className="rounded-[24px] border border-[rgba(91,84,74,0.08)] p-5">
+                    <span className={`mb-4 flex h-11 w-11 items-center justify-center rounded-[14px] ${pillar.tone}`}>
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <h3 className="text-sm font-bold text-[var(--ds-black)]">{pillar.title}</h3>
+                    <p className="mt-2 text-sm text-[var(--ds-gray-600)] leading-relaxed">{pillar.detail}</p>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
           <div className="section-shell rounded-[32px] p-6">
-            <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">En una frase</p>
-            <p className="text-xl font-semibold leading-snug text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">No pide aprender un visor complejo. Pide elegir mejor un trayecto cuando el sol castiga.</p>
+            <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Valor inmediato</p>
+            <p className="text-xl font-semibold leading-snug text-[var(--ds-black)]">La información urbana compleja se traduce en una elección peatonal usable en segundos.</p>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">Primero ves el trayecto, luego el desvío, después el alivio térmico. La lectura está pensada para decidir, no para explorar capas infinitas.</p>
           </div>
         </section>
-
-        {/* Workflow / Pillars — kept but smaller */}
-        <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16 stagger-children">
-          <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3 fade-in-up">
-            <div className="w-8 h-8 rounded-full bg-[#ebf5ff] flex items-center justify-center text-[#0a72ef] shadow-[var(--shadow-border)]">
-              <Activity className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-bold text-[var(--ds-black)]">Salud</h3>
-            <p className="text-xs text-[var(--ds-gray-600)]">Protección activa para mayores de 65+. +<CountUp key={`c1-${clickStamp}`} end={432} /> m de sombra en ruta óptima.</p>
-          </Card>
-          <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3 fade-in-up">
-            <div className="w-8 h-8 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] shadow-[var(--shadow-border)]">
-              <TreePine className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-bold text-[var(--ds-black)]">Clima</h3>
-            <p className="text-xs text-[var(--ds-gray-600)]">662.173 polígonos LiDAR + 661.192 árboles del Inventario Municipal.</p>
-          </Card>
-          <Card level={1} className="p-4 sm:p-5 flex flex-col gap-3 fade-in-up">
-            <div className="w-8 h-8 rounded-full bg-[#fef2f2] flex items-center justify-center text-[#ff5b4f] shadow-[var(--shadow-border)]">
-              <MapIcon className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-bold text-[var(--ds-black)]">Equidad</h3>
-            <p className="text-xs text-[var(--ds-gray-600)]">64,1% de barrios sin refugio operativo a &lt;300 m. Evidencia para adaptación climática.</p>
-          </Card>
-        </div>
 
         {/* Diagnóstico urbano (Insights) */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
@@ -595,24 +622,35 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Data Sources Section */}
-        <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
-          <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Trazabilidad publica</p>
-          <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de datos abiertos</h2>
-          <p className="text-[var(--ds-gray-600)] mt-2">Los enlaces de esta seccion abren la ficha oficial de cada fuente para consultar metadatos, licencia y opciones de descarga.</p>
-          <p className="text-[var(--ds-gray-600)] mt-2">No existe un dataset municipal operativo de refugios climaticos oficiales; por eso la capa de sustitucion usa bibliotecas, centros culturales y polideportivos con trazabilidad explicita.</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
+        <section className="section-shell mb-24 rounded-[32px] p-6 fade-in-up sm:p-8">
+          <div className="mb-8 grid gap-6 border-b border-[var(--ds-gray-100)] pb-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+            <div>
+              <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Trazabilidad publica</p>
+              <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de datos abiertos</h2>
+              <p className="text-[var(--ds-gray-600)] mt-2">Los enlaces de esta sección abren la ficha oficial de cada fuente para consultar metadatos, licencia y opciones de descarga.</p>
+              <p className="text-[var(--ds-gray-600)] mt-2">No existe un dataset municipal operativo de refugios climáticos oficiales; por eso la capa de sustitución usa bibliotecas, centros culturales y polideportivos con trazabilidad explícita.</p>
+            </div>
+            <div className="rounded-[24px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.88)] p-5 shadow-[0_12px_28px_rgba(31,26,23,0.05)]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Criterio de publicación</p>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">Si una URL oficial pública estable no está verificada, la fuente se mantiene como referencia informativa sin enlace activo.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {sourceCards.map((src) => {
-            const cardClassName = `fade-in-up rounded-[24px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.8)] p-4 transition-all group block shadow-[0_12px_28px_rgba(31,26,23,0.05)] ${src.href ? "hover:-translate-y-[2px] hover:border-[var(--ds-gray-400)] hover:shadow-[0_20px_40px_rgba(31,26,23,0.09)]" : "opacity-90"}`;
+            const cardClassName = `fade-in-up rounded-[24px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.8)] p-5 transition-all group block shadow-[0_12px_28px_rgba(31,26,23,0.05)] ${src.href ? "hover:-translate-y-[2px] hover:border-[var(--ds-gray-400)] hover:shadow-[0_20px_40px_rgba(31,26,23,0.09)]" : "opacity-90"}`;
 
             const content = (
               <>
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${src.color}12` }}>
-                  <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[14px]" style={{ background: `${src.color}12` }}>
+                    <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
+                  </div>
+                  <span className="rounded-full bg-[rgba(17,24,39,0.05)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ds-gray-500)]">
+                    {src.href ? "Ficha oficial" : "Referencia"}
+                  </span>
                 </div>
-                <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 group-hover:text-[var(--ds-black)] leading-tight">{src.label}</p>
-                <p className="text-xs text-[var(--ds-gray-500)]">{src.detail}</p>
+                <p className="text-base font-semibold text-[var(--ds-black)] mb-1 leading-tight">{src.label}</p>
+                <p className="text-sm text-[var(--ds-gray-500)] leading-relaxed">{src.detail}</p>
               </>
             );
 
@@ -626,14 +664,44 @@ export default function Home() {
               </div>
             );
           })}
-        </div>
+          </div>
+        </section>
 
         {/* Footer */}
-        <footer className="border-t border-[var(--ds-gray-100)] pt-12 mt-24 pb-12 flex flex-col md:flex-row justify-between items-center text-sm text-[var(--ds-gray-500)]">
-          <div>&copy; 2026 Madrid Refugio. Datos Abiertos del Ayuntamiento de Madrid.</div>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <Link href="/metodologia" className="hover:text-[var(--ds-black)] transition-colors">Metodología</Link>
-            <a href="https://datos.madrid.es/pages/premios-de-reutilizacion-2026" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--ds-black)] transition-colors">Premios de reutilización</a>
+        <footer className="mt-24 pb-12">
+          <div className="rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[linear-gradient(180deg,rgba(255,253,250,0.94),rgba(248,250,249,0.9))] p-6 shadow-[0_18px_42px_rgba(36,53,65,0.05)] sm:p-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,242,233,0.92))] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[rgba(91,84,74,0.08)]">
+                    <AlcalaLogo className="h-8 w-8" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--ds-black)]">Madrid Refugio</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Planificador peatonal climático</p>
+                  </div>
+                </div>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--ds-gray-600)]">
+                  Proyecto demostrador que convierte datos abiertos urbanos en una decisión peatonal más segura durante episodios de calor en Madrid.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-[var(--ds-gray-500)]">
+                  <span className="rounded-full border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Datos abiertos municipales</span>
+                  <span className="rounded-full border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Metodología trazable</span>
+                  <span className="rounded-full border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Madrid 2026</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 text-sm text-[var(--ds-gray-600)] lg:items-end">
+                <Link href="/metodologia" className="font-medium transition-colors hover:text-[var(--ds-black)]">Metodología</Link>
+                <a href="https://datos.madrid.es/pages/premios-de-reutilizacion-2026" target="_blank" rel="noopener noreferrer" className="font-medium transition-colors hover:text-[var(--ds-black)]">Premios de reutilización</a>
+                <a href="https://datos.madrid.es/portal/site/egob" target="_blank" rel="noopener noreferrer" className="font-medium transition-colors hover:text-[var(--ds-black)]">Portal datos.madrid.es</a>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-2 border-t border-[var(--ds-gray-100)] pt-4 text-xs text-[var(--ds-gray-500)] sm:flex-row sm:items-center sm:justify-between">
+              <span>&copy; 2026 Madrid Refugio. Datos Abiertos del Ayuntamiento de Madrid.</span>
+              <span>Herramienta de rutas peatonales con criterio climático y trazabilidad pública.</span>
+            </div>
           </div>
         </footer>
       </div>

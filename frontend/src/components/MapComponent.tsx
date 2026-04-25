@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, GeoJSON, Marker, Popup, Polyline, useMap } fro
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
 import L from 'leaflet';
+import { ClimateRouteBadge, ClimateShelterIcon, OrganicTree, WaterFountainIcon } from './branding/HomeVisuals';
 
 // Fix Leaflet default icon paths (Next.js asset issue)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -106,13 +107,13 @@ function FitDataController({ data, isActive }: { data: any, isActive: boolean })
 // ──────────────────────────────────────────────────────────────────────────
 
 const originIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
 const destIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
@@ -139,6 +140,16 @@ const shelterIcon = createResourceIcon(
 const treeIcon = createResourceIcon(
   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z"/><path d="M12 22v-3"/></svg>',
   '#2d6a4f',
+  'rgba(255,255,255,0.92)'
+);
+
+function renderSvgToString(markup: string) {
+  return markup.replace(/\n\s*/g, '');
+}
+
+const brandedTreeIcon = createResourceIcon(
+  renderSvgToString('<svg width="16" height="20" viewBox="0 0 28 36" fill="none" aria-hidden="true"><ellipse cx="14" cy="31.5" rx="8.5" ry="3.5" fill="#00000020"/><path d="M14 18.5v10.5" stroke="#8b5e3c" stroke-width="4" stroke-linecap="round"/><path d="M14.7 4.4c3.6 0 6.5 1.4 8.3 3.9 3.1.3 5.3 2.8 5.3 5.9 0 3.3-2.5 5.8-5.7 6.1-.7 3.3-3.7 5.6-7.5 5.6-4.4 0-7.5-1.6-9.8-4.6C2.6 20.6.6 18.2.6 14.8c0-3.5 2.6-6.2 6.1-6.4C8.6 5.9 11.3 4.4 14.7 4.4Z" fill="#2d6a4f"/><path d="M11.1 6.7c2.7 0 4.8 1 6.2 2.8 2.3.2 3.8 2 3.8 4.2 0 2.5-1.8 4.1-4.1 4.3-.6 2.3-2.8 3.8-5.4 3.8-3 0-5.2-1.1-6.8-3.2-1.8-.5-3.1-2.2-3.1-4.5 0-2.4 1.8-4.3 4.2-4.4 1.2-1.9 3-3 5.2-3Z" fill="#52b788"/></svg>'),
+  '#f3fbf5',
   'rgba(255,255,255,0.92)'
 );
 
@@ -285,7 +296,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
               </Marker>
             ))}
             {routeShadeMarkers.map((pos: [number, number], idx: number) => (
-              <Marker key={`tree-${idx}`} position={pos} icon={treeIcon}>
+              <Marker key={`tree-${idx}`} position={pos} icon={brandedTreeIcon}>
                 <Popup>Zona arbolada o tramo de sombra acumulada</Popup>
               </Marker>
             ))}
@@ -332,17 +343,17 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       {routeResult && (
         <div className="absolute bottom-3 left-3 z-[1000] space-y-2 rounded-2xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.92)] px-3 py-3 text-xs shadow-[0_14px_28px_rgba(31,26,23,0.10)] backdrop-blur-sm">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-6 h-1.5 bg-[#10b981] rounded-full" />
-            <span className="text-[var(--ds-black)] font-semibold">Ruta eco-refugio</span>
+            <ClimateRouteBadge className="h-5 w-9" />
+            <span className="text-[var(--ds-black)] font-semibold">Ruta con alivio climático</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-0.5 bg-[#9ca3af] border-t border-dashed border-[#9ca3af]" />
             <span className="text-[var(--ds-gray-500)]">Ruta estándar</span>
           </div>
           <div className="border-t border-[rgba(91,84,74,0.08)] pt-2 text-[10px] text-[var(--ds-gray-500)]">
-            <div className="mb-1 flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#1a6fa8] text-white">F</span> {routeResult.metrics?.comfort?.fuentes ?? 0} fuentes cerca</div>
-            <div className="mb-1 flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#c0392b] text-white">R</span> {routeResult.metrics?.comfort?.refugios ?? 0} refugios cerca</div>
-            <div className="flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#2d6a4f] text-white">A</span> sombra y arbolado en ruta</div>
+            <div className="mb-1 flex items-center gap-2"><WaterFountainIcon className="h-4 w-4" /> {routeResult.metrics?.comfort?.fuentes ?? 0} fuentes cerca</div>
+            <div className="mb-1 flex items-center gap-2"><ClimateShelterIcon className="h-4 w-4" /> {routeResult.metrics?.comfort?.refugios ?? 0} refugios cerca</div>
+            <div className="flex items-center gap-2"><OrganicTree testId="route-legend-tree" className="h-5 w-4" /> sombra y arbolado en ruta</div>
             {showHeatmap ? <div className="mt-2 rounded-full bg-[rgba(230,126,34,0.12)] px-2 py-1 text-[#c0392b]">Capa térmica superpuesta</div> : null}
           </div>
         </div>
