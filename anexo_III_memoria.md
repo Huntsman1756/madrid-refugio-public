@@ -69,11 +69,13 @@ En el ejemplo operativo validado en el proyecto, una ruta de confort térmico in
 
 **Modelo de routing.** OSMnx para construir el grafo peatonal desde OpenStreetMap y NetworkX para el calculo de rutas ponderadas por confort térmico.
 
-**Aplicación web.** Frontend en Next.js con React. API en Python con FastAPI. Visualización cartográfica con Leaflet y React-Leaflet. Despliegue web en Vercel y Railway.
+**Aplicación web.** Frontend en Next.js con React. API en Python con FastAPI. Visualización cartográfica con Leaflet y React-Leaflet. Despliegue del frontend en Vercel y del backend en infraestructura propia (servidor privado con Cloudflare Tunnel), con Railway como alternativa de despliegue.
 
 **Arquitectura de calculo.** El sistema combina precomputación offline de capas pesadas, como la matriz de sombra por franja horaria, con cálculo interactivo en el momento de la consulta. Este enfoque permite tiempos de respuesta operativos sin renunciar a detalle geoespacial.
 
 **Trazabilidad.** El proyecto conserva documentación técnica, scripts de generación y referencia directa a las fuentes originales utilizadas durante el procesamiento y la evaluación.
+
+**Metodología reproducible.** La preparación de datos y la consulta en tiempo real están separadas de forma explícita. Los artefactos pesados se generan offline, se conservan como runtime versionado y el backend aplica los pesos horarios en la consulta sin recalcular toda la cadena geoespacial en producción.
 
 ## 8. Impacto esperado
 
@@ -90,3 +92,5 @@ Madrid Refugio transforma datos abiertos en protección climática concreta. Es 
 La combinación de reutilización de datos, modelización geoespacial y utilidad ciudadana convierte el proyecto en un ejemplo sólido de innovación aplicada al interés general.
 
 **URL pública de la herramienta:** <https://madridrefugio.es/>
+
+**Arquitectura operativa actual:** frontend en Vercel y backend en infraestructura propia publicado mediante Cloudflare Tunnel. Railway permanece documentado solo como alternativa opcional de despliegue.

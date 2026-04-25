@@ -34,6 +34,18 @@ Hemos integrado 8 conjuntos de datos y fuentes críticas del ecosistema urbano d
 - `api.py`: Backend FastAPI con motor de routing dinámico.
 - `06a-06d_*.py`: Pipeline de procesamiento LiDAR y generación de sombras.
 
+## 4.1 Arquitectura operativa actual
+
+Arquitectura principal hoy en producción:
+
+- Frontend en `Vercel`
+- Backend `FastAPI` en infraestructura propia
+- Publicación del backend mediante `Cloudflare Tunnel`
+- Dominio público principal: `https://madridrefugio.es`
+- Backend público estable: `https://api.madridrefugio.es`
+
+`Railway` se mantiene documentado en este repositorio solo como alternativa opcional de despliegue del backend, no como infraestructura principal actual.
+
 ## 5. Datos precomputados
 
 Los archivos grandes no están en el repositorio (gestionados vía Git LFS).
@@ -94,17 +106,50 @@ El builder prioriza las entradas curadas cuando hay colisiones y vuelve a escrib
 
 Variables de entorno esperadas:
 
-- `GITHUB_TOKEN`: opcional, solo si quieres usar peticiones autenticadas a GitHub.
+- `AEMET_API_KEY`: opcional; habilita datos meteorológicos de AEMET en la API.
+- `GITHUB_TOKEN` o `GH_TOKEN`: opcional; permite descargar assets de releases autenticadas de GitHub.
+- `LOG_LEVEL`: opcional; por defecto `INFO`.
+- `DATA_DIR`: opcional; directorio persistente para artefactos procesados.
+- `FRONTEND_ORIGIN`: opcional; origen principal permitido por CORS.
+- `ADDITIONAL_ALLOWED_ORIGINS`: opcional; lista adicional separada por comas.
+- `FORCE_REFRESH_GRAPH_FROM_RELEASE`: opcional; fuerza refresco de assets de release cuando vale `1`.
 
-### Despliegue en Railway
+Consulta `.env.example` para la plantilla completa.
 
-El backend de produccion en Railway necesita estas condiciones para arrancar de forma estable:
+## 6.1 Metodología resumida y reproducible
+
+El proyecto combina dos capas metodológicas:
+
+1. Precomputación offline
+2. Cálculo interactivo en tiempo real
+
+Flujo resumido:
+
+1. Se procesan edificios, arbolado, callejero y capas auxiliares a partir de datos abiertos.
+2. Se genera una red peatonal de referencia basada en OpenStreetMap.
+3. Se precalcula una matriz de sombra por tramo y franja horaria.
+4. Se publican artefactos pesados de runtime para evitar recalcularlos en producción.
+5. En cada consulta, el backend ajusta los pesos de la red según hora y preferencia de confort.
+6. Se comparan una ruta corta y una ruta de mayor confort térmico.
+
+El enfoque es reproducible porque separa claramente:
+
+- fuentes de datos
+- scripts de preparación
+- artefactos generados
+- cálculo online de la consulta
+
+La geometría solar usada para sombras es determinista y no depende de APIs meteorológicas externas.
+
+### Despliegue alternativo en Railway
+
+El backend también puede desplegarse en Railway como alternativa al servidor privado. Para ello necesita:
 
 - Volumen montado en `/mnt/data`
 - `DATA_DIR=/mnt/data/processed`
 - Recursos del servicio suficientes para cargar el grafo completo en memoria
 
-El arranque en Railway usa ahora:
+El arranque usa:
 
 ```bash
 python prepare_search_data.py && uvicorn api:app --host 0.0.0.0 --port $PORT
@@ -114,7 +159,7 @@ Eso mueve la descarga/generación del CSV e índice al prestart del despliegue, 
 
 El motor pesado de routing ya no se carga completo durante `startup`. El backend publica `/health` nada más arrancar y difiere la carga del grafo, refugios, fuentes y matriz de sombra hasta la primera petición real a `/api/route`. Esto reduce el pico de memoria del deploy y evita bucles de reinicio cuando el servicio se ajusta a `3 GB RAM`.
 
-Configuracion operativa validada en produccion:
+Configuracion operativa:
 
 - `DATA_DIR=/mnt/data/processed`
 - volumen persistente con `madrid_shadow_graph.graphml` y `shadow_matrix.parquet`
@@ -151,6 +196,13 @@ Si el servicio vuelve a responder `502` durante el arranque, lo primero que hay 
 Este repositorio se facilita como soporte de evaluación, documentación y revisión del proyecto durante la convocatoria 2026 de los Premios a la Reutilización de Datos Abiertos del Ayuntamiento de Madrid.
 
 Salvo que se indique expresamente lo contrario en un subdirectorio o dependencia de terceros, no se concede permiso general de reutilización, modificación o redistribución del código de este repositorio. Consulta el archivo `LICENSE` de la raíz para el detalle legal aplicable.
+
+## Seguridad y secretos
+
+- No subas ficheros `.env*` con secretos reales.
+- Si en algún momento un token operativo ha vivido en un `.env` local, debes rotarlo antes de compartir el proyecto.
+- Usa `.env.example` como plantilla pública y mantén los secretos reales fuera del repositorio.
+- Consulta `SECURITY.md` para el detalle operativo mínimo.
 
 ### Frontend (Node.js 20+)
 ```bash

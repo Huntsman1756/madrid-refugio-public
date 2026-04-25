@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 cache/
 .env
+.env.local
+.env.vps
+.env.*.local
 .env.example.local
 .ipynb_checkpoints
 .vscode/

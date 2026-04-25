@@ -112,7 +112,10 @@ export default function MetodologiaPage() {
             El procesamiento geoespacial se apoya en Python, GeoPandas, Shapely, PyProj, Pandas, <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pvlib</code> y <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pybdshadow</code>. El modelo de routing utiliza OSMnx y NetworkX sobre una red peatonal derivada de OpenStreetMap.
           </p>
           <p className="text-[var(--ds-gray-600)]">
-            La aplicación web utiliza Next.js, React, FastAPI, Leaflet y React-Leaflet. La arquitectura combina precomputación offline de capas pesadas con cálculo interactivo en el momento de la consulta, manteniendo trazabilidad sobre las fuentes y un despliegue operativo en Vercel y Railway.
+            La aplicación web utiliza Next.js, React, FastAPI, Leaflet y React-Leaflet. La arquitectura combina precomputación offline de capas pesadas con cálculo interactivo en el momento de la consulta, manteniendo trazabilidad sobre las fuentes. El despliegue se realiza en Vercel (frontend) y un servidor privado con Cloudflare Tunnel (backend), con Railway como alternativa de despliegue.
+          </p>
+          <p className="text-[var(--ds-gray-600)] mt-4">
+            La metodología de operación separa explícitamente la generación offline de artefactos pesados y la resolución online de consultas. Esto permite mantener reproducibilidad técnica, tiempos de respuesta bajos y una arquitectura pública estable para evaluación externa.
           </p>
         </section>
 
