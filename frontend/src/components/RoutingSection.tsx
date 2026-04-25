@@ -181,7 +181,7 @@ ${gpxPoints}
   };
 
   return (
-    <div className="mb-24">
+    <div className="mb-10 sm:mb-12">
       {/* Header — simplified */}
       {/* Search Bar — primary interaction */}
       <Card level={2} className="p-5 sm:p-6 border border-[var(--ds-gray-100)] shadow-xl mb-8">

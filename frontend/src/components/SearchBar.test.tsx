@@ -252,4 +252,21 @@ describe("SearchBar integration", () => {
     expect(getSearchOptionsMock).toHaveBeenCalledTimes(1);
     expect(getSearchOptionsMock).toHaveBeenCalledWith("pra");
   });
+
+  it("shows a single compact helper line instead of duplicated origin guidance", async () => {
+    render(<RoutingSection />);
+
+    expect(await screen.findByText("Madrid solo: calle, lugar o coordenadas oficiales.")).toBeInTheDocument();
+    expect(screen.getAllByText("Madrid solo: calle, lugar o coordenadas oficiales.")).toHaveLength(1);
+  });
+
+  it("keeps the time and route type controls visible in the compact planner", async () => {
+    render(<RoutingSection />);
+
+    expect(await screen.findByText("Hora de salida")).toBeInTheDocument();
+    expect(screen.getByText("Tipo de ruta")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /10:00/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /directa/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /buscar ruta con sombra/i })).toBeInTheDocument();
+  });
 });
