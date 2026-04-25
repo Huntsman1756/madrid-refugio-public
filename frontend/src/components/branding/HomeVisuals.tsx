@@ -164,7 +164,7 @@ export function HeatmapBadgeIcon({ title = "Mapa de calor", testId, className, .
 export function MadridShelterBuildingArt({ title, testId, className, size = 160, ...props }: ArtProps) {
   return (
     <svg
-      viewBox="0 0 160 160"
+      viewBox="0 0 160 120"
       fill="none"
       role={title ? "img" : undefined}
       aria-label={title}
@@ -175,19 +175,20 @@ export function MadridShelterBuildingArt({ title, testId, className, size = 160,
       {...props}
     >
       {title ? <title>{title}</title> : null}
-      <ellipse cx="79" cy="142" rx="46" ry="10" fill="#00000012" />
-      <path d="M20 128h120" stroke="#d7c8b0" strokeWidth="4" strokeLinecap="round" />
-      <path d="M36 72h54v56H36z" fill="#efe5d4" stroke="#b79a74" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M90 58h32v70H90z" fill="#e4d6c1" stroke="#b79a74" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M122 82h16v46h-16z" fill="#d8c8b1" stroke="#b79a74" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M44 128V94c0-4.4 3.6-8 8-8h14c4.4 0 8 3.6 8 8v34" fill="#dfe9e1" stroke="#2d6a4f" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M56 104h6M56 114h6" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M99 73h14v14H99zM99 94h14v14H99z" fill="#f8f4ec" stroke="#b79a74" strokeWidth="2.5" />
-      <path d="M127 92h6v22h-6z" fill="#f8f4ec" stroke="#b79a74" strokeWidth="2.5" />
-      <path d="M86 48c3-18 13-29 29-29 16 0 26 11 29 29" stroke="#c0392b" strokeWidth="4" strokeLinecap="round" />
-      <path d="M115 23v34" stroke="#c0392b" strokeWidth="4" strokeLinecap="round" />
-      <path d="M107 40h16" stroke="#c0392b" strokeWidth="4" strokeLinecap="round" />
-      <path d="M30 70c10-3 18-9 23-19 5 9 6 18 1 27" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <ellipse cx="80" cy="108" rx="50" ry="8" fill="#00000012" />
+      <path d="M24 99h112" stroke="#d4c8b7" strokeWidth="4" strokeLinecap="round" />
+      <path d="M38 34h84v54H38z" fill="#e8e4d9" stroke="#b6a891" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M33 30h94" stroke="#1a3d2b" strokeWidth="4" strokeLinecap="round" />
+      <path d="M42 24h76" stroke="#d8d0c1" strokeWidth="4" strokeLinecap="round" />
+      <path d="M48 18h8M62 18h8M76 18h8M90 18h8M104 18h8" stroke="#d8d0c1" strokeWidth="3" strokeLinecap="round" />
+      <path d="M50 50h18v12H50zM92 50h18v12H92z" fill="#f8f5ef" stroke="#b6a891" strokeWidth="2.5" />
+      <path d="M48 88V70c0-9 5-16 12-16s12 7 12 16v18" fill="#f6f2ea" stroke="#1a3d2b" strokeWidth="4" strokeLinejoin="round" />
+      <path d="M74 88V68c0-10 5-18 12-18s12 8 12 18v20" fill="#f6f2ea" stroke="#1a3d2b" strokeWidth="4" strokeLinejoin="round" />
+      <path d="M100 88V70c0-9 5-16 12-16s12 7 12 16v18" fill="#f6f2ea" stroke="#1a3d2b" strokeWidth="4" strokeLinejoin="round" />
+      <path d="M56 88V72M82 88V70M108 88V72" stroke="#1a3d2b" strokeWidth="3" strokeLinecap="round" />
+      <path d="M77 88c0-3 1-5 3-7 2 2 3 4 3 7" fill="#1a3d2b" />
+      <path d="M79 88v10" stroke="#1a3d2b" strokeWidth="3" strokeLinecap="round" />
+      <path d="M28 62c8-2 14-6 19-14 4 6 5 12 1 18" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

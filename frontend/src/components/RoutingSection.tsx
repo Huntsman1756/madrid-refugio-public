@@ -25,6 +25,7 @@ const RESULT_PREFERENCE_OPTIONS = [
   { value: 0.5, label: "Equilibrada", actionLabel: "Mostrar ruta equilibrada", detail: "Buen balance" },
   { value: 1.0, label: "Más sombra", actionLabel: "Mostrar ruta con más sombra", detail: "Mayor protección" },
 ] as const;
+const OFFICIAL_SHELTER_LIST_URL = "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Calormad/";
 const OFFICIAL_HEAT_GUIDANCE_URL = "https://www.comunidad.madrid/servicios/salud/calor-salud";
 
 function normalizePreference(val: number): number {
@@ -497,7 +498,15 @@ ${gpxPoints}
                   <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Refugios cercanos</h3>
                   <p className="mt-3 font-serif text-5xl font-semibold leading-none text-[#2d6a4f]">{routeResult.metrics.comfort.refugios}</p>
                   <p className="mt-3 text-sm text-[var(--ds-gray-500)]">La ruta recomendada conecta {routeResult.metrics.comfort.refugios} refugios y {routeResult.metrics.comfort.fuentes} puntos de agua para descansar o recargar.</p>
-                  <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f]">Ver refugios <ArrowRight className="h-4 w-4" /></p>
+                  <a
+                    href={OFFICIAL_SHELTER_LIST_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Ver listado oficial de refugios climáticos del Ayuntamiento de Madrid"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f] transition-opacity hover:opacity-80"
+                  >
+                    Ver refugios <ArrowRight className="h-4 w-4" />
+                  </a>
                 </div>
                 <MadridShelterBuildingArt className="h-28 w-28 flex-shrink-0 text-[#2d6a4f]" aria-hidden="true" />
               </div>

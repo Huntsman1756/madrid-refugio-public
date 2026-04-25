@@ -405,6 +405,15 @@ describe("SearchBar integration", () => {
     expect(adviceLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
+  it("links the shelter card to the official CalorMad refuge listing", async () => {
+    render(<RoutingSection autoDemo />);
+
+    const shelterLink = await screen.findByRole("link", { name: /ver listado oficial de refugios climáticos del ayuntamiento de madrid/i });
+    expect(shelterLink).toHaveAttribute("href", "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Calormad/");
+    expect(shelterLink).toHaveAttribute("target", "_blank");
+    expect(shelterLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
   it("uses the lower heatmap card as the heatmap toggle affordance", async () => {
     render(<RoutingSection autoDemo />);
 
