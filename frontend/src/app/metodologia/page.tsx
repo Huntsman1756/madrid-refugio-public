@@ -9,18 +9,74 @@ export default function MetodologiaPage() {
   return (
     <main className="min-h-screen bg-[var(--background)]">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-[rgba(255,255,255,0.8)] backdrop-blur-md border-b shadow-[var(--shadow-border)] px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <ThermometerSun className="w-6 h-6 text-[var(--ds-black)]" />
-          <span className="font-sans font-semibold text-[var(--ds-black)] tracking-tight">Madrid Refugio</span>
+      <nav className="sticky top-0 z-50 border-b border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.82)] px-4 py-3 shadow-[0_8px_24px_rgba(36,53,65,0.04)] backdrop-blur-md sm:px-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ThermometerSun className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--ds-black)]" />
+            <div>
+              <span className="block font-sans font-semibold text-[var(--ds-black)] tracking-tight text-sm sm:text-base">Madrid Refugio</span>
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Planificador peatonal climático</span>
+            </div>
+          </div>
+          <Link href="/">
+            <Button variant="secondary" className="h-9 px-4 text-sm"><ArrowLeft className="w-4 h-4 mr-2" /> Volver al mapa</Button>
+          </Link>
         </div>
-        <Link href="/">
-          <Button variant="secondary"><ArrowLeft className="w-4 h-4 mr-2" /> Volver al mapa</Button>
-        </Link>
       </nav>
 
-      <div className="max-w-[800px] mx-auto px-6 py-16 sm:py-24">
-        <h1 className="display-hero text-[var(--ds-black)] mb-8">Memoria del proyecto</h1>
+      <div className="max-w-[1760px] mx-auto px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
+        <section className="hero-atmosphere hero-grid px-1 py-4 sm:px-2 sm:py-6 lg:px-3 lg:py-7">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-12">
+            <div className="text-left">
+              <h1 className="hero-title-serif mb-4 max-w-5xl text-[clamp(3rem,4.3vw,4.5rem)] text-[var(--ds-black)]">
+                Metodología del proyecto
+              </h1>
+              <p className="mb-0 max-w-4xl text-base font-semibold leading-[1.65] text-[var(--ds-gray-500)] sm:text-lg">
+                Memoria técnica, conjuntos de datos reutilizados y decisiones de diseño que sostienen el cálculo de rutas peatonales climáticas en Madrid Refugio.
+              </p>
+              <p className="editorial-kicker mt-6 text-[#247b56]">Transparencia metodológica, trazabilidad pública y arquitectura reproducible.</p>
+            </div>
+
+            <div className="hero-art-shell hidden lg:block" aria-hidden="true">
+              <svg width="100%" height="100%" viewBox="0 0 680 232" fill="none" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="method-wash" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stopColor="#edf4f0"/>
+                    <stop offset="1" stopColor="#d7e9df"/>
+                  </linearGradient>
+                  <linearGradient id="method-tree" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stopColor="#9fbea8"/>
+                    <stop offset="1" stopColor="#6d9d7b"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0 178c78-26 145-24 219-17 61 6 130-6 211-30 78-23 160-27 250-6v107H0Z" fill="url(#method-wash)" opacity=".72"/>
+                <circle cx="42" cy="55" r="25" fill="#dfeae4" opacity=".75"/>
+                <path d="M151 86h42v100h-42V86Zm54 34h32v66h-32v-66Zm74-46h38v112h-38V74Zm128-15h46v127h-46V59Zm178-16h48v143h-48V43Z" fill="#dfe8e6" opacity=".64"/>
+                <path d="M106 110h52v76h-52v-76Zm340-82h18v158h-18V28Zm35 51 27-32 27 32v107h-54V79Zm80 17h30v90h-30V96Z" fill="#e7eeee" opacity=".70"/>
+                <path d="M242 105c4-34 20-55 47-55s43 21 47 55v81H242v-81Z" fill="#dde9e8" opacity=".86"/>
+                <path d="M261 107c2-22 11-36 29-36 17 0 27 14 29 36v79h-58v-79Z" fill="#c8dbd7" opacity=".55"/>
+                <path d="M286 50V31M276 34h20" stroke="#c4d9d2" strokeWidth="4" strokeLinecap="round"/>
+                <g opacity=".62" stroke="#bacfc9" strokeWidth="3" strokeLinecap="round">
+                  <path d="M239 133h100M250 151h78M260 169h58"/>
+                  <path d="M284 72v-7M296 73v-7"/>
+                </g>
+                <g transform="translate(390 89)">
+                  <rect x="0" y="80" width="74" height="8" rx="4" fill="#98b8a4" opacity=".75"/>
+                  <path d="M9 88v21M63 88v21M11 72h51c7 0 12 5 12 12v2H0v-2c0-7 5-12 11-12Z" stroke="#7fa18c" strokeWidth="3" fill="none"/>
+                  <path d="M14 73v-13M61 73v-13" stroke="#7fa18c" strokeWidth="3" strokeLinecap="round"/>
+                </g>
+                <g opacity=".9">
+                  <path d="M348 119c-13-3-23-15-23-30 0-18 15-32 33-32 6 0 12 2 17 5 6-18 22-31 42-31 25 0 45 20 45 45 0 7-2 14-5 20 15 4 26 17 26 33 0 19-15 34-34 34H355c-17 0-31-14-31-31 0-16 12-29 28-31" fill="url(#method-tree)" opacity=".74"/>
+                  <path d="M413 161v36" stroke="#78977f" strokeWidth="8" strokeLinecap="round"/>
+                  <path d="M399 198h31" stroke="#78977f" strokeWidth="6" strokeLinecap="round"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="max-w-[800px] mx-auto px-6 py-8 sm:py-14">
 
         {/* 1. Introducción */}
         <section className="mb-12">
@@ -124,9 +180,6 @@ export default function MetodologiaPage() {
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">6. Conclusión</h2>
           <p className="text-[var(--ds-gray-600)]">
             Madrid Refugio transforma datos abiertos en protección climática concreta. Es una herramienta operativa y funcional que permite calcular rutas peatonales más confortables en Madrid y, al mismo tiempo, producir evidencia territorial para orientar decisiones públicas de adaptación al calor.
-          </p>
-          <p className="text-[var(--ds-gray-600)] mt-4">
-            URL pública: <a href="https://madridrefugio.es/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">https://madridrefugio.es/</a>
           </p>
         </section>
 
