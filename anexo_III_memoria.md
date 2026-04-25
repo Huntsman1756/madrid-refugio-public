@@ -61,6 +61,18 @@ La segunda innovación es el indice territorial multicriterio por barrio, que co
 
 En el ejemplo operativo validado en el proyecto, una ruta de confort térmico incrementa la distancia un 4,3% respecto al trayecto mas corto, a cambio de multiplicar por 5,4 la sombra acumulada.
 
+### 6.1 Lógica de routing climático
+
+En cada consulta el backend calcula dos alternativas sobre la misma red peatonal: una ruta directa, optimizada exclusivamente por longitud, y una ruta de confort térmico, optimizada mediante una función de coste dinámica. Esa función combina cuatro factores: la longitud del tramo, la sombra biológica procedente del arbolado, la sombra proyectada por edificios para la franja horaria solicitada y un bono de proximidad a recursos de alivio.
+
+La hora introducida por la persona usuaria se transforma en una franja discreta comprendida entre las 08:00 y las 20:00. Con ello, el motor selecciona la matriz horaria de sombra precomputada correspondiente y evita recalcular la geometría solar completa en producción. La preferencia de ruta se modela en un continuo técnico entre 0 y 1, pero se expone en tres modos comprensibles: Directa, Equilibrada y Más sombra.
+
+### 6.2 Recursos de proximidad y salida operativa
+
+Las fuentes de agua y los refugios sustitutos no se incorporan como meros puntos de contexto, sino como recursos detectados espacialmente sobre la geometría de cada ruta. El sistema aplica buffers funcionales sobre el recorrido calculado y selecciona los puntos contenidos en ese corredor: 75 metros para fuentes de agua potable y 200 metros para refugios sustitutos climatizados.
+
+La respuesta del endpoint no devuelve solo una polilínea cartográfica. Incluye las coordenadas de la ruta directa y la ruta de confort, la longitud de ambas alternativas, la sombra acumulada diferenciada entre arbolado y edificios, la reducción térmica estimada, el tiempo adicional asumido y el número de fuentes y refugios próximos. Esta salida permite auditar cada recomendación y convierte la herramienta en un sistema interpretable para ciudadanía y evaluación pública.
+
 ## 7. Tecnologia utilizada
 
 **Procesamiento geoespacial.** Python con GeoPandas, Shapely, PyProj, Pandas y utilidades de análisis espacial sobre ETRS89 / UTM zona 30N (EPSG:25830). Para el modelo de sombra proyectada se utilizan `pvlib` y `pybdshadow`.

@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { ThermometerSun, ArrowLeft } from "lucide-react";
+import { AlcalaLogo } from "@/components/branding/HomeVisuals";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function MetodologiaPage() {
@@ -11,8 +12,10 @@ export default function MetodologiaPage() {
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.82)] px-4 py-3 shadow-[0_8px_24px_rgba(36,53,65,0.04)] backdrop-blur-md sm:px-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ThermometerSun className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--ds-black)]" />
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,242,233,0.92))] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[rgba(91,84,74,0.08)]">
+              <AlcalaLogo className="h-8 w-8" />
+            </span>
             <div>
               <span className="block font-sans font-semibold text-[var(--ds-black)] tracking-tight text-sm sm:text-base">Madrid Refugio</span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Planificador peatonal climático</span>
@@ -120,9 +123,34 @@ export default function MetodologiaPage() {
           </div>
         </section>
 
-        {/* 3. Reutilización de Datos Abiertos */}
+        {/* 3. Lógica de cálculo */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Conjuntos de datos utilizados</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">3. Lógica de cálculo de ruta</h2>
+          <p className="text-[var(--ds-gray-600)] mb-4">
+            El motor calcula siempre dos alternativas sobre la misma red peatonal: una ruta directa, optimizada solo por longitud, y una ruta de confort térmico, optimizada mediante una función de coste dinámica. La hora introducida por la persona usuaria se acota al rango operativo de 08:00 a 20:00 y activa la matriz horaria de sombra correspondiente.
+          </p>
+          <p className="text-[var(--ds-gray-600)] mb-6">
+            La ruta de confort no minimiza únicamente metros recorridos. El peso de cada tramo combina longitud, sombra de arbolado, sombra proyectada por edificios y un bono de recursos próximos. El usuario puede modular el equilibrio entre rapidez y protección mediante tres preferencias visibles en interfaz: Directa, Equilibrada y Más sombra.
+          </p>
+          <div className="space-y-4">
+            <Card level={1} className="p-5 border-l-4 border-l-[#247b56]">
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Ruta directa y ruta de confort</h4>
+              <p className="text-sm text-[var(--ds-gray-600)]">El sistema compara de forma explícita la alternativa de menor longitud con otra alternativa ponderada por confort térmico para que la decisión final sea interpretable.</p>
+            </Card>
+            <Card level={1} className="p-5 border-l-4 border-l-[#0a72ef]">
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Ponderación horaria reproducible</h4>
+              <p className="text-sm text-[var(--ds-gray-600)]">La hora elegida se transforma en una franja horaria discreta que selecciona pesos precomputados de sombra, evitando recalcular toda la geometría solar en producción.</p>
+            </Card>
+            <Card level={1} className="p-5 border-l-4 border-l-[#ff8f3d]">
+              <h4 className="font-semibold text-[var(--ds-black)] text-sm mb-1">Trade-off configurable</h4>
+              <p className="text-sm text-[var(--ds-gray-600)]">La preferencia de ruta se expresa en un continuo técnico entre 0 y 1, pero se presenta en tres modos comprensibles para ciudadanía y evaluación pública.</p>
+            </Card>
+          </div>
+        </section>
+
+        {/* 4. Reutilización de Datos Abiertos */}
+        <section className="mb-12">
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">4. Conjuntos de datos utilizados</h2>
           <p className="text-[var(--ds-gray-600)] mb-6">El proyecto reutiliza datos abiertos municipales, cartografía oficial y OpenStreetMap para resolver el problema con trazabilidad completa:</p>
           <div className="border border-[var(--ds-gray-100)] rounded-lg overflow-hidden">
             <table className="w-full text-sm text-left">
@@ -151,19 +179,28 @@ export default function MetodologiaPage() {
               El proyecto documenta expresamente que no existe un dataset municipal reutilizable de refugios climáticos oficiales en formato operativo. Por ello, se emplea una sustitución defensiva basada en equipamientos municipales con climatización y coordenadas verificadas.
             </p>
           </div>
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[var(--ds-black)] mb-3">Recursos de proximidad en ruta</h3>
+            <p className="text-[var(--ds-gray-600)] mb-4">
+              Las fuentes y refugios no se muestran como contexto genérico de ciudad, sino como recursos detectados espacialmente sobre la propia ruta calculada. Para ello, el backend genera buffers sobre la geometría del recorrido y selecciona los puntos que quedan dentro de ese corredor funcional.
+            </p>
+            <p className="text-[var(--ds-gray-600)]">
+              En la configuración actual, las fuentes de agua se computan con un buffer de 75 metros y los refugios sustitutos con un buffer de 200 metros. La respuesta del endpoint devuelve tanto el número de recursos como sus coordenadas, lo que permite representarlos sobre el mapa y resumirlos en la ficha de resultados.
+            </p>
+          </div>
         </section>
 
-        {/* 4. Impacto Social */}
+        {/* 5. Impacto Social */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">4. Impacto esperado</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Impacto esperado</h2>
           <p className="text-[var(--ds-gray-600)]">
             Madrid Refugio tiene impacto potencial directo en salud urbana, adaptación climática y planificación territorial. Facilita desplazamientos más seguros para la ciudadanía y genera evidencia útil para priorizar inversiones en barrios con mayor déficit de cobertura y mayor exposición de población vulnerable.
           </p>
         </section>
 
-        {/* 5. Escalabilidad */}
+        {/* 6. Tecnología */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">5. Tecnología utilizada</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">6. Tecnología utilizada</h2>
           <p className="text-[var(--ds-gray-600)] mb-4">
             El procesamiento geoespacial se apoya en Python, GeoPandas, Shapely, PyProj, Pandas, <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pvlib</code> y <code className="bg-[var(--ds-gray-50)] px-1 py-0.5 rounded text-xs">pybdshadow</code>. El modelo de routing utiliza OSMnx y NetworkX sobre una red peatonal derivada de OpenStreetMap.
           </p>
@@ -173,11 +210,14 @@ export default function MetodologiaPage() {
           <p className="text-[var(--ds-gray-600)] mt-4">
             La metodología de operación separa explícitamente la generación offline de artefactos pesados y la resolución online de consultas. Esto permite mantener reproducibilidad técnica, tiempos de respuesta bajos y una arquitectura pública estable para evaluación externa.
           </p>
+          <p className="text-[var(--ds-gray-600)] mt-4">
+            La salida operativa del sistema no se limita a una polilínea cartográfica. Cada consulta devuelve geometrías de la ruta directa y de la ruta de confort, longitud total, sombra acumulada, reducción térmica estimada, tiempo adicional asumido y conteos de fuentes y refugios próximos. Esto permite auditar cada recomendación y no tratar el resultado como una caja negra.
+          </p>
         </section>
 
-        {/* 6. Conclusión */}
+        {/* 7. Conclusión */}
         <section className="mb-12">
-          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">6. Conclusión</h2>
+          <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">7. Conclusión</h2>
           <p className="text-[var(--ds-gray-600)]">
             Madrid Refugio transforma datos abiertos en protección climática concreta. Es una herramienta operativa y funcional que permite calcular rutas peatonales más confortables en Madrid y, al mismo tiempo, producir evidencia territorial para orientar decisiones públicas de adaptación al calor.
           </p>
