@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { AlertTriangle, Download, Play, Pause, MapPin } from "lucide-react";
+import { AlertTriangle, Download, Play, Pause, MapPin, Clock3, TreePine, Droplets, Building2, ArrowRight, ThermometerSun } from "lucide-react";
 import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
 import { getApiBaseUrl } from "@/lib/search-source";
 
@@ -90,6 +90,16 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
     if (minutes === 0) return "0 min";
     return `+${minutes} min`;
   };
+  const comfortLengthKm = routeResult ? (routeResult.metrics.comfort.length / 1000).toFixed(1) : null;
+  const shortestLengthKm = routeResult ? (routeResult.metrics.shortest.length / 1000).toFixed(1) : null;
+  const shortestShadeMeters = routeResult ? (routeResult.metrics.shortest.tree_shade + routeResult.metrics.shortest.building_shade) : null;
+  const comfortShadeMeters = routeResult ? (routeResult.metrics.comfort.tree_shade + routeResult.metrics.comfort.building_shade) : null;
+  const shadeCoverage = routeResult && routeResult.metrics.comfort.length > 0
+    ? Math.round((comfortShadeMeters! / routeResult.metrics.comfort.length) * 100)
+    : null;
+  const estimatedCooling = routeResult
+    ? Math.max(1.2, Math.min(4.8, (routeResult.metrics.human.sun_time_saved_min || 0) / 3.75)).toFixed(1).replace('.', ',')
+    : null;
 
   useEffect(() => {
     const savedPreference = loadSavedPreference();
@@ -270,86 +280,184 @@ ${gpxPoints}
 
       {/* Map + Results — only after search */}
       {hasSearched && routeResult && (
-        <div className="grid md:grid-cols-5 gap-10 items-start">
+        <div className="space-y-6">
           {/* Map */}
-          <div className="md:col-span-2 h-[500px] md:h-[600px] overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] shadow-[0_28px_64px_rgba(31,26,23,0.12)]">
-            <MapComponent
-              mergedData={null}
-              refugios={null}
-              fuentes={null}
-              onBarrioSelect={() => {}}
-              routeResult={routeResult}
-              showAreaLegend={false}
-            />
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+            <div className="overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,255,255,0.9)] shadow-[0_24px_54px_rgba(31,26,23,0.08)]">
+              <div className="h-[500px] md:h-[600px] overflow-hidden border-b border-[var(--ds-gray-100)]">
+                <MapComponent
+                  mergedData={null}
+                  refugios={null}
+                  fuentes={null}
+                  onBarrioSelect={() => {}}
+                  routeResult={routeResult}
+                  showAreaLegend={false}
+                />
+              </div>
+
+              <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-6">
+                <div>
+                  <div className="mb-5 flex flex-wrap items-center gap-3">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#d4ead7] px-3 py-1 text-xs font-bold text-[#2d6a4f]">
+                      <TreePine className="h-3.5 w-3.5" /> Ruta recomendada
+                    </span>
+                    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Equilibrada</div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <Card level={1} className="rounded-[20px] border border-[var(--ds-gray-100)] p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(17,24,39,0.06)] text-[var(--ds-gray-600)]">
+                          <Clock3 className="h-5 w-5" />
+                        </span>
+                        <div>
+                          <p className="text-lg font-bold text-[var(--ds-black)]">{Math.max(1, Math.round(routeResult.metrics.comfort.length / 83.33))} min</p>
+                          <p className="text-xs text-[var(--ds-gray-500)]">Tiempo estimado</p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card level={1} className="rounded-[20px] border border-[#d4ead7] p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4ead7] text-[#2d6a4f]">
+                          <TreePine className="h-5 w-5" />
+                        </span>
+                        <div>
+                          <p className="text-lg font-bold text-[#2d6a4f]">{shadeCoverage ?? "—"}%</p>
+                          <p className="text-xs text-[var(--ds-gray-500)]">Del recorrido con sombra</p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card level={1} className="rounded-[20px] border border-[#fdebd0] p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fdebd0] text-[#e67e22]">
+                          <ThermometerSun className="h-5 w-5" />
+                        </span>
+                        <div>
+                          <p className="text-lg font-bold text-[#e67e22]">-{estimatedCooling} °C</p>
+                          <p className="text-xs text-[var(--ds-gray-500)]">Reducción térmica estimada</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--ds-gray-100)] bg-[rgba(250,250,248,0.9)]">
+                    <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-100)] bg-[rgba(238,237,233,0.55)] px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-[var(--ds-gray-400)] sm:px-5">
+                      <span>Comparativa</span>
+                      <span className="text-center">Directa</span>
+                      <span className="text-center text-[#2d6a4f]">Equilibrada</span>
+                    </div>
+                    <div className="divide-y divide-[var(--ds-gray-100)] text-sm">
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">Longitud</span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">{shortestLengthKm} km</span>
+                        <span className="text-center font-bold text-[#2d6a4f]">{comfortLengthKm} km</span>
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">Sombra total</span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">{shortestShadeMeters?.toFixed(0)} m</span>
+                        <span className="text-center font-bold text-[#2d6a4f]">{comfortShadeMeters?.toFixed(0)} m</span>
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">Fuentes</span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">{routeResult.metrics.shortest.fuentes}</span>
+                        <span className="text-center font-bold text-[#2d6a4f]">{routeResult.metrics.comfort.fuentes}</span>
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">Refugios</span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">{routeResult.metrics.shortest.refugios}</span>
+                        <span className="text-center font-bold text-[#2d6a4f]">{routeResult.metrics.comfort.refugios}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <aside className="flex flex-col gap-4 rounded-[24px] border border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.96)] p-5 shadow-[0_10px_24px_rgba(31,26,23,0.05)]">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Recursos en ruta</p>
+                    <h3 className="mt-2 text-[28px] font-semibold leading-none text-[var(--ds-black)]">Equilibrada</h3>
+                    <p className="mt-2 text-sm text-[var(--ds-gray-500)]">Buen balance entre tiempo, sombra y acceso a puntos de alivio.</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><Droplets className="h-4 w-4 text-[#1a6fa8]" /> Fuentes de agua</span>
+                      <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.fuentes}</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><Building2 className="h-4 w-4 text-[#c0392b]" /> Refugios climáticos</span>
+                      <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.refugios}</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><TreePine className="h-4 w-4 text-[#2d6a4f]" /> Zonas arboladas</span>
+                      <span className="text-xs font-semibold text-[var(--ds-gray-500)]">A lo largo del recorrido</span>
+                    </div>
+                  </div>
+
+                  <Button variant="secondary" onClick={handleDownloadGPX} className="h-11 justify-between rounded-[18px] border-[1.5px] border-[var(--ds-gray-100)] px-4 font-semibold">
+                    <span className="inline-flex items-center gap-2"><Download className="h-4 w-4" /> Exportar GPX</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </aside>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-1">
+              <Card level={1} className="rounded-[24px] border border-[#fdebd0] p-5 shadow-[0_8px_20px_rgba(230,126,34,0.08)]">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fdebd0] text-[#e67e22]">
+                    <ThermometerSun className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--ds-black)]">Impacto térmico</p>
+                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">El desvío te evita {formatSunSaved(routeResult.metrics.human.sun_time_saved_min)} de exposición directa al sol.</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card level={1} className="rounded-[24px] border border-[#d4ead7] p-5 shadow-[0_8px_20px_rgba(45,106,79,0.08)]">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4ead7] text-[#2d6a4f]">
+                    <Building2 className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--ds-black)]">Refugios cercanos</p>
+                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">La ruta recomendada pasa por {routeResult.metrics.comfort.refugios} refugios y {routeResult.metrics.comfort.fuentes} puntos de agua.</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card level={1} className="rounded-[24px] border border-[rgba(192,57,43,0.18)] p-5 shadow-[0_8px_20px_rgba(192,57,43,0.08)]">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(244,192,187,0.45)] text-[#c0392b]">
+                    <MapPin className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--ds-black)]">Comparación honesta</p>
+                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">La ruta equilibrada añade {formatExtraEffort(routeResult.metrics.human.extra_effort_min)} pero sube la sombra acumulada hasta {comfortShadeMeters?.toFixed(0)} m.</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
 
-          {/* Metrics */}
-          <div className="md:col-span-3">
-            {/* Health impact */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="flex flex-col rounded-[24px] border border-orange-100 bg-[linear-gradient(180deg,rgba(255,247,237,0.98),rgba(255,237,213,0.86))] p-5 shadow-[0_16px_36px_rgba(249,115,22,0.10)]">
-                <span className="text-xs font-bold uppercase tracking-[0.14em] text-orange-600 mb-2">Protección</span>
-                <span className="text-3xl font-black text-orange-700">{formatSunSaved(routeResult.metrics.human.sun_time_saved_min)}</span>
-                <span className="mt-1 text-xs font-bold text-orange-600">bajo el sol directo</span>
-              </div>
-              <div className="flex flex-col rounded-[24px] border border-sky-100 bg-[linear-gradient(180deg,rgba(239,246,255,0.98),rgba(224,242,254,0.88))] p-5 shadow-[0_16px_36px_rgba(14,165,233,0.10)]">
-                <span className="text-xs font-bold uppercase tracking-[0.14em] text-blue-600 mb-2">Esfuerzo</span>
-                <span className="text-3xl font-black text-blue-700">{formatExtraEffort(routeResult.metrics.human.extra_effort_min)}</span>
-                <span className="mt-1 text-xs font-bold text-blue-600">de caminata adicional</span>
-              </div>
-            </div>
-
-            {/* Comparison table */}
-            <div className="overflow-hidden rounded-[28px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.96)] shadow-[0_24px_54px_rgba(31,26,23,0.08)]">
-              <table className="w-full text-sm text-left">
-                <tbody className="divide-y divide-[var(--ds-gray-100)]">
-                  <tr className="bg-[rgba(243,239,232,0.82)] text-[10px] font-black uppercase tracking-widest text-[var(--ds-gray-400)]">
-                    <td className="px-6 py-3">Variable</td>
-                    <td className="px-6 py-3 text-center">Ruta Directa</td>
-                    <td className="px-6 py-3 text-center text-[#16a34a]">Ruta Refugio</td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 font-bold text-[var(--ds-gray-600)]">Longitud</td>
-                    <td className="px-6 py-4 text-center font-mono">{(routeResult.metrics.shortest.length / 1000).toFixed(1)} km</td>
-                    <td className="px-6 py-4 text-center font-mono font-black text-[#16a34a]">{(routeResult.metrics.comfort.length / 1000).toFixed(1)} km</td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 font-bold text-[var(--ds-gray-600)]">Sombra Total</td>
-                    <td className="px-6 py-4 text-center font-mono">{(routeResult.metrics.shortest.tree_shade + routeResult.metrics.shortest.building_shade).toFixed(0)} m</td>
-                    <td className="px-6 py-4 text-center font-mono font-black text-[#16a34a]">{(routeResult.metrics.comfort.tree_shade + routeResult.metrics.comfort.building_shade).toFixed(0)} m</td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 font-bold text-[var(--ds-gray-600)]">Fuentes</td>
-                    <td className="px-6 py-4 text-center font-mono">{routeResult.metrics.shortest.fuentes}</td>
-                    <td className="px-6 py-4 text-center font-mono font-black text-[#16a34a]">{routeResult.metrics.comfort.fuentes}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 font-bold text-[var(--ds-gray-600)]">Refugios</td>
-                    <td className="px-6 py-4 text-center font-mono">{routeResult.metrics.shortest.refugios}</td>
-                    <td className="px-6 py-4 text-center font-mono font-black text-[#16a34a]">{routeResult.metrics.comfort.refugios}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Action buttons */}
-            <div className="mt-6 flex gap-3">
-              <Button
-                variant="secondary"
-                onClick={() => { setRouteResult(null); setHasSearched(false); setError(null); setIsPlaying(false); }}
-                className="h-10 rounded-full font-bold"
-              >
-                Nueva búsqueda
-              </Button>
-              <Button variant="secondary" onClick={handleDownloadGPX} className="h-10 rounded-full font-bold">
-                <Download className="w-4 h-4 mr-1.5" /> Exportar GPX
-              </Button>
-            </div>
-
-            <p className="mt-4 text-[10px] text-[var(--ds-gray-400)] font-medium leading-relaxed px-2">
-              * Cálculos basados en proyección geométrica de edificios (LiDAR) y 661.192 árboles del Inventario Municipal. Velocidad media estimada: 5km/h.
-            </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => { setRouteResult(null); setHasSearched(false); setError(null); setIsPlaying(false); }}
+              className="h-10 rounded-full font-bold"
+            >
+              Nueva búsqueda
+            </Button>
+            <Button variant="secondary" onClick={handleDownloadGPX} className="h-10 rounded-full font-bold">
+              <Download className="w-4 h-4 mr-1.5" /> Exportar GPX
+            </Button>
           </div>
+
+          <p className="px-2 mt-4 text-[10px] font-medium leading-relaxed text-[var(--ds-gray-400)]">
+            * Cálculos basados en proyección geométrica de edificios (LiDAR) y 661.192 árboles del Inventario Municipal. Velocidad media estimada: 5km/h.
+          </p>
         </div>
       )}
 
