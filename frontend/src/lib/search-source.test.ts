@@ -73,7 +73,7 @@ describe("getSearchOptions", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith("/data/madrid_search_index.json");
-    expect(firstResult).toEqual<SearchOption[]>([
+    expect(firstResult).toEqual([
       {
         id: "gomez-ulla-40.4211--3.6738-demo_destination",
         label: "Gomez Ulla",
@@ -83,7 +83,7 @@ describe("getSearchOptions", () => {
         district: "Salamanca",
       },
     ]);
-    expect(secondResult).toEqual<SearchOption[]>([
+    expect(secondResult).toEqual([
       {
         id: "plaza-de-castilla-40.466--3.6904-demo_origin",
         label: "Plaza de Castilla",
@@ -114,13 +114,13 @@ describe("getSearchOptions", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(getSearchOptions("gomez")).rejects.toMatchObject<Partial<SearchSourceError>>({
+    await expect(getSearchOptions("gomez")).rejects.toMatchObject({
       name: "SearchSourceError",
       message: "No se pudo cargar el catalogo de lugares. Recarga la pagina e intentalo de nuevo.",
       cause: new Error("network down"),
     });
 
-    await expect(getSearchOptions("gomez")).resolves.toEqual<SearchOption[]>([
+    await expect(getSearchOptions("gomez")).resolves.toEqual([
       {
         id: "gomez-ulla-40.4211--3.6738-demo_destination",
         label: "Gomez Ulla",
@@ -141,7 +141,7 @@ describe("getSearchOptions", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(getSearchOptions("gomez")).rejects.toMatchObject<Partial<SearchSourceError>>({
+    await expect(getSearchOptions("gomez")).rejects.toMatchObject({
       name: "SearchSourceError",
       message: "No se pudo cargar el catalogo de lugares. Recarga la pagina e intentalo de nuevo.",
       cause: new Error("Failed to load search index: 503"),

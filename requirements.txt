@@ -9,3 +9,4 @@ shapely
 networkx
 scipy
 requests
+httpx
