@@ -543,7 +543,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
           {[
-            { icon: Building2, label: "Modelo 3D municipal", detail: "Fuente oficial para alturas de edificacion", color: "#0a72ef", href: "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Urbanismo-e-infraestructuras/Visualizador-Urbanistico/Modelo-3D/?vgnextfmt=default&vgnextoid=4ac0fd1d4f53b710VgnVCM2000001f4a900aRCRD&vgnextchannel=5a6f6eec8c4ce410VgnVCM2000000c205a0aRCRD" },
+            { icon: Building2, label: "Modelo 3D municipal", detail: "Fuente oficial de referencia no enlazada por falta de URL publica estable verificada", color: "#0a72ef" },
             { icon: TreePine, label: "Arbolado detallado", detail: "Ficha oficial del dataset municipal", color: "#16a34a", href: "https://datos.madrid.es/dataset/300761-0-arbolado-especies" },
             { icon: Users, label: "Padron municipal historico", detail: "Ficha oficial del dataset municipal", color: "#de1d8d", href: "https://datos.madrid.es/dataset/209163-0-padron-municipal-historico" },
             { icon: Wind, label: "Calidad del aire", detail: "Ficha oficial del dataset municipal", color: "#f97316", href: "https://datos.madrid.es/dataset/201200-0-calidad-aire-horario" },
@@ -554,15 +554,29 @@ export default function Home() {
             { icon: Landmark, label: "Polideportivos municipales", detail: "Ficha oficial del dataset municipal", color: "#9333ea", href: "https://datos.madrid.es/dataset/200186-0-polideportivos" },
             { icon: MapPin, label: "Barrios municipales", detail: "Limites administrativos oficiales", color: "#ff5b4f", href: "https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/LIMITES_ADMINISTRATIVOS/Barrios/Barrios.zip" },
             { icon: Database, label: "Portal datos.madrid.es", detail: "Catalogo oficial del Ayuntamiento", color: "#171717", href: "https://datos.madrid.es/portal/site/egob" },
-          ].map((src) => (
-            <a key={src.label} href={src.href} target="_blank" rel="noopener noreferrer" className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 hover:border-[var(--ds-gray-400)] hover:shadow-md transition-all group block">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
-                <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
+          ].map((src) => {
+            const cardClassName = `fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 transition-all group block ${src.href ? "hover:border-[var(--ds-gray-400)] hover:shadow-md" : "opacity-90"}`;
+
+            const content = (
+              <>
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
+                  <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
+                </div>
+                <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 group-hover:text-[var(--ds-black)] leading-tight">{src.label}</p>
+                <p className="text-xs text-[var(--ds-gray-500)]">{src.detail}</p>
+              </>
+            );
+
+            return src.href ? (
+              <a key={src.label} href={src.href} target="_blank" rel="noopener noreferrer" className={cardClassName}>
+                {content}
+              </a>
+            ) : (
+              <div key={src.label} className={cardClassName}>
+                {content}
               </div>
-              <p className="text-sm font-semibold text-[var(--ds-black)] mb-0.5 group-hover:text-[var(--ds-black)] leading-tight">{src.label}</p>
-              <p className="text-xs text-[var(--ds-gray-500)]">{src.detail}</p>
-            </a>
-          ))}
+            );
+          })}
         </div>
 
         {/* Footer */}
