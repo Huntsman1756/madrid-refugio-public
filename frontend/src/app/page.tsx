@@ -211,11 +211,11 @@ export default function Home() {
   return (
     <main ref={mainRef} className="min-h-screen bg-[var(--background)]">
       {/* Navbar — minimal */}
-      <nav className="sticky top-0 z-50 border-b border-[rgba(91,84,74,0.08)] bg-[rgba(255,251,246,0.82)] px-4 py-3 shadow-[0_12px_32px_rgba(36,53,65,0.05)] backdrop-blur-md sm:px-6">
-        <div className="flex justify-between items-center">
+      <nav className="sticky top-0 z-50 navbar px-4 py-3 sm:px-6">
+        <div className="flex justify-between items-center max-w-[1760px] mx-auto">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,242,233,0.92))] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[rgba(91,84,74,0.08)]">
-            <AlcalaLogo className="h-8 w-8" />
+          <span className="navbar-brand">
+            <AlcalaLogo className="h-7 w-7" />
           </span>
           <div>
             <span className="block font-sans font-semibold text-[var(--ds-black)] tracking-tight text-sm sm:text-base">Madrid Refugio</span>
@@ -244,9 +244,26 @@ export default function Home() {
                 Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
               </p>
               <div className="fade-in-up mt-6 flex flex-wrap gap-3 text-sm font-semibold text-[var(--ds-gray-600)]">
-                <span className="hero-chip">Sombra urbana real</span>
-                <span className="hero-chip">Comparación inmediata</span>
-                <span className="hero-chip">Recursos climáticos en ruta</span>
+                <span className="hero-chip">
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[#2d6a4f]" aria-hidden="true">
+                    <path d="M8 1.5a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 0 0-4-4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M5 5.5a3 3 0 0 1 6 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
+                  </svg>
+                  Sombra urbana real
+                </span>
+                <span className="hero-chip">
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[#2d6a4f]" aria-hidden="true">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Comparación inmediata
+                </span>
+                <span className="hero-chip">
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[#2d6a4f]" aria-hidden="true">
+                    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
+                  </svg>
+                  Recursos climáticos en ruta
+                </span>
               </div>
             </div>
 
