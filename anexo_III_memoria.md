@@ -2,6 +2,10 @@
 
 **Madrid Refugio: rutas de confort térmico urbano basadas en datos abiertos**
 
+**Autor:** Daniel Romero Gil
+
+**URL del repositorio:** <https://github.com/Huntsman1756/madrid-refugio-public>
+
 ## 1. Resumen ejecutivo
 
 Madrid Refugio es una herramienta de simulación climática urbana que calcula rutas peatonales de confort térmico en el momento de la consulta, combinando datos abiertos del Ayuntamiento de Madrid con un grafo de calles de OpenStreetMap. El proyecto responde a un problema público acreditado: el 64,1% de los barrios de Madrid no dispone de un refugio climático operativo en un radio de 300 metros, mientras que la cobertura actual de refugios oficiales resulta claramente insuficiente en comparación con otras grandes ciudades españolas.
