@@ -10,7 +10,6 @@ import {
 } from "react";
 
 import {
-  filterSearchOptions,
   type SearchKind,
   type SearchOption,
 } from "@/lib/madrid-search";
@@ -56,9 +55,7 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
   const value = controlledValue ?? uncontrolledValue;
   const selectedOption = controlledSelectedOption ?? uncontrolledSelectedOption;
 
-  const suggestions = selectedOption?.label === value
-    ? []
-    : filterSearchOptions(options, value);
+  const suggestions = selectedOption?.label === value ? [] : options;
 
   const isListOpen = isOpen && suggestions.length > 0;
 

@@ -126,6 +126,23 @@ describe("AddressAutocompleteField", () => {
     expect(input).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("renders provided suggestions without refiltering them locally", () => {
+    render(
+      <AddressAutocompleteField
+        label="Destino"
+        name="destination"
+        options={[OPTIONS[1]]}
+        value="zz"
+        onSelect={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Destino" });
+    fireEvent.focus(input);
+
+    expect(screen.getByRole("button", { name: /ciudad universitaria, madrid/i })).toBeInTheDocument();
+  });
+
   it("dismisses suggestions on escape, blur, and outside pointer events", () => {
     const onSelect = vi.fn();
     const ref = createRef<HTMLInputElement>();

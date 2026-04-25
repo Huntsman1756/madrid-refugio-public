@@ -29,6 +29,7 @@ interface SearchBarProps {
 }
 
 const HOUR_OPTIONS = [10, 14, 18] as const;
+const AUTOCOMPLETE_DEBOUNCE_MS = 180;
 
 const HOUR_LABELS: Record<number, string> = {
   10: "Mañana",
@@ -106,6 +107,8 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   const [origin, setOrigin] = useState(initialState?.useMyLocation ? "" : initialState?.origin?.label || "");
   const [selectedOrigin, setSelectedOrigin] = useState<SearchOption | null>(() => initialState?.useMyLocation ? null : toSearchOption(initialState?.origin));
   const [originOptions, setOriginOptions] = useState<SearchOption[]>([]);
+  const [debouncedDestination, setDebouncedDestination] = useState(destination);
+  const [debouncedOrigin, setDebouncedOrigin] = useState(origin);
   const [hour, setHour] = useState(() => normalizeHour(initialState?.hour ?? new Date().getHours()));
   const [preference, setPreference] = useState(() => normalizePreference(initialState?.preference ?? 0.5));
   const [useMyLocation, setUseMyLocation] = useState(initialState?.useMyLocation ?? false);
@@ -157,14 +160,38 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
   ]);
 
   useEffect(() => {
-    if (selectedDestination?.label === destination || !destination.trim()) {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedDestination(destination);
+    }, AUTOCOMPLETE_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [destination]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedOrigin(origin);
+    }, AUTOCOMPLETE_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [origin]);
+
+  useEffect(() => {
+    if (
+      selectedDestination?.label === destination ||
+      !destination.trim() ||
+      debouncedDestination.trim() !== destination.trim()
+    ) {
       setDestinationOptions([]);
       return;
     }
 
     let cancelled = false;
 
-    getSearchSuggestions(destination)
+    getSearchSuggestions(debouncedDestination)
       .then((options) => {
         if (!cancelled) {
           setSearchSourceError(null);
@@ -185,17 +212,22 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     return () => {
       cancelled = true;
     };
-  }, [destination, selectedDestination]);
+  }, [debouncedDestination, destination, selectedDestination]);
 
   useEffect(() => {
-    if (useMyLocation || selectedOrigin?.label === origin || !origin.trim()) {
+    if (
+      useMyLocation ||
+      selectedOrigin?.label === origin ||
+      !origin.trim() ||
+      debouncedOrigin.trim() !== origin.trim()
+    ) {
       setOriginOptions([]);
       return;
     }
 
     let cancelled = false;
 
-    getSearchSuggestions(origin)
+    getSearchSuggestions(debouncedOrigin)
       .then((options) => {
         if (!cancelled) {
           setSearchSourceError(null);
@@ -216,7 +248,7 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
     return () => {
       cancelled = true;
     };
-  }, [origin, selectedOrigin, useMyLocation]);
+  }, [debouncedOrigin, origin, selectedOrigin, useMyLocation]);
 
   const requestGeolocation = () => {
     setHasRequestedGeolocation(true);

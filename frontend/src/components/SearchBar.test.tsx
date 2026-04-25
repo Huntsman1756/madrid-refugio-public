@@ -231,4 +231,25 @@ describe("SearchBar integration", () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /museo del prado, madrid/i })).not.toBeInTheDocument();
   });
+
+  it("debounces destination lookups while the user types", async () => {
+    vi.useFakeTimers();
+
+    render(<RoutingSection />);
+
+    const destinationInput = screen.getByRole("combobox", { name: "Destino" });
+
+    fireEvent.change(destinationInput, { target: { value: "p" } });
+    fireEvent.change(destinationInput, { target: { value: "pr" } });
+    fireEvent.change(destinationInput, { target: { value: "pra" } });
+
+    expect(getSearchOptionsMock).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(getSearchOptionsMock).toHaveBeenCalledTimes(1);
+    expect(getSearchOptionsMock).toHaveBeenCalledWith("pra");
+  });
 });
