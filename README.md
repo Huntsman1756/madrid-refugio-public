@@ -67,7 +67,7 @@ python api.py
 
 ### Regenerar el índice de búsqueda de Madrid
 
-El autocompletado de origen y destino usa el índice canónico `data/processed/madrid_search_index.json`, con metadatos de tamaño en `data/processed/madrid_search_index.meta.json`.
+El autocompletado de origen y destino usa el índice canónico `data/processed/madrid_search_index.json`, con metadatos de tamaño en `data/processed/madrid_search_index.meta.json`, pero el frontend ya no descarga ese fichero completo: consulta sugerencias al backend mediante `/api/suggest`.
 
 En producción, el despliegue prepara esos artefactos antes de arrancar el backend ejecutando `python prepare_search_data.py`. Ese script descarga el CSV oficial del callejero solo si no existe todavía en `DATA_DIR` y genera el índice antes de levantar `uvicorn`.
 
@@ -80,8 +80,6 @@ En producción debes preparar antes del deploy estos artefactos en `data/process
 Si usas un volumen persistente, deja esos ficheros en `DATA_DIR` para que sobrevivan entre despliegues y el prestart no tenga que regenerarlos en cada arranque.
 
 Si despliegas sin ellos, `/api/suggest` responderá `503 Service Unavailable` hasta que el CSV oficial y/o el índice precomputado estén presentes.
-
-La demo del frontend lo sirve desde `/data/madrid_search_index.json`, por lo que tras regenerarlo conviene sincronizar la copia publicada en `frontend/public/data/madrid_search_index.json`.
 
 Comando base para regenerarlo:
 
