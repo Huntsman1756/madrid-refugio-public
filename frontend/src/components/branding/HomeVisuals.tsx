@@ -144,3 +144,27 @@ export function ClimateRouteBadge({ title = "Ruta con alivio climático", testId
     </svg>
   );
 }
+
+export function HeatmapBadgeIcon({ title = "Mapa de calor", testId, className, ...props }: SvgProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" role={title ? "img" : undefined} aria-label={title} data-testid={testId} className={className} {...props}>
+      {title ? <title>{title}</title> : null}
+      <circle cx="6" cy="8" r="3.2" fill="#fdebd0" />
+      <circle cx="12.4" cy="7.2" r="4.2" fill="#f6ad55" fillOpacity="0.95" />
+      <circle cx="9.8" cy="12.4" r="4.5" fill="#e67e22" fillOpacity="0.88" />
+      <circle cx="13.8" cy="12.6" r="2.7" fill="#c0392b" />
+    </svg>
+  );
+}
+
+export function HonestComparisonIcon({ title = "Comparación", testId, className, ...props }: SvgProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" role={title ? "img" : undefined} aria-label={title} data-testid={testId} className={className} {...props}>
+      {title ? <title>{title}</title> : null}
+      <path d="M4 14.8 8.1 10l2.8 2.8 5.1-6.1" stroke="#c0392b" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 4.5v10.8h11.8" stroke="#8b5e3c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+      <circle cx="8.1" cy="10" r="1.2" fill="#f4c0bb" stroke="#c0392b" strokeWidth="1" />
+      <circle cx="15.9" cy="6.7" r="1.2" fill="#f4c0bb" stroke="#c0392b" strokeWidth="1" />
+    </svg>
+  );
+}

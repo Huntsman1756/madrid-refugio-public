@@ -444,7 +444,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                       key={option}
                       type="button"
                       onClick={() => setHour(option)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-[0_12px_20px_rgba(31,26,23,0.14)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[#1a3d2b] bg-[#1a3d2b] text-white shadow-[0_12px_20px_rgba(26,61,43,0.20)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
                     >
                       {option}:00
                     </button>

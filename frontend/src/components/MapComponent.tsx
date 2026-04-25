@@ -137,12 +137,6 @@ const shelterIcon = createResourceIcon(
   '#c0392b',
   'rgba(255,255,255,0.92)'
 );
-const treeIcon = createResourceIcon(
-  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z"/><path d="M12 22v-3"/></svg>',
-  '#2d6a4f',
-  'rgba(255,255,255,0.92)'
-);
-
 function renderSvgToString(markup: string) {
   return markup.replace(/\n\s*/g, '');
 }
@@ -169,7 +163,19 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
   ref
 ) {
   const mapRef = useRef<L.Map | null>(null);
-  const routeShadeMarkers: [number, number][] = routeResult?.comfort_coords?.filter((_: [number, number], index: number) => index % 6 === 0) ?? [];
+  const routeShadeMarkers: [number, number][] = routeResult?.comfort_coords?.filter((_: [number, number], index: number, coords: [number, number][]) => {
+    if (coords.length <= 10) {
+      return true;
+    }
+
+    const markerCount = 8;
+    const firstIndex = Math.floor(coords.length * 0.12);
+    const lastIndex = Math.ceil(coords.length * 0.88);
+    const usableLength = Math.max(1, lastIndex - firstIndex);
+    const step = Math.max(1, Math.floor(usableLength / markerCount));
+
+    return index >= firstIndex && index <= lastIndex && (index - firstIndex) % step === 0;
+  }).slice(0, 10) ?? [];
   const heatmapPoints: [number, number, number][] = routeResult?.comfort_coords?.map((point: [number, number], index: number) => {
     const progress = routeResult.comfort_coords.length <= 1 ? 1 : index / (routeResult.comfort_coords.length - 1);
     const weight = 0.35 + (1 - progress) * 0.55;
@@ -238,12 +244,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
-        />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
-          pane="overlayPane"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
         {/* View controllers */}

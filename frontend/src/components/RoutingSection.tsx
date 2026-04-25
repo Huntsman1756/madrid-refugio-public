@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { AlertTriangle, Download, Play, Pause, MapPin, Clock3, TreePine, Droplets, Building2, ArrowRight, ThermometerSun } from "lucide-react";
+import { AlertTriangle, Download, Play, Pause, MapPin, Clock3, ThermometerSun, ArrowRight } from "lucide-react";
 import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
 import { getApiBaseUrl } from "@/lib/search-source";
-import { ClimateRouteBadge, ClimateShelterIcon, OrganicTree, WaterFountainIcon } from "./branding/HomeVisuals";
+import { ClimateRouteBadge, ClimateShelterIcon, HeatmapBadgeIcon, HonestComparisonIcon, OrganicTree, WaterFountainIcon } from "./branding/HomeVisuals";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -103,11 +103,12 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
   const shortestShadeMeters = routeResult ? (routeResult.metrics.shortest.tree_shade + routeResult.metrics.shortest.building_shade) : null;
   const comfortShadeMeters = routeResult ? (routeResult.metrics.comfort.tree_shade + routeResult.metrics.comfort.building_shade) : null;
   const shadeCoverage = routeResult && routeResult.metrics.comfort.length > 0
-    ? Math.round((comfortShadeMeters! / routeResult.metrics.comfort.length) * 100)
+    ? Math.min(100, Math.round((comfortShadeMeters! / routeResult.metrics.comfort.length) * 100))
     : null;
   const estimatedCooling = routeResult
     ? Math.max(1.2, Math.min(4.8, (routeResult.metrics.human.sun_time_saved_min || 0) / 3.75)).toFixed(1).replace('.', ',')
     : null;
+  const shadeMetersLabel = comfortShadeMeters != null ? comfortShadeMeters.toLocaleString("es-ES") : "—";
 
   useEffect(() => {
     if (!routeResult) return;
@@ -355,7 +356,7 @@ ${gpxPoints}
                     })}
                   </div>
 
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="grid gap-4 sm:gap-4 sm:grid-cols-3">
                     <Card level={1} className="rounded-[20px] border border-[var(--ds-gray-100)] p-4">
                       <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(17,24,39,0.06)] text-[var(--ds-gray-600)]">
@@ -374,14 +375,14 @@ ${gpxPoints}
                           <OrganicTree className="h-7 w-5" />
                         </span>
                         <div>
-                          <p className="text-lg font-bold text-[#2d6a4f]">{shadeCoverage ?? "—"}%</p>
-                          <p className="text-xs text-[var(--ds-gray-500)]">Del recorrido con sombra</p>
+                          <p className="text-lg font-bold text-[#2d6a4f]">{shadeMetersLabel} m</p>
+                          <p className="text-xs text-[var(--ds-gray-500)]">Sombra acumulada</p>
                         </div>
                       </div>
                       <div
                         className="mt-3 h-2.5 overflow-hidden rounded-full bg-[rgba(17,24,39,0.08)]"
                         role="progressbar"
-                        aria-label="Cobertura de sombra del recorrido"
+                        aria-label="Sombra acumulada relativa al total de la ruta"
                         aria-valuemin={0}
                         aria-valuemax={100}
                         aria-valuenow={shadeCoverage ?? 0}
@@ -445,20 +446,23 @@ ${gpxPoints}
                     <p className="mt-2 text-sm text-[var(--ds-gray-500)]">Buen balance entre tiempo, sombra y acceso a puntos de alivio.</p>
                   </div>
 
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
-                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><WaterFountainIcon className="h-4 w-4" /> Fuentes de agua</span>
-                       <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.fuentes}</span>
-                     </div>
-                     <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
-                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><ClimateShelterIcon className="h-4 w-4" /> Refugios climáticos</span>
-                       <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.refugios}</span>
-                     </div>
-                     <div className="flex items-center justify-between rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
-                      <span className="flex items-center gap-2 text-sm text-[var(--ds-gray-500)]"><OrganicTree className="h-5 w-4" /> Zonas arboladas</span>
-                       <span className="text-xs font-semibold text-[var(--ds-gray-500)]">A lo largo del recorrido</span>
-                     </div>
-                   </div>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <WaterFountainIcon className="h-5 w-5" />
+                      <span className="text-sm text-[var(--ds-gray-500)]">Fuentes de agua</span>
+                      <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.fuentes}</span>
+                    </div>
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <ClimateShelterIcon className="h-5 w-5" />
+                      <span className="text-sm text-[var(--ds-gray-500)]">Refugios climáticos</span>
+                      <span className="text-base font-bold text-[var(--ds-black)]">{routeResult.metrics.comfort.refugios}</span>
+                    </div>
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[18px] border border-[var(--ds-gray-100)] px-4 py-3">
+                      <OrganicTree className="h-6 w-5" />
+                      <span className="text-sm text-[var(--ds-gray-500)]">Zonas arboladas</span>
+                      <span className="text-xs font-semibold text-[var(--ds-gray-500)]">En ruta</span>
+                    </div>
+                  </div>
 
                   <Button variant="secondary" onClick={handleDownloadGPX} className="h-11 justify-between rounded-[18px] border-[1.5px] border-[var(--ds-gray-100)] px-4 font-semibold">
                     <span className="inline-flex items-center gap-2"><Download className="h-4 w-4" /> Exportar GPX</span>
@@ -474,11 +478,11 @@ ${gpxPoints}
                 aria-pressed={showHeatmap}
                 aria-label="Ver mapa de calor"
                 onClick={() => setShowHeatmap((current) => !current)}
-                className={`text-left rounded-[24px] border p-5 shadow-[0_8px_20px_rgba(230,126,34,0.08)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[rgba(253,235,208,0.72)]" : "border-[#fdebd0] bg-white hover:border-[#e67e22]"}`}
+                  className={`text-left rounded-[24px] border p-5 shadow-[0_8px_20px_rgba(230,126,34,0.08)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[rgba(253,235,208,0.72)]" : "border-[#fdebd0] bg-white hover:border-[#e67e22]"}`}
               >
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fdebd0] text-[#e67e22]">
-                    <ThermometerSun className="h-5 w-5" />
+                    <HeatmapBadgeIcon className="h-5 w-5" />
                   </span>
                   <div>
                     <p className="text-sm font-bold text-[var(--ds-black)]">Ver mapa de calor</p>
@@ -490,7 +494,7 @@ ${gpxPoints}
               <Card level={1} className="rounded-[24px] border border-[#d4ead7] p-5 shadow-[0_8px_20px_rgba(45,106,79,0.08)]">
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4ead7] text-[#2d6a4f]">
-                    <Building2 className="h-5 w-5" />
+                    <ClimateShelterIcon className="h-5 w-5" />
                   </span>
                   <div>
                     <p className="text-sm font-bold text-[var(--ds-black)]">Refugios cercanos</p>
@@ -502,7 +506,7 @@ ${gpxPoints}
               <Card level={1} className="rounded-[24px] border border-[rgba(192,57,43,0.18)] p-5 shadow-[0_8px_20px_rgba(192,57,43,0.08)]">
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(244,192,187,0.45)] text-[#c0392b]">
-                    <MapPin className="h-5 w-5" />
+                    <HonestComparisonIcon className="h-5 w-5" />
                   </span>
                   <div>
                     <p className="text-sm font-bold text-[var(--ds-black)]">Comparación honesta</p>

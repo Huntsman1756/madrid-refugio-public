@@ -245,7 +245,6 @@ export default function Home() {
                 <span className="hero-chip">Comparación inmediata</span>
                 <span className="hero-chip">Recursos climáticos en ruta</span>
               </div>
-              <p className="editorial-kicker fade-in-up mt-6 text-[#247b56]">Sombra urbana real, comparación inmediata y recursos climáticos en ruta.</p>
             </div>
 
             <div className="hero-art-shell hero-art-stage fade-in-up hidden lg:block" aria-hidden="true">
