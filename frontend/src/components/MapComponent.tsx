@@ -87,6 +87,87 @@ function HeatLayerController({ enabled, points }: { enabled: boolean; points: [n
   return null;
 }
 
+function createClusterIcon(count: number, background: string, label: string) {
+  return L.divIcon({
+    html: `<div aria-label="${label}: ${count}" style="width: 36px; height: 36px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: ${background}; color: #fff; border: 2px solid rgba(255,255,255,0.92); box-shadow: 0 12px 24px rgba(15,23,42,0.24); font-size: 12px; font-weight: 700;">${count}</div>`,
+    className: '',
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+  });
+}
+
+function RouteResourceClusterController({
+  fountainPoints,
+  shelterPoints,
+}: {
+  fountainPoints: [number, number][];
+  shelterPoints: [number, number][];
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    let active = true;
+    const layers: L.Layer[] = [];
+
+    async function mountClusters() {
+      if (fountainPoints.length === 0 && shelterPoints.length === 0) {
+        return;
+      }
+
+      await import('leaflet.markercluster');
+
+      if (!active) {
+        return;
+      }
+
+      if (fountainPoints.length > 0) {
+        const fountainClusterGroup = (L as any).markerClusterGroup({
+          showCoverageOnHover: false,
+          spiderfyOnMaxZoom: true,
+          maxClusterRadius: 42,
+          iconCreateFunction: (cluster: any) => createClusterIcon(cluster.getChildCount(), '#1a6fa8', 'Fuentes agrupadas'),
+        });
+
+        fountainPoints.forEach((point: [number, number]) => {
+          fountainClusterGroup.addLayer(L.marker(point, { icon: fountainIcon }).bindPopup('Fuente de agua potable'));
+        });
+
+        map.addLayer(fountainClusterGroup);
+        layers.push(fountainClusterGroup);
+      }
+
+      if (shelterPoints.length > 0) {
+        const shelterClusterGroup = (L as any).markerClusterGroup({
+          showCoverageOnHover: false,
+          spiderfyOnMaxZoom: true,
+          maxClusterRadius: 42,
+          iconCreateFunction: (cluster: any) => createClusterIcon(cluster.getChildCount(), '#c0392b', 'Refugios agrupados'),
+        });
+
+        shelterPoints.forEach((point: [number, number]) => {
+          shelterClusterGroup.addLayer(L.marker(point, { icon: shelterIcon }).bindPopup('Refugio climático'));
+        });
+
+        map.addLayer(shelterClusterGroup);
+        layers.push(shelterClusterGroup);
+      }
+    }
+
+    mountClusters();
+
+    return () => {
+      active = false;
+      layers.forEach((layer) => {
+        if (map.hasLayer(layer)) {
+          map.removeLayer(layer);
+        }
+      });
+    };
+  }, [fountainPoints, map, shelterPoints]);
+
+  return null;
+}
+
 /** Fits map to the entire dataset (Madrid bounds) on mount if no route is active */
 function FitDataController({ data, isActive }: { data: any, isActive: boolean }) {
   const map = useMap();
@@ -168,14 +249,14 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
       return true;
     }
 
-    const markerCount = 8;
+    const markerCount = 6;
     const firstIndex = Math.floor(coords.length * 0.12);
     const lastIndex = Math.ceil(coords.length * 0.88);
     const usableLength = Math.max(1, lastIndex - firstIndex);
     const step = Math.max(1, Math.floor(usableLength / markerCount));
 
     return index >= firstIndex && index <= lastIndex && (index - firstIndex) % step === 0;
-  }).slice(0, 10) ?? [];
+  }).slice(0, 6) ?? [];
   const heatmapPoints: [number, number, number][] = routeResult?.comfort_coords?.map((point: [number, number], index: number) => {
     const progress = routeResult.comfort_coords.length <= 1 ? 1 : index / (routeResult.comfort_coords.length - 1);
     const weight = 0.35 + (1 - progress) * 0.55;
@@ -252,6 +333,10 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
         <RouteViewController routeResult={routeResult} />
         <FitDataController data={mergedData} isActive={!routeResult && !flyTarget} />
         <HeatLayerController enabled={Boolean(routeResult && showHeatmap)} points={heatmapPoints} />
+        <RouteResourceClusterController
+          fountainPoints={routeResult?.metrics?.comfort?.fuentes_pts ?? []}
+          shelterPoints={routeResult?.metrics?.comfort?.refugios_pts ?? []}
+        />
 
         {/* ── Route mode ── */}
         {routeResult && (
@@ -285,17 +370,6 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
               <Popup>🏁 Destino: {routeResult.destination || 'Fin'}</Popup>
             </Marker>
 
-            {/* Nearby resources markers */}
-            {routeResult.metrics?.comfort?.fuentes_pts?.map((pos: [number, number], idx: number) => (
-              <Marker key={`fountain-${idx}`} position={pos} icon={fountainIcon}>
-                <Popup>Fuente de agua potable</Popup>
-              </Marker>
-            ))}
-            {routeResult.metrics?.comfort?.refugios_pts?.map((pos: [number, number], idx: number) => (
-              <Marker key={`shelter-${idx}`} position={pos} icon={shelterIcon}>
-                <Popup>Refugio climático</Popup>
-              </Marker>
-            ))}
             {routeShadeMarkers.map((pos: [number, number], idx: number) => (
               <Marker key={`tree-${idx}`} position={pos} icon={brandedTreeIcon}>
                 <Popup>Zona arbolada o tramo de sombra acumulada</Popup>

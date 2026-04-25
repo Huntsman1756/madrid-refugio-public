@@ -7,7 +7,7 @@ import { Card } from "./ui/Card";
 import { AlertTriangle, Download, Play, Pause, MapPin, Clock3, ThermometerSun, ArrowRight } from "lucide-react";
 import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
 import { getApiBaseUrl } from "@/lib/search-source";
-import { ClimateRouteBadge, ClimateShelterIcon, HeatmapBadgeIcon, HonestComparisonIcon, OrganicTree, WaterFountainIcon } from "./branding/HomeVisuals";
+import { ClimateRouteBadge, ClimateShelterIcon, MadridHeatmapMiniArt, MadridShelterBuildingArt, OrganicTree, TreeBenchArt, WaterFountainIcon } from "./branding/HomeVisuals";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -98,6 +98,7 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
     if (minutes === 0) return "0 min";
     return `+${minutes} min`;
   };
+  const comfortMinutes = routeResult ? Math.max(1, Math.round(routeResult.metrics.comfort.length / 83.33)) : null;
   const comfortLengthKm = routeResult ? (routeResult.metrics.comfort.length / 1000).toFixed(1) : null;
   const shortestLengthKm = routeResult ? (routeResult.metrics.shortest.length / 1000).toFixed(1) : null;
   const shortestShadeMeters = routeResult ? (routeResult.metrics.shortest.tree_shade + routeResult.metrics.shortest.building_shade) : null;
@@ -109,6 +110,13 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
     ? Math.max(1.2, Math.min(4.8, (routeResult.metrics.human.sun_time_saved_min || 0) / 3.75)).toFixed(1).replace('.', ',')
     : null;
   const shadeMetersLabel = comfortShadeMeters != null ? comfortShadeMeters.toLocaleString("es-ES") : "—";
+  const routeHourLabel = `Hoy a las ${String(hour).padStart(2, "0")}:00`;
+  const isLongRoute = routeResult ? Number(comfortLengthKm) > 8 || (comfortMinutes ?? 0) > 90 : false;
+  const adviceText = hour >= 17
+    ? "Haz la ultima parada en una plaza arbolada o refugio antes del tramo final: el asfalto retiene calor incluso al caer la tarde."
+    : hour >= 12
+      ? "Si sales en hora critica, reserva una pausa corta cada 10-15 minutos en sombra o junto a una fuente para bajar pulsaciones."
+      : "Aprovecha las primeras horas para llenar agua y cubrir los tramos mas abiertos antes de que suba la temperatura.";
 
   useEffect(() => {
     if (!routeResult) return;
@@ -363,7 +371,7 @@ ${gpxPoints}
                           <Clock3 className="h-5 w-5" />
                         </span>
                         <div>
-                          <p className="text-lg font-bold text-[var(--ds-black)]">{Math.max(1, Math.round(routeResult.metrics.comfort.length / 83.33))} min</p>
+                          <p className="text-lg font-bold text-[var(--ds-black)]">{comfortMinutes} min</p>
                           <p className="text-xs text-[var(--ds-gray-500)]">Tiempo estimado</p>
                         </div>
                       </div>
@@ -407,6 +415,13 @@ ${gpxPoints}
                       </div>
                     </Card>
                   </div>
+
+                  {isLongRoute ? (
+                    <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-[rgba(192,57,43,0.18)] bg-[linear-gradient(180deg,rgba(254,242,242,0.98),rgba(254,226,226,0.92))] px-4 py-3 text-sm text-[#8f2d23] shadow-[0_10px_24px_rgba(192,57,43,0.08)]">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <p className="font-medium">Ruta larga · Considera dividirla en tramos</p>
+                    </div>
+                  ) : null}
 
                   <div className="mt-6 overflow-hidden rounded-[24px] border border-[var(--ds-gray-100)] bg-[rgba(250,250,248,0.9)]">
                     <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-100)] bg-[rgba(238,237,233,0.55)] px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-[var(--ds-gray-400)] sm:px-5">
@@ -471,50 +486,51 @@ ${gpxPoints}
                 </aside>
               </div>
             </div>
+          </div>
 
-            <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-1">
-              <button
-                type="button"
-                aria-pressed={showHeatmap}
-                aria-label="Ver mapa de calor"
-                onClick={() => setShowHeatmap((current) => !current)}
-                  className={`text-left rounded-[24px] border p-5 shadow-[0_8px_20px_rgba(230,126,34,0.08)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[rgba(253,235,208,0.72)]" : "border-[#fdebd0] bg-white hover:border-[#e67e22]"}`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fdebd0] text-[#e67e22]">
-                    <HeatmapBadgeIcon className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold text-[var(--ds-black)]">Ver mapa de calor</p>
-                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">{showHeatmap ? "Capa térmica superpuesta" : `El desvío te evita ${formatSunSaved(routeResult.metrics.human.sun_time_saved_min)} de exposición directa al sol.`}</p>
-                  </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card level={1} className="overflow-hidden rounded-[28px] border border-[#d4ead7] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(244,250,245,0.95))] p-5 shadow-[0_14px_32px_rgba(45,106,79,0.08)]">
+              <div className="flex h-full items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2d6a4f]">Lugares frescos a tu alrededor</p>
+                  <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Refugios cercanos</h3>
+                  <p className="mt-3 font-serif text-5xl font-semibold leading-none text-[#2d6a4f]">{routeResult.metrics.comfort.refugios}</p>
+                  <p className="mt-3 text-sm text-[var(--ds-gray-500)]">La ruta recomendada conecta {routeResult.metrics.comfort.refugios} refugios y {routeResult.metrics.comfort.fuentes} puntos de agua para descansar o recargar.</p>
+                  <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f]">Ver refugios <ArrowRight className="h-4 w-4" /></p>
                 </div>
-              </button>
+                <MadridShelterBuildingArt className="h-28 w-28 flex-shrink-0 text-[#2d6a4f]" aria-hidden="true" />
+              </div>
+            </Card>
 
-              <Card level={1} className="rounded-[24px] border border-[#d4ead7] p-5 shadow-[0_8px_20px_rgba(45,106,79,0.08)]">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4ead7] text-[#2d6a4f]">
-                    <ClimateShelterIcon className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold text-[var(--ds-black)]">Refugios cercanos</p>
-                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">La ruta recomendada pasa por {routeResult.metrics.comfort.refugios} refugios y {routeResult.metrics.comfort.fuentes} puntos de agua.</p>
-                  </div>
+            <button
+              type="button"
+              aria-pressed={showHeatmap}
+              aria-label="Ver mapa de calor"
+              onClick={() => setShowHeatmap((current) => !current)}
+              className={`overflow-hidden rounded-[28px] border p-5 text-left shadow-[0_14px_32px_rgba(230,126,34,0.10)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[linear-gradient(180deg,rgba(255,247,237,0.98),rgba(253,235,208,0.92))]" : "border-[#fdebd0] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(255,247,237,0.96))] hover:border-[#e67e22]"}`}
+            >
+              <div className="flex h-full items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#c26a1b]">Radiación prevista</p>
+                  <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Mapa de calor</h3>
+                  <p className="mt-3 text-sm text-[var(--ds-gray-500)]">{showHeatmap ? "Capa térmica superpuesta" : `El desvio te evita ${formatSunSaved(routeResult.metrics.human.sun_time_saved_min)} de exposición directa al sol en el tramo más duro.`}</p>
+                  <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#c26a1b]">Ver mapa <ArrowRight className="h-4 w-4" /></p>
                 </div>
-              </Card>
+                <MadridHeatmapMiniArt className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
+              </div>
+            </button>
 
-              <Card level={1} className="rounded-[24px] border border-[rgba(192,57,43,0.18)] p-5 shadow-[0_8px_20px_rgba(192,57,43,0.08)]">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(244,192,187,0.45)] text-[#c0392b]">
-                    <HonestComparisonIcon className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold text-[var(--ds-black)]">Comparación honesta</p>
-                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">La ruta equilibrada añade {formatExtraEffort(routeResult.metrics.human.extra_effort_min)} pero sube la sombra acumulada hasta {comfortShadeMeters?.toFixed(0)} m.</p>
-                  </div>
+            <Card level={1} className="overflow-hidden rounded-[28px] border border-[rgba(45,106,79,0.14)] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(240,247,242,0.95))] p-5 shadow-[0_14px_32px_rgba(45,106,79,0.08)]">
+              <div className="flex h-full items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2d6a4f]">{routeHourLabel}</p>
+                  <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Consejo del día</h3>
+                  <p className="mt-3 text-sm text-[var(--ds-gray-500)]">{adviceText}</p>
+                  <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f]">Ver más consejos <ArrowRight className="h-4 w-4" /></p>
                 </div>
-              </Card>
-            </div>
+                <TreeBenchArt className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
+              </div>
+            </Card>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">

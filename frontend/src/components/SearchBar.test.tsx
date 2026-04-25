@@ -42,6 +42,33 @@ vi.mock("@/lib/search-source", () => ({
 import { RoutingSection } from "./RoutingSection";
 
 describe("SearchBar integration", () => {
+  const LONG_ROUTE_RESPONSE = {
+    metrics: {
+      human: {
+        sun_time_saved_min: 26,
+        extra_effort_min: 14,
+      },
+      shortest: {
+        length: 7600,
+        tree_shade: 1200,
+        building_shade: 700,
+        fuentes: 3,
+        refugios: 4,
+      },
+      comfort: {
+        length: 9100,
+        tree_shade: 3100,
+        building_shade: 1400,
+        fuentes: 7,
+        refugios: 12,
+        fuentes_pts: [],
+        refugios_pts: [],
+      },
+    },
+    comfort_coords: [],
+    shortest_coords: [],
+  };
+
   afterEach(() => {
     vi.useRealTimers();
     Object.defineProperty(navigator, "geolocation", {
@@ -346,5 +373,38 @@ describe("SearchBar integration", () => {
     expect(await screen.findByTestId("shade-progress")).toHaveAttribute("aria-valuenow", "50");
     expect(screen.getByTestId("route-legend-tree")).toBeInTheDocument();
     expect(screen.getByText(/ruta con alivio clim[aá]tico/i, { selector: "div" })).toBeInTheDocument();
+  });
+
+  it("renders the prototype lower card row and warns on long routes", async () => {
+    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => LONG_ROUTE_RESPONSE });
+
+    render(<RoutingSection autoDemo />);
+
+    expect(await screen.findByText("Refugios cercanos")).toBeInTheDocument();
+    expect(screen.getByText("Mapa de calor")).toBeInTheDocument();
+    expect(screen.getByText("Consejo del día")).toBeInTheDocument();
+    expect(screen.getByText("Lugares frescos a tu alrededor")).toBeInTheDocument();
+    expect(screen.getByText("Hoy a las 14:00")).toBeInTheDocument();
+    expect(screen.getByText(/Ruta larga · Considera dividirla en tramos/i)).toBeInTheDocument();
+  });
+
+  it("uses the selected route hour when rendering the lower contextual cards", async () => {
+    render(<RoutingSection autoDemo />);
+
+    expect(await screen.findByText("Mapa de calor")).toBeInTheDocument();
+    expect(screen.getByText("Hoy a las 14:00")).toBeInTheDocument();
+    expect(screen.getByText("Consejo del día")).toBeInTheDocument();
+  });
+
+  it("uses the lower heatmap card as the heatmap toggle affordance", async () => {
+    render(<RoutingSection autoDemo />);
+
+    const toggle = await screen.findByRole("button", { name: /ver mapa de calor/i });
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(/capa térmica superpuesta/i)).toBeInTheDocument();
   });
 });

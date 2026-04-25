@@ -5,6 +5,10 @@ type SvgProps = SVGProps<SVGSVGElement> & {
   testId?: string;
 };
 
+type ArtProps = SvgProps & {
+  size?: number | string;
+};
+
 export function OrganicTree({ title, testId, className, ...props }: SvgProps) {
   return (
     <svg
@@ -153,6 +157,91 @@ export function HeatmapBadgeIcon({ title = "Mapa de calor", testId, className, .
       <circle cx="12.4" cy="7.2" r="4.2" fill="#f6ad55" fillOpacity="0.95" />
       <circle cx="9.8" cy="12.4" r="4.5" fill="#e67e22" fillOpacity="0.88" />
       <circle cx="13.8" cy="12.6" r="2.7" fill="#c0392b" />
+    </svg>
+  );
+}
+
+export function MadridShelterBuildingArt({ title, testId, className, size = 160, ...props }: ArtProps) {
+  return (
+    <svg
+      viewBox="0 0 160 160"
+      fill="none"
+      role={title ? "img" : undefined}
+      aria-label={title}
+      data-testid={testId}
+      className={className}
+      width={size}
+      height={size}
+      {...props}
+    >
+      {title ? <title>{title}</title> : null}
+      <ellipse cx="79" cy="142" rx="46" ry="10" fill="#00000012" />
+      <path d="M20 128h120" stroke="#d7c8b0" strokeWidth="4" strokeLinecap="round" />
+      <path d="M36 72h54v56H36z" fill="#efe5d4" stroke="#b79a74" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M90 58h32v70H90z" fill="#e4d6c1" stroke="#b79a74" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M122 82h16v46h-16z" fill="#d8c8b1" stroke="#b79a74" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M44 128V94c0-4.4 3.6-8 8-8h14c4.4 0 8 3.6 8 8v34" fill="#dfe9e1" stroke="#2d6a4f" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M56 104h6M56 114h6" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M99 73h14v14H99zM99 94h14v14H99z" fill="#f8f4ec" stroke="#b79a74" strokeWidth="2.5" />
+      <path d="M127 92h6v22h-6z" fill="#f8f4ec" stroke="#b79a74" strokeWidth="2.5" />
+      <path d="M86 48c3-18 13-29 29-29 16 0 26 11 29 29" stroke="#c0392b" strokeWidth="4" strokeLinecap="round" />
+      <path d="M115 23v34" stroke="#c0392b" strokeWidth="4" strokeLinecap="round" />
+      <path d="M107 40h16" stroke="#c0392b" strokeWidth="4" strokeLinecap="round" />
+      <path d="M30 70c10-3 18-9 23-19 5 9 6 18 1 27" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function MadridHeatmapMiniArt({ title, testId, className, size = 160, ...props }: ArtProps) {
+  return (
+    <svg
+      viewBox="0 0 160 160"
+      fill="none"
+      role={title ? "img" : undefined}
+      aria-label={title}
+      data-testid={testId}
+      className={className}
+      width={size}
+      height={size}
+      {...props}
+    >
+      {title ? <title>{title}</title> : null}
+      <rect x="16" y="24" width="128" height="112" rx="22" fill="#f7efe4" stroke="#d9cab3" strokeWidth="3" />
+      <path d="M40 42v76M68 42v76M96 42v76M124 42v76" stroke="#ddd0ba" strokeWidth="2" strokeLinecap="round" />
+      <path d="M30 58h100M30 84h100M30 110h100" stroke="#ddd0ba" strokeWidth="2" strokeLinecap="round" />
+      <path d="M32 96c10-5 17-9 22-21 7-16 20-22 36-18 12 3 20 12 24 26 7 22 17 29 28 31" stroke="#cfb899" strokeWidth="5" strokeLinecap="round" opacity="0.55" />
+      <circle cx="58" cy="88" r="26" fill="#fde2bf" />
+      <circle cx="92" cy="77" r="33" fill="#f6ad55" fillOpacity="0.95" />
+      <circle cx="101" cy="102" r="30" fill="#e67e22" fillOpacity="0.88" />
+      <circle cx="116" cy="108" r="19" fill="#c0392b" fillOpacity="0.92" />
+      <circle cx="52" cy="54" r="8" fill="#f7f1e8" opacity="0.72" />
+      <path d="M116 34c7-1 13-4 17-11 3 7 2 13-3 18" fill="#d6e8dc" stroke="#7aa78e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function TreeBenchArt({ title, testId, className, size = 160, ...props }: ArtProps) {
+  return (
+    <svg
+      viewBox="0 0 160 160"
+      fill="none"
+      role={title ? "img" : undefined}
+      aria-label={title}
+      data-testid={testId}
+      className={className}
+      width={size}
+      height={size}
+      {...props}
+    >
+      {title ? <title>{title}</title> : null}
+      <ellipse cx="78" cy="142" rx="50" ry="10" fill="#00000012" />
+      <path d="M46 78v50" stroke="#8b5e3c" strokeWidth="6" strokeLinecap="round" />
+      <path d="M50 30c14 0 25 5 32 16 12 1 21 10 21 22 0 12-9 21-21 22-5 12-18 20-33 20-18 0-32-6-42-19-10-2-18-11-18-23 0-14 10-24 24-25 7-12 20-19 37-19Z" fill="#2d6a4f" />
+      <path d="M46 38c11 0 20 4 26 12 10 1 17 8 17 17 0 10-7 17-17 18-4 9-15 15-27 15-14 0-24-4-31-14-8-2-13-9-13-18 0-10 8-18 18-18 5-8 14-12 27-12Z" fill="#52b788" />
+      <path d="M78 102h28" stroke="#b48458" strokeWidth="5" strokeLinecap="round" />
+      <path d="M75 112h34" stroke="#b48458" strokeWidth="5" strokeLinecap="round" />
+      <path d="M81 118l-5 12M104 118l5 12" stroke="#8b5e3c" strokeWidth="4" strokeLinecap="round" />
+      <path d="M114 49c10-2 18-7 23-18 5 9 5 18-1 26" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
