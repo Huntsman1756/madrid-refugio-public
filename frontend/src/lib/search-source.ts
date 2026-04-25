@@ -1,4 +1,4 @@
-import { filterSearchOptions, type SearchKind, type SearchOption } from "./madrid-search";
+import type { SearchKind, SearchOption } from "./madrid-search";
 
 function trimTrailingSlash(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
@@ -17,8 +17,6 @@ export function getSuggestApiUrl(): string {
   return `${getApiBaseUrl()}/api/suggest`;
 }
 
-const STATIC_INDEX_URL = "/data/madrid_search_index.json";
-
 const SEARCH_SOURCE_ERROR_MESSAGE = "No se pudo cargar el catalogo de lugares. Recarga la pagina e intentalo de nuevo.";
 
 interface StaticSearchEntry {
@@ -28,8 +26,6 @@ interface StaticSearchEntry {
   kind: string;
   district?: string;
 }
-
-let staticSearchOptionsPromise: Promise<SearchOption[]> | null = null;
 
 export class SearchSourceError extends Error {
   override cause: unknown;
@@ -75,24 +71,13 @@ function toSearchOption(entry: StaticSearchEntry): SearchOption {
 }
 
 async function loadSearchOptions(): Promise<SearchOption[]> {
-  const response = await fetch(STATIC_INDEX_URL);
+  const response = await fetch(getSuggestApiUrl());
   if (!response.ok) {
-    throw new Error(`Failed to load search index: ${response.status}`);
+    throw new Error(`Failed to load suggestions: ${response.status}`);
   }
 
   const payload = (await response.json()) as StaticSearchEntry[];
   return payload.map(toSearchOption);
-}
-
-async function getCachedSearchOptions(): Promise<SearchOption[]> {
-  if (!staticSearchOptionsPromise) {
-    staticSearchOptionsPromise = loadSearchOptions().catch((error: unknown) => {
-      staticSearchOptionsPromise = null;
-      throw error;
-    });
-  }
-
-  return staticSearchOptionsPromise;
 }
 
 function toSearchSourceError(error: unknown): SearchSourceError {
@@ -105,7 +90,7 @@ function toSearchSourceError(error: unknown): SearchSourceError {
 
 export async function getAllSearchOptions(): Promise<SearchOption[]> {
   try {
-    return await getCachedSearchOptions();
+    return await loadSearchOptions();
   } catch (error: unknown) {
     throw toSearchSourceError(error);
   }
@@ -120,13 +105,25 @@ export async function getSearchOptions(
   }
 
   try {
-    const options = await getCachedSearchOptions();
-    return filterSearchOptions(options, query, limit);
+    const url = new URL(getSuggestApiUrl(), "https://madridrefugio.es");
+    url.searchParams.set("q", query.trim());
+    url.searchParams.set("limit", String(limit));
+    return await loadSearchOptionsFromUrl(`${url.pathname}${url.search}`);
   } catch (error: unknown) {
     throw toSearchSourceError(error);
   }
 }
 
+async function loadSearchOptionsFromUrl(url: string): Promise<SearchOption[]> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load suggestions: ${response.status}`);
+  }
+
+  const payload = (await response.json()) as StaticSearchEntry[];
+  return payload.map(toSearchOption);
+}
+
 export function resetSearchSourceCacheForTests(): void {
-  staticSearchOptionsPromise = null;
+  // No-op: kept for test compatibility.
 }
