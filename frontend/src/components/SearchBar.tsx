@@ -339,7 +339,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="rounded-[32px] border border-black/8 bg-white px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.10)] sm:px-5 sm:py-5">
+      <div className="rounded-[32px] border border-black/5 bg-white px-4 py-4 shadow-[0_12px_36px_rgba(15,23,42,0.06)] sm:px-5 sm:py-5">
         <div className="mb-4 flex flex-col gap-2 border-b border-[var(--ds-gray-100)] pb-4 text-left sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Planifica tu recorrido</p>
@@ -444,7 +444,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                       key={option}
                       type="button"
                       onClick={() => setHour(option)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-transparent bg-[var(--ds-gray-100)] text-[var(--ds-black)] hover:bg-[var(--ds-gray-200)]"}`}
                     >
                       {option}:00
                     </button>
@@ -463,7 +463,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                       key={option.value}
                       type="button"
                       onClick={() => setPreference(option.value)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-transparent bg-[var(--ds-gray-100)] text-[var(--ds-black)] hover:bg-[var(--ds-gray-200)]"}`}
                     >
                       {option.label}
                     </button>

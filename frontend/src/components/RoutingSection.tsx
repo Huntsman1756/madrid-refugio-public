@@ -232,7 +232,7 @@ ${gpxPoints}
           }}
           loading={loading}
           footerNotice={isHeatHour && hasSearched ? (
-            <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 flex items-start gap-3">
+            <div className="rounded-2xl bg-orange-50 px-4 py-3 flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-600" />
               <div>
                 <p className="text-xs font-bold text-orange-800">Calor Extremo a las {hour}:00</p>
