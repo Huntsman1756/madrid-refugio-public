@@ -396,6 +396,15 @@ describe("SearchBar integration", () => {
     expect(screen.getByText("Consejo del día")).toBeInTheDocument();
   });
 
+  it("links the advice card to the official Comunidad de Madrid heat guidance", async () => {
+    render(<RoutingSection autoDemo />);
+
+    const adviceLink = await screen.findByRole("link", { name: /recomendaciones oficiales frente al calor de la comunidad de madrid/i });
+    expect(adviceLink).toHaveAttribute("href", "https://www.comunidad.madrid/servicios/salud/calor-salud");
+    expect(adviceLink).toHaveAttribute("target", "_blank");
+    expect(adviceLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
   it("uses the lower heatmap card as the heatmap toggle affordance", async () => {
     render(<RoutingSection autoDemo />);
 

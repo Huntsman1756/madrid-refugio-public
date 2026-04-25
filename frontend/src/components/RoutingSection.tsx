@@ -25,6 +25,7 @@ const RESULT_PREFERENCE_OPTIONS = [
   { value: 0.5, label: "Equilibrada", actionLabel: "Mostrar ruta equilibrada", detail: "Buen balance" },
   { value: 1.0, label: "Más sombra", actionLabel: "Mostrar ruta con más sombra", detail: "Mayor protección" },
 ] as const;
+const OFFICIAL_HEAT_GUIDANCE_URL = "https://www.comunidad.madrid/servicios/salud/calor-salud";
 
 function normalizePreference(val: number): number {
   const options = [0, 0.5, 1];
@@ -526,7 +527,16 @@ ${gpxPoints}
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2d6a4f]">{routeHourLabel}</p>
                   <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Consejo del día</h3>
                   <p className="mt-3 text-sm text-[var(--ds-gray-500)]">{adviceText}</p>
-                  <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f]">Ver más consejos <ArrowRight className="h-4 w-4" /></p>
+                  <a
+                    href={OFFICIAL_HEAT_GUIDANCE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Recomendaciones oficiales frente al calor de la Comunidad de Madrid"
+                    title="Recomendaciones oficiales frente al calor de la Comunidad de Madrid"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f] transition-opacity hover:opacity-80"
+                  >
+                    Ver más consejos <ArrowRight className="h-4 w-4" />
+                  </a>
                 </div>
                 <TreeBenchArt className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
               </div>
