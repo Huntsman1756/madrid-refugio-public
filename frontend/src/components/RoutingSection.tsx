@@ -7,7 +7,7 @@ import { Card } from "./ui/Card";
 import { AlertTriangle, Download, Play, Pause, MapPin, Clock3, ThermometerSun, ArrowRight } from "lucide-react";
 import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
 import { getApiBaseUrl } from "@/lib/search-source";
-import { ClimateRouteBadge, ClimateShelterIcon, MadridHeatmapMiniArt, MadridShelterBuildingArt, OrganicTree, TreeBenchArt, WaterFountainIcon } from "./branding/HomeVisuals";
+import { ClimateRouteBadge, ClimateShelterIcon, OrganicTree, RouteAdviceVisual, RouteHeatVisual, RouteResourceVisual, WaterFountainIcon } from "./branding/HomeVisuals";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -511,7 +511,7 @@ ${gpxPoints}
                     Ver refugios <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
-                <MadridShelterBuildingArt className="h-28 w-28 flex-shrink-0 text-[#2d6a4f]" aria-hidden="true" />
+                <RouteResourceVisual className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
               </div>
             </Card>
 
@@ -529,7 +529,7 @@ ${gpxPoints}
                   <p className="mt-3 text-sm text-[var(--ds-gray-500)]">{showHeatmap ? "Capa térmica superpuesta" : `El desvio te evita ${formatSunSaved(routeResult.metrics.human.sun_time_saved_min)} de exposición directa al sol en el tramo más duro.`}</p>
                   <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#c26a1b]">Ver mapa <ArrowRight className="h-4 w-4" /></p>
                 </div>
-                <MadridHeatmapMiniArt className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
+                <RouteHeatVisual className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
               </div>
             </button>
 
@@ -550,7 +550,7 @@ ${gpxPoints}
                     Ver más consejos <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
-                <TreeBenchArt className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
+                <RouteAdviceVisual className="h-28 w-28 flex-shrink-0" aria-hidden="true" />
               </div>
             </Card>
           </div>

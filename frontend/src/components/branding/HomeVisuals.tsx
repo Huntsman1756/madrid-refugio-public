@@ -193,6 +193,35 @@ export function MadridShelterBuildingArt({ title, testId, className, size = 160,
   );
 }
 
+export function RouteResourceVisual({ title, testId = "route-resource-visual", className, size = 160, ...props }: ArtProps) {
+  return (
+    <svg
+      viewBox="0 0 160 120"
+      fill="none"
+      role={title ? "img" : undefined}
+      aria-label={title}
+      data-testid={testId}
+      className={className}
+      width={size}
+      height={size}
+      {...props}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M18 90c20-24 39-38 58-38 15 0 24 10 36 10 9 0 18-5 30-17" stroke="#2d6a4f" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="32" cy="76" r="8" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="4" />
+      <circle cx="78" cy="55" r="8" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="4" />
+      <circle cx="126" cy="43" r="8" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="4" />
+      <path d="M112 90V62l14-10 14 10v28Z" fill="#f6f2ea" stroke="#1a3d2b" strokeWidth="4" strokeLinejoin="round" />
+      <path d="M126 49V66" stroke="#1a3d2b" strokeWidth="3" strokeLinecap="round" />
+      <rect x="122" y="45" width="8" height="10" rx="4" fill="#1a3d2b" />
+      <path d="M48 95c7-1 12-5 16-12 3 6 3 11-1 16" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M86 92c7-1 12-5 16-12 3 6 3 11-1 16" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M60 26c0-7 5-12 12-12" stroke="#0ea5e9" strokeWidth="3" strokeLinecap="round" />
+      <path d="M73 15c3 4 3 7 0 11-4-1-6-4-6-7 0-2 2-3 6-4Z" fill="#0ea5e9" />
+    </svg>
+  );
+}
+
 export function MadridHeatmapMiniArt({ title, testId, className, size = 160, ...props }: ArtProps) {
   return (
     <svg
@@ -221,6 +250,33 @@ export function MadridHeatmapMiniArt({ title, testId, className, size = 160, ...
   );
 }
 
+export function RouteHeatVisual({ title, testId = "route-heat-visual", className, size = 160, ...props }: ArtProps) {
+  return (
+    <svg
+      viewBox="0 0 160 120"
+      fill="none"
+      role={title ? "img" : undefined}
+      aria-label={title}
+      data-testid={testId}
+      className={className}
+      width={size}
+      height={size}
+      {...props}
+    >
+      {title ? <title>{title}</title> : null}
+      <circle cx="120" cy="28" r="16" fill="#f6ad55" />
+      <circle cx="120" cy="28" r="9" fill="#fde2bf" />
+      <path d="M24 89h112" stroke="#d9cab3" strokeWidth="4" strokeLinecap="round" />
+      <path d="M38 89 72 48h42" stroke="#c0392b" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" opacity="0.92" />
+      <path d="M38 89 72 48" stroke="#f6ad55" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
+      <path d="M72 48h42" stroke="#2d6a4f" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M64 82 94 46" stroke="#c7dfd0" strokeWidth="16" strokeLinecap="round" opacity="0.9" />
+      <path d="M56 96c8-2 13-6 17-14 4 6 4 12 0 17" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M104 95c8-2 13-6 17-14 4 6 4 12 0 17" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function TreeBenchArt({ title, testId, className, size = 160, ...props }: ArtProps) {
   return (
     <svg
@@ -243,6 +299,33 @@ export function TreeBenchArt({ title, testId, className, size = 160, ...props }:
       <path d="M75 112h34" stroke="#b48458" strokeWidth="5" strokeLinecap="round" />
       <path d="M81 118l-5 12M104 118l5 12" stroke="#8b5e3c" strokeWidth="4" strokeLinecap="round" />
       <path d="M114 49c10-2 18-7 23-18 5 9 5 18-1 26" fill="#dcebdc" stroke="#52b788" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function RouteAdviceVisual({ title, testId = "route-advice-visual", className, size = 160, ...props }: ArtProps) {
+  return (
+    <svg
+      viewBox="0 0 160 120"
+      fill="none"
+      role={title ? "img" : undefined}
+      aria-label={title}
+      data-testid={testId}
+      className={className}
+      width={size}
+      height={size}
+      {...props}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M24 92h112" stroke="#d4c8b7" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="118" cy="30" r="12" fill="#f6ad55" opacity="0.95" />
+      <path d="M118 10v-7M103 16l-5-5M133 16l5-5" stroke="#c26a1b" strokeWidth="3" strokeLinecap="round" />
+      <path d="M56 46c13 0 24 5 31 16 12 1 21 10 21 22 0 12-9 21-21 22-5 10-16 14-30 14-18 0-31-6-39-19-11-2-18-11-18-23 0-14 10-24 24-25 7-11 17-17 32-17Z" fill="#2d6a4f" />
+      <path d="M56 53c10 0 18 4 24 11 9 1 15 8 15 17 0 9-6 16-15 17-4 8-13 12-24 12-13 0-22-4-28-13-7-2-12-8-12-17 0-10 7-17 16-17 5-7 13-10 24-10Z" fill="#52b788" />
+      <path d="M54 92h44" stroke="#d9f3e2" strokeWidth="8" strokeLinecap="round" />
+      <path d="M54 78h54" stroke="#d9f3e2" strokeWidth="8" strokeLinecap="round" opacity="0.72" />
+      <path d="M48 28c0-8 6-14 14-14" stroke="#0a72ef" strokeWidth="4" strokeLinecap="round" />
+      <path d="M64 13c4 5 4 9 0 13-5-1-7-4-7-8 0-2 2-4 7-5Z" fill="#0a72ef" />
     </svg>
   );
 }

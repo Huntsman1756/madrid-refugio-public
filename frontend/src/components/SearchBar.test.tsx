@@ -388,6 +388,14 @@ describe("SearchBar integration", () => {
     expect(screen.getByText(/Ruta larga · Considera dividirla en tramos/i)).toBeInTheDocument();
   });
 
+  it("uses functional route visuals instead of decorative illustrations in the lower cards", async () => {
+    render(<RoutingSection autoDemo />);
+
+    expect(await screen.findByTestId("route-resource-visual")).toBeInTheDocument();
+    expect(screen.getByTestId("route-heat-visual")).toBeInTheDocument();
+    expect(screen.getByTestId("route-advice-visual")).toBeInTheDocument();
+  });
+
   it("uses the selected route hour when rendering the lower contextual cards", async () => {
     render(<RoutingSection autoDemo />);
 
