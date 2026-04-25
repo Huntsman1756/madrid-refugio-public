@@ -87,4 +87,15 @@ describe("Home hero", () => {
     expect(screen.getByText("Una herramienta principal, tres pasos claros")).toBeInTheDocument();
     expect(screen.getByText("Fuentes de datos abiertos")).toBeInTheDocument();
   });
+
+  it("keeps the differentiator block focused on the main copy and updated pillar icons", async () => {
+    const { container } = render(<Home />);
+
+    await screen.findByText("Por que es distinto");
+
+    expect(screen.queryByText("Valor inmediato")).not.toBeInTheDocument();
+    expect(container.querySelector('[data-testid="value-pillar-icon-salud"] .lucide-thermometer-sun')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="value-pillar-icon-clima"] .lucide-tree-pine')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="value-pillar-icon-equidad"] .lucide-users')).toBeInTheDocument();
+  });
 });

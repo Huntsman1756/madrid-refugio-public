@@ -175,19 +175,22 @@ export default function Home() {
     {
       title: "Salud",
       detail: "+432 m de sombra acumulada en la ruta óptima para reducir exposición directa en trayectos cotidianos.",
-      icon: Activity,
+      icon: ThermometerSun,
+      testId: "value-pillar-icon-salud",
       tone: "bg-[#ebf5ff] text-[#0a72ef]",
     },
     {
       title: "Clima",
       detail: "662.173 polígonos LiDAR y 661.192 árboles municipales convertidos en una señal útil para caminar mejor.",
       icon: TreePine,
+      testId: "value-pillar-icon-clima",
       tone: "bg-[#f0fdf4] text-[#2d6a4f]",
     },
     {
       title: "Equidad",
       detail: "64,1% de barrios sin refugio operativo a menos de 300 metros: evidencia para priorizar adaptación climática.",
-      icon: MapIcon,
+      icon: Users,
+      testId: "value-pillar-icon-equidad",
       tone: "bg-[#fef2f2] text-[#ff5b4f]",
     },
   ] as const;
@@ -282,7 +285,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-16 grid gap-6 fade-in-up lg:grid-cols-[minmax(0,1.1fr)_320px] lg:items-start">
+        <section className="mb-16 fade-in-up">
           <div className="section-shell rounded-[32px] p-6 sm:p-8">
             <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Por que es distinto</p>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)] lg:items-start">
@@ -311,7 +314,7 @@ export default function Home() {
                 const Icon = pillar.icon;
                 return (
                   <Card key={pillar.title} level={1} className="rounded-[24px] border border-[rgba(91,84,74,0.08)] p-5">
-                    <span className={`mb-4 flex h-11 w-11 items-center justify-center rounded-[14px] ${pillar.tone}`}>
+                    <span data-testid={pillar.testId} className={`mb-4 flex h-11 w-11 items-center justify-center rounded-[14px] ${pillar.tone}`}>
                       <Icon className="h-4 w-4" />
                     </span>
                     <h3 className="text-sm font-bold text-[var(--ds-black)]">{pillar.title}</h3>
@@ -320,11 +323,6 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
-          <div className="section-shell rounded-[32px] p-6">
-            <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Valor inmediato</p>
-            <p className="text-xl font-semibold leading-snug text-[var(--ds-black)]">La información urbana compleja se traduce en una elección peatonal usable en segundos.</p>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">Primero ves el trayecto, luego el desvío, después el alivio térmico. La lectura está pensada para decidir, no para explorar capas infinitas.</p>
           </div>
         </section>
 
