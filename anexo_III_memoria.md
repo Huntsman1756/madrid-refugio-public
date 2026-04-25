@@ -85,4 +85,4 @@ Madrid Refugio transforma datos abiertos en protección climática concreta. Es 
 
 La combinación de reutilización de datos, modelización geoespacial y utilidad ciudadana convierte el proyecto en un ejemplo sólido de innovación aplicada al interés general.
 
-**URL pública de la herramienta:** <https://madrid-refugio.vercel.app/>
+**URL pública de la herramienta:** <https://madridrefugio.es/>

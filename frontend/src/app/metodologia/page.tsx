@@ -123,7 +123,7 @@ export default function MetodologiaPage() {
             Madrid Refugio transforma datos abiertos en protección climática concreta. Es una herramienta operativa y funcional que permite calcular rutas peatonales más confortables en Madrid y, al mismo tiempo, producir evidencia territorial para orientar decisiones públicas de adaptación al calor.
           </p>
           <p className="text-[var(--ds-gray-600)] mt-4">
-            URL pública: <a href="https://madrid-refugio.vercel.app/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">https://madrid-refugio.vercel.app/</a>
+            URL pública: <a href="https://madridrefugio.es/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">https://madridrefugio.es/</a>
           </p>
         </section>
 

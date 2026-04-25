@@ -19,7 +19,7 @@ def assert_ok(response: requests.Response, label: str) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Smoke test Madrid Refugio production endpoints.")
-    parser.add_argument("--base-url", default="https://madrid-refugio.vercel.app", help="Frontend base URL")
+    parser.add_argument("--base-url", default="https://madridrefugio.es", help="Frontend base URL")
     parser.add_argument("--origin", default="Plaza Elíptica, Madrid")
     parser.add_argument("--destination", default="Hospital Central de la Defensa Gómez Ulla, Madrid")
     parser.add_argument("--hour", type=int, default=14)

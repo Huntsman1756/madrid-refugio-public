@@ -203,7 +203,7 @@ def fetch_aemet_data():
 
 def get_allowed_origins() -> list[str]:
     origins = {
-        "https://madrid-refugio.vercel.app",
+        "https://madridrefugio.es",
         "http://localhost:3000",
     }
     for env_key in ("FRONTEND_ORIGIN", "ADDITIONAL_ALLOWED_ORIGINS"):

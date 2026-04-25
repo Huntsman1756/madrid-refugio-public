@@ -1,4 +1,5 @@
 {
+  "name": "madrid-refugio",
   "headers": [
     {
       "source": "/(.*)",

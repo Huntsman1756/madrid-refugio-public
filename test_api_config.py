@@ -174,7 +174,7 @@ class ApiConfigTests(unittest.TestCase):
 
             reloaded = importlib.reload(api)
             origins = reloaded.get_allowed_origins()
-            self.assertIn("https://madrid-refugio.vercel.app", origins)
+            self.assertIn("https://madridrefugio.es", origins)
             self.assertIn("http://localhost:3000", origins)
             self.assertIn("https://custom.madrid-refugio.es", origins)
             self.assertIn("https://preview.example.com", origins)
