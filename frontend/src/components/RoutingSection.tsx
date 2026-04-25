@@ -19,6 +19,11 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 });
 
 const STORAGE_KEY = "madrid-refugio-preference";
+const RESULT_PREFERENCE_OPTIONS = [
+  { value: 0.0, label: "Directa", actionLabel: "Mostrar ruta directa", detail: "La más rápida" },
+  { value: 0.5, label: "Equilibrada", actionLabel: "Mostrar ruta equilibrada", detail: "Buen balance" },
+  { value: 1.0, label: "Más sombra", actionLabel: "Mostrar ruta con más sombra", detail: "Mayor protección" },
+] as const;
 
 function normalizePreference(val: number): number {
   const options = [0, 0.5, 1];
@@ -81,6 +86,8 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [demoLoaded, setDemoLoaded] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [animateResults, setAnimateResults] = useState(false);
   const lastPlaybackHourRef = useRef<number | null>(null);
   const autoDemoStartedRef = useRef(false);
 
@@ -100,6 +107,14 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
   const estimatedCooling = routeResult
     ? Math.max(1.2, Math.min(4.8, (routeResult.metrics.human.sun_time_saved_min || 0) / 3.75)).toFixed(1).replace('.', ',')
     : null;
+
+  useEffect(() => {
+    if (!routeResult) return;
+
+    setAnimateResults(true);
+    const timer = window.setTimeout(() => setAnimateResults(false), 360);
+    return () => window.clearTimeout(timer);
+  }, [routeResult]);
 
   useEffect(() => {
     const savedPreference = loadSavedPreference();
@@ -193,6 +208,16 @@ export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingS
       setLoading(false);
     }
   };
+
+  const handlePreferenceRefresh = useCallback((nextPreference: number) => {
+    if (!origin || !destination || nextPreference === preference) {
+      return;
+    }
+
+    setPreference(nextPreference);
+    savePreference(nextPreference);
+    doCalculate(origin, destination, hour, nextPreference);
+  }, [destination, hour, origin, preference]);
 
   const handleDownloadGPX = () => {
     if (!routeResult?.comfort_coords) {
@@ -291,17 +316,37 @@ ${gpxPoints}
                   fuentes={null}
                   onBarrioSelect={() => {}}
                   routeResult={routeResult}
+                  showHeatmap={showHeatmap}
                   showAreaLegend={false}
                 />
               </div>
 
-              <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-6">
+              <div className={`grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-6 ${loading ? "opacity-70" : "opacity-100"} ${animateResults ? "results-refresh" : ""}`}>
                 <div>
                   <div className="mb-5 flex flex-wrap items-center gap-3">
                     <span className="inline-flex items-center gap-2 rounded-full bg-[#d4ead7] px-3 py-1 text-xs font-bold text-[#2d6a4f]">
                       <TreePine className="h-3.5 w-3.5" /> Ruta recomendada
                     </span>
                     <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Equilibrada</div>
+                  </div>
+
+                  <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Recomendación de ruta calculada">
+                    {RESULT_PREFERENCE_OPTIONS.map((option) => {
+                      const active = option.value === preference;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          aria-pressed={active}
+                          aria-label={option.actionLabel}
+                          onClick={() => handlePreferenceRefresh(option.value)}
+                          className={`rounded-[18px] border px-4 py-2 text-left text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${active ? "border-[#2d6a4f] bg-[#d4ead7] text-[#2d6a4f] shadow-[0_8px_18px_rgba(45,106,79,0.16)]" : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-gray-600)] hover:border-[#2d6a4f] hover:text-[#2d6a4f]"}`}
+                        >
+                          <span className="block">{option.label}</span>
+                          <span className="block text-[11px] font-medium opacity-70">{option.detail}</span>
+                        </button>
+                      );
+                    })}
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-3">
@@ -404,17 +449,23 @@ ${gpxPoints}
             </div>
 
             <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-1">
-              <Card level={1} className="rounded-[24px] border border-[#fdebd0] p-5 shadow-[0_8px_20px_rgba(230,126,34,0.08)]">
+              <button
+                type="button"
+                aria-pressed={showHeatmap}
+                aria-label="Ver mapa de calor"
+                onClick={() => setShowHeatmap((current) => !current)}
+                className={`text-left rounded-[24px] border p-5 shadow-[0_8px_20px_rgba(230,126,34,0.08)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[rgba(253,235,208,0.72)]" : "border-[#fdebd0] bg-white hover:border-[#e67e22]"}`}
+              >
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fdebd0] text-[#e67e22]">
                     <ThermometerSun className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-[var(--ds-black)]">Impacto térmico</p>
-                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">El desvío te evita {formatSunSaved(routeResult.metrics.human.sun_time_saved_min)} de exposición directa al sol.</p>
+                    <p className="text-sm font-bold text-[var(--ds-black)]">Ver mapa de calor</p>
+                    <p className="mt-1 text-xs text-[var(--ds-gray-500)]">{showHeatmap ? "Capa térmica superpuesta" : `El desvío te evita ${formatSunSaved(routeResult.metrics.human.sun_time_saved_min)} de exposición directa al sol.`}</p>
                   </div>
                 </div>
-              </Card>
+              </button>
 
               <Card level={1} className="rounded-[24px] border border-[#d4ead7] p-5 shadow-[0_8px_20px_rgba(45,106,79,0.08)]">
                 <div className="flex items-start gap-3">

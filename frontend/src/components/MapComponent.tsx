@@ -3,6 +3,7 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.heat';
 import L from 'leaflet';
 
 // Fix Leaflet default icon paths (Next.js asset issue)
@@ -26,6 +27,7 @@ interface MapComponentProps {
   flyTarget?: { lat: number; lon: number } | null;
   viewMode?: 'vulnerability' | 'shelter_deficit';
   showAreaLegend?: boolean;
+  showHeatmap?: boolean;
 }
 
 // ── Inner controllers (must live inside MapContainer) ──────────────────────
@@ -51,6 +53,36 @@ function RouteViewController({ routeResult }: { routeResult: any }) {
     const bounds = L.latLngBounds(allCoords);
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: 16 });
   }, [routeResult, map]);
+  return null;
+}
+
+function HeatLayerController({ enabled, points }: { enabled: boolean; points: [number, number, number][] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!enabled || points.length === 0) {
+      return;
+    }
+
+    const heatLayer = (L as any).heatLayer(points, {
+      radius: 22,
+      blur: 18,
+      maxZoom: 16,
+      gradient: {
+        0.2: '#fdebd0',
+        0.45: '#f6ad55',
+        0.7: '#e67e22',
+        1: '#c0392b',
+      },
+    });
+
+    heatLayer.addTo(map);
+
+    return () => {
+      map.removeLayer(heatLayer);
+    };
+  }, [enabled, map, points]);
+
   return null;
 }
 
@@ -85,17 +117,30 @@ const destIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
-function createResourceIcon(symbol: string, background: string, border: string) {
+function createResourceIcon(svg: string, background: string, border: string) {
   return L.divIcon({
-    html: `<div style="width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: ${background}; color: white; border: 2px solid ${border}; box-shadow: 0 8px 16px rgba(15,23,42,0.20); font-size: 11px; font-weight: 700;">${symbol}</div>`,
+    html: `<div style="width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: ${background}; color: white; border: 2px solid ${border}; box-shadow: 0 10px 20px rgba(15,23,42,0.22);">${svg}</div>`,
     className: '',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 }
 
-const fountainIcon = createResourceIcon('F', '#0ea5e9', 'rgba(255,255,255,0.92)');
-const shelterIcon = createResourceIcon('R', '#f97316', 'rgba(255,255,255,0.92)');
+const fountainIcon = createResourceIcon(
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s-5 6.3-5 10a5 5 0 0 0 10 0c0-3.7-5-10-5-10Z"/><path d="M9.5 15.5c.8 1 1.6 1.5 2.5 1.5 1 0 1.8-.5 2.5-1.5"/></svg>',
+  '#1a6fa8',
+  'rgba(255,255,255,0.92)'
+);
+const shelterIcon = createResourceIcon(
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-7 9 7"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-5h6v5"/></svg>',
+  '#c0392b',
+  'rgba(255,255,255,0.92)'
+);
+const treeIcon = createResourceIcon(
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z"/><path d="M12 22v-3"/></svg>',
+  '#2d6a4f',
+  'rgba(255,255,255,0.92)'
+);
 
 function resourcePointStyle(fillColor: string, radius: number) {
   return {
@@ -109,10 +154,16 @@ function resourcePointStyle(fillColor: string, radius: number) {
 }
 
 const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapComponent(
-  { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget, viewMode = 'vulnerability', showAreaLegend = true },
+  { mergedData, refugios, fuentes, onBarrioSelect, routeResult, flyTarget, viewMode = 'vulnerability', showAreaLegend = true, showHeatmap = false },
   ref
 ) {
   const mapRef = useRef<L.Map | null>(null);
+  const routeShadeMarkers: [number, number][] = routeResult?.comfort_coords?.filter((_: [number, number], index: number) => index % 6 === 0) ?? [];
+  const heatmapPoints: [number, number, number][] = routeResult?.comfort_coords?.map((point: [number, number], index: number) => {
+    const progress = routeResult.comfort_coords.length <= 1 ? 1 : index / (routeResult.comfort_coords.length - 1);
+    const weight = 0.35 + (1 - progress) * 0.55;
+    return [point[0], point[1], Number(weight.toFixed(2))];
+  }) ?? [];
 
   useImperativeHandle(ref, () => ({
     flyToBarrio(lat: number, lon: number) {
@@ -188,6 +239,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
         <FlyController target={flyTarget} />
         <RouteViewController routeResult={routeResult} />
         <FitDataController data={mergedData} isActive={!routeResult && !flyTarget} />
+        <HeatLayerController enabled={Boolean(routeResult && showHeatmap)} points={heatmapPoints} />
 
         {/* ── Route mode ── */}
         {routeResult && (
@@ -224,12 +276,17 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
             {/* Nearby resources markers */}
             {routeResult.metrics?.comfort?.fuentes_pts?.map((pos: [number, number], idx: number) => (
               <Marker key={`fountain-${idx}`} position={pos} icon={fountainIcon}>
-                <Popup>💧 Fuente de agua potable</Popup>
+                <Popup>Fuente de agua potable</Popup>
               </Marker>
             ))}
             {routeResult.metrics?.comfort?.refugios_pts?.map((pos: [number, number], idx: number) => (
               <Marker key={`shelter-${idx}`} position={pos} icon={shelterIcon}>
-                <Popup>🏠 Refugio climático</Popup>
+                <Popup>Refugio climático</Popup>
+              </Marker>
+            ))}
+            {routeShadeMarkers.map((pos: [number, number], idx: number) => (
+              <Marker key={`tree-${idx}`} position={pos} icon={treeIcon}>
+                <Popup>Zona arbolada o tramo de sombra acumulada</Popup>
               </Marker>
             ))}
           </>
@@ -283,8 +340,10 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
             <span className="text-[var(--ds-gray-500)]">Ruta estándar</span>
           </div>
           <div className="border-t border-[rgba(91,84,74,0.08)] pt-2 text-[10px] text-[var(--ds-gray-500)]">
-            <div className="mb-1 flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#0ea5e9] text-white">F</span> {routeResult.metrics?.comfort?.fuentes ?? 0} fuentes cerca</div>
-            <div className="flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f97316] text-white">R</span> {routeResult.metrics?.comfort?.refugios ?? 0} refugios cerca</div>
+            <div className="mb-1 flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#1a6fa8] text-white">F</span> {routeResult.metrics?.comfort?.fuentes ?? 0} fuentes cerca</div>
+            <div className="mb-1 flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#c0392b] text-white">R</span> {routeResult.metrics?.comfort?.refugios ?? 0} refugios cerca</div>
+            <div className="flex items-center gap-2"><span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#2d6a4f] text-white">A</span> sombra y arbolado en ruta</div>
+            {showHeatmap ? <div className="mt-2 rounded-full bg-[rgba(230,126,34,0.12)] px-2 py-1 text-[#c0392b]">Capa térmica superpuesta</div> : null}
           </div>
         </div>
       )}

@@ -323,4 +323,20 @@ describe("SearchBar integration", () => {
     expect(await screen.findByText(/calor extremo a las 14:00/i)).toBeInTheDocument();
     expect(screen.getByText(/La Ruta Refugio es prioritaria/i)).toBeInTheDocument();
   });
+
+  it("exposes a heatmap toggle and route resource summary after calculating a route", async () => {
+    render(<RoutingSection autoDemo />);
+
+    expect(await screen.findByText(/recursos en ruta/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/fuentes de agua/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/refugios climáticos/i).length).toBeGreaterThan(0);
+
+    const heatmapToggle = screen.getByRole("button", { name: /ver mapa de calor/i });
+    expect(heatmapToggle).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(heatmapToggle);
+
+    expect(heatmapToggle).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(/capa térmica superpuesta/i)).toBeInTheDocument();
+  });
 });
