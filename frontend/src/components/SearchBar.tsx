@@ -432,54 +432,42 @@ export function SearchBar({ onSearch, initialState, loading }: SearchBarProps) {
             </button>
           </div>
 
-          <div className="mt-3 flex flex-col gap-3 border-t border-[var(--ds-gray-200)] pt-3 lg:flex-row lg:items-start lg:justify-between">
-            <p className="text-sm text-[var(--ds-gray-500)]">
-              Ajusta la hora y el equilibrio de la ruta sin perder espacio para buscar dos puntos reales.
-            </p>
-
-            <div className="flex flex-col gap-3 lg:min-w-0 lg:flex-row lg:justify-end">
-              <div role="group" aria-label="Hora del recorrido" className="min-w-0">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Hora</label>
-                  <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{hour}:00</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {HOUR_OPTIONS.map((option) => {
-                    const selected = option === hour;
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setHour(option)}
-                        className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
-                      >
-                        {option}:00
-                      </button>
-                    );
-                  })}
-                </div>
+          <div className="mt-3 grid gap-3 border-t border-[var(--ds-gray-200)] pt-3 lg:grid-cols-2 lg:gap-6">
+            <div role="group" aria-label="Hora del recorrido" className="min-w-0">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Hora salida</label>
+              <div className="grid grid-cols-3 gap-2">
+                {HOUR_OPTIONS.map((option) => {
+                  const selected = option === hour;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setHour(option)}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                    >
+                      {option}:00
+                    </button>
+                  );
+                })}
               </div>
+            </div>
 
-              <div role="group" aria-label="Preferencia de ruta" className="min-w-0">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Ruta</label>
-                  <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{getPreferenceLabel(preference)}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {PREFERENCE_OPTIONS.map((option) => {
-                    const selected = option.value === preference;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setPreference(option.value)}
-                        className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
-                      >
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
+            <div role="group" aria-label="Preferencia de ruta" className="min-w-0">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Tipo de ruta</label>
+              <div className="grid grid-cols-3 gap-2">
+                {PREFERENCE_OPTIONS.map((option) => {
+                  const selected = option.value === preference;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setPreference(option.value)}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-black)] hover:border-[var(--ds-gray-300)]"}`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

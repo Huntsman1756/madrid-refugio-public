@@ -263,10 +263,11 @@ describe("SearchBar integration", () => {
   it("keeps the time and route type controls visible in the compact planner", async () => {
     render(<RoutingSection />);
 
-    expect(await screen.findByText("Hora")).toBeInTheDocument();
-    expect(screen.getByText("Ruta")).toBeInTheDocument();
+    expect(await screen.findByText("Hora salida")).toBeInTheDocument();
+    expect(screen.getByText("Tipo de ruta")).toBeInTheDocument();
     expect(screen.getByRole("group", { name: /hora del recorrido/i })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: /preferencia de ruta/i })).toBeInTheDocument();
+    expect(screen.queryByText(/Ajusta la hora y el equilibrio/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /10:00/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /directa/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /buscar ruta con sombra/i })).toBeInTheDocument();
@@ -287,8 +288,8 @@ describe("SearchBar integration", () => {
     expect(await screen.findByText("Planifica tu recorrido")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Origen" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Destino" })).toBeInTheDocument();
-    expect(screen.getByText("Hora")).toBeInTheDocument();
-    expect(screen.getByText("Ruta")).toBeInTheDocument();
+    expect(screen.getByText("Hora salida")).toBeInTheDocument();
+    expect(screen.getByText("Tipo de ruta")).toBeInTheDocument();
   });
 
   it("can auto-load a demo route that showcases the product on first render", async () => {
