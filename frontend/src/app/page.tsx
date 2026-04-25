@@ -538,18 +538,22 @@ export default function Home() {
         {/* Data Sources Section */}
         <div className="mb-12 border-b border-[var(--ds-gray-100)] pb-6 fade-in-up">
           <h2 className="sub-heading-large text-[var(--ds-black)]">Fuentes de datos abiertos</h2>
-          <p className="text-[var(--ds-gray-600)] mt-2">Todos los datos provienen del ecosistema abierto del Ayuntamiento de Madrid.</p>
+          <p className="text-[var(--ds-gray-600)] mt-2">Los enlaces de esta seccion apuntan a recursos oficiales concretos usados o documentados por el proyecto.</p>
+          <p className="text-[var(--ds-gray-600)] mt-2">No existe un dataset municipal operativo de refugios climaticos oficiales; por eso la capa de sustitucion usa bibliotecas, centros culturales y polideportivos con trazabilidad explicita.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-24 stagger-children">
           {[
-            { icon: Building2, label: "Alturas de edificación", detail: "662.173 polígonos LiDAR", color: "#0a72ef", href: "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Urbanismo-e-infraestructuras/Visualizador-Urbanistico/Modelo-3D/?vgnextfmt=default&vgnextoid=4ac0fd1d4f53b710VgnVCM2000001f4a900aRCRD&vgnextchannel=5a6f6eec8c4ce410VgnVCM2000000c205a0aRCRD" },
-            { icon: TreePine, label: "Arbolado viario", detail: "661.192 ejemplares", color: "#16a34a", href: "https://datos.madrid.es/portal/site/egob/menuitem.1f3361415fda829be152e15284f1a5a0/?vgnextoid=a6ae341c47f23310VgnVCM2000000c205a0aRCRD" },
-            { icon: Users, label: "Padrón municipal", detail: "Enero 2026", color: "#de1d8d", href: "https://datos.madrid.es/portal/site/egob/menuitem.1f3361415fda829be152e15284f1a5a0/?vgnextoid=36a42bf1c2f23310VgnVCM2000000c205a0aRCRD" },
-            { icon: Wind, label: "Calidad del aire", detail: "NO₂ horario por estación", color: "#f97316", href: "https://datos.madrid.es/portal/site/egob/menuitem.1f3361415fda829be152e15284f1a5a0/?vgnextoid=26b6a79eb3d5f010VgnVCM1000009b25680aRCRD" },
-            { icon: Droplets, label: "Fuentes de agua", detail: "Red de hidrantes", color: "#0ea5e9", href: "https://datos.madrid.es/sites/v/index.jsp?vgnextoid=a21519c88fe4b410VgnVCM100000171f5a0aRCRD" },
-            { icon: Landmark, label: "Equipamientos", detail: "Bibliotecas y CDM", color: "#8b5cf6", href: "https://datos.madrid.es/portal/site/egob" },
-            { icon: MapPin, label: "Límites administrativos", detail: "Barrios y distritos", color: "#ff5b4f", href: "https://datos.madrid.es/portal/site/egob/menuitem.1f3361415fda829be152e15284f1a5a0/?vgnextoid=28d9052c5ef29310VgnVCM100000171f5a0aRCRD" },
-            { icon: Database, label: "Portal datos.madrid.es", detail: "Fuente oficial", color: "#171717", href: "https://datos.madrid.es/portal/site/egob" },
+            { icon: Building2, label: "Modelo 3D municipal", detail: "Fuente oficial para alturas de edificacion", color: "#0a72ef", href: "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Urbanismo-e-infraestructuras/Visualizador-Urbanistico/Modelo-3D/?vgnextfmt=default&vgnextoid=4ac0fd1d4f53b710VgnVCM2000001f4a900aRCRD&vgnextchannel=5a6f6eec8c4ce410VgnVCM2000000c205a0aRCRD" },
+            { icon: TreePine, label: "Arbolado detallado", detail: "Recurso XLSX oficial usado en el inventario", color: "#16a34a", href: "https://datos.madrid.es/dataset/300761-0-arbolado-especies/resource/300761-0-arbolado-especies-xlsx/download/300761-0-arbolado-especies-xlsx.xlsx" },
+            { icon: Users, label: "Padron municipal historico", detail: "2026. Enero", color: "#de1d8d", href: "https://datos.madrid.es/dataset/209163-0-padron-municipal-historico/resource/209163-27-padron-municipal-historico-csv/download/209163-27-padron-municipal-historico-csv.csv" },
+            { icon: Wind, label: "Calidad del aire", detail: "Datos horarios 2024", color: "#f97316", href: "https://datos.madrid.es/dataset/201200-0-calidad-aire-horario/resource/201200-0-calidad-aire-horario-zip/download/201200-0-calidad-aire-horario-zip.zip" },
+            { icon: Database, label: "Estaciones de aire", detail: "Coordenadas oficiales de estaciones de control", color: "#7c3aed", href: "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire/resource/212629-0-estaciones-control-aire-csv/download/212629-0-estaciones-control-aire-csv.csv" },
+            { icon: Droplets, label: "Fuentes de agua para beber", detail: "Recurso CSV oficial 2025", color: "#0ea5e9", href: "https://datos.madrid.es/dataset/300051-0-fuentes/resource/300051-1-fuentes-csv/download/300051-1-fuentes-csv.csv" },
+            { icon: Landmark, label: "Bibliotecas municipales", detail: "Refugios sustitutos documentados", color: "#8b5cf6", href: "https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas/resource/201747-5-bibliobuses-bibliotecas-geo/download/201747-5-bibliobuses-bibliotecas-geo.geo" },
+            { icon: Landmark, label: "Centros culturales", detail: "Refugios sustitutos documentados", color: "#6d28d9", href: "https://datos.madrid.es/dataset/200304-0-centros-culturales/resource/200304-2-centros-culturales-geo/download/200304-2-centros-culturales-geo.geo" },
+            { icon: Landmark, label: "Polideportivos municipales", detail: "Refugios sustitutos documentados", color: "#9333ea", href: "https://datos.madrid.es/dataset/200186-0-polideportivos/resource/200186-2-polideportivos-geo/download/200186-2-polideportivos-geo.geo" },
+            { icon: MapPin, label: "Barrios municipales", detail: "Limites administrativos oficiales", color: "#ff5b4f", href: "https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/LIMITES_ADMINISTRATIVOS/Barrios/Barrios.zip" },
+            { icon: Database, label: "Portal datos.madrid.es", detail: "Catalogo oficial del Ayuntamiento", color: "#171717", href: "https://datos.madrid.es/portal/site/egob" },
           ].map((src) => (
             <a key={src.label} href={src.href} target="_blank" rel="noopener noreferrer" className="fade-in-up p-4 rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]/50 hover:border-[var(--ds-gray-400)] hover:shadow-md transition-all group block">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${src.color}12` }}>
