@@ -71,7 +71,7 @@ function HeatLayerController({ enabled, points }: { enabled: boolean; points: [n
       maxZoom: 16,
       gradient: {
         0.2: '#fdebd0',
-        0.45: '#f6ad55',
+        0.45: 'var(--climate-terracotta)',
         0.7: '#e67e22',
         1: '#c0392b',
       },
@@ -223,7 +223,7 @@ function renderSvgToString(markup: string) {
 }
 
 const brandedTreeIcon = createResourceIcon(
-  renderSvgToString('<svg width="16" height="20" viewBox="0 0 28 36" fill="none" aria-hidden="true"><ellipse cx="14" cy="31.5" rx="8.5" ry="3.5" fill="#00000020"/><path d="M14 18.5v10.5" stroke="#8b5e3c" stroke-width="4" stroke-linecap="round"/><path d="M14.7 4.4c3.6 0 6.5 1.4 8.3 3.9 3.1.3 5.3 2.8 5.3 5.9 0 3.3-2.5 5.8-5.7 6.1-.7 3.3-3.7 5.6-7.5 5.6-4.4 0-7.5-1.6-9.8-4.6C2.6 20.6.6 18.2.6 14.8c0-3.5 2.6-6.2 6.1-6.4C8.6 5.9 11.3 4.4 14.7 4.4Z" fill="#2d6a4f"/><path d="M11.1 6.7c2.7 0 4.8 1 6.2 2.8 2.3.2 3.8 2 3.8 4.2 0 2.5-1.8 4.1-4.1 4.3-.6 2.3-2.8 3.8-5.4 3.8-3 0-5.2-1.1-6.8-3.2-1.8-.5-3.1-2.2-3.1-4.5 0-2.4 1.8-4.3 4.2-4.4 1.2-1.9 3-3 5.2-3Z" fill="#52b788"/></svg>'),
+  renderSvgToString('<svg width="16" height="20" viewBox="0 0 28 36" fill="none" aria-hidden="true"><ellipse cx="14" cy="31.5" rx="8.5" ry="3.5" fill="#00000020"/><path d="M14 18.5v10.5" stroke="#8b5e3c" stroke-width="4" stroke-linecap="round"/><path d="M14.7 4.4c3.6 0 6.5 1.4 8.3 3.9 3.1.3 5.3 2.8 5.3 5.9 0 3.3-2.5 5.8-5.7 6.1-.7 3.3-3.7 5.6-7.5 5.6-4.4 0-7.5-1.6-9.8-4.6C2.6 20.6.6 18.2.6 14.8c0-3.5 2.6-6.2 6.1-6.4C8.6 5.9 11.3 4.4 14.7 4.4Z" fill="var(--climate-green)"/><path d="M11.1 6.7c2.7 0 4.8 1 6.2 2.8 2.3.2 3.8 2 3.8 4.2 0 2.5-1.8 4.1-4.1 4.3-.6 2.3-2.8 3.8-5.4 3.8-3 0-5.2-1.1-6.8-3.2-1.8-.5-3.1-2.2-3.1-4.5 0-2.4 1.8-4.3 4.2-4.4 1.2-1.9 3-3 5.2-3Z" fill="var(--climate-green)"/></svg>'),
   '#f3fbf5',
   'rgba(255,255,255,0.92)'
 );

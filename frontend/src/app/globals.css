@@ -20,6 +20,16 @@
   --preview-text: #de1d8d;
   --develop-text: #0a72ef;
 
+  /* Climate palette */
+  --climate-green: #4A7C59;
+  --climate-terracotta: #D48C4E;
+  --climate-cyan: #5CCEE4;
+
+  /* Brand aliases (backward-compatible) */
+  --brand-green: var(--climate-green);
+  --brand-orange: var(--climate-terracotta);
+  --brand-blue: var(--climate-cyan);
+
   /* Vercel Design System Shadows */
   --shadow-border: 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
   --shadow-ring-light: 0px 0px 0px 1px rgb(235, 235, 235);
@@ -44,6 +54,10 @@
   --color-ship: var(--ship-text);
   --color-preview: var(--preview-text);
   --color-develop: var(--develop-text);
+
+  --color-climate-green: var(--climate-green);
+  --color-climate-terracotta: var(--climate-terracotta);
+  --color-climate-cyan: var(--climate-cyan);
 
   --shadow-border: var(--shadow-border);
   --shadow-ring-light: var(--shadow-ring-light);

@@ -5,7 +5,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ThermometerSun, TreePine, Navigation, Map as MapIcon, Activity, Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
+import { Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
+import { ThermometerSun, TreePine, Navigation } from "@/components/ui/Icons";
 import { AlcalaLogo, HeroClimateArt, OrganicTree } from "@/components/branding/HomeVisuals";
 import { RoutingSection } from "@/components/RoutingSection";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
@@ -154,14 +155,14 @@ export default function Home() {
       title: "Define el trayecto",
       detail: "Selecciona dos puntos reales de Madrid desde el catálogo oficial o usa tu ubicación actual como origen.",
       icon: Navigation,
-      tone: "bg-[#ebf5ff] text-[#0a72ef]",
+      tone: "bg-[var(--ds-gray-50)] text-[var(--ds-gray-600)]",
     },
     {
       step: "02",
       title: "Leemos la ciudad",
       detail: "Contrastamos la ruta directa con una alternativa más fresca usando sombra urbana, arbolado, agua y refugios próximos.",
       icon: TreePine,
-      tone: "bg-[#f0fdf4] text-[#2d6a4f]",
+      tone: "bg-[var(--climate-green)]/10 text-[var(--climate-green)]",
     },
     {
       step: "03",
@@ -177,14 +178,14 @@ export default function Home() {
       detail: "+432 m de sombra acumulada en la ruta óptima para reducir exposición directa en trayectos cotidianos.",
       icon: ThermometerSun,
       testId: "value-pillar-icon-salud",
-      tone: "bg-[#ebf5ff] text-[#0a72ef]",
+      tone: "bg-[var(--ds-gray-50)] text-[var(--ds-gray-600)]",
     },
     {
       title: "Clima",
       detail: "662.173 polígonos LiDAR y 661.192 árboles municipales convertidos en una señal útil para caminar mejor.",
       icon: TreePine,
       testId: "value-pillar-icon-clima",
-      tone: "bg-[#f0fdf4] text-[#2d6a4f]",
+      tone: "bg-[var(--climate-green)]/10 text-[var(--climate-green)]",
     },
     {
       title: "Equidad",
@@ -200,7 +201,7 @@ export default function Home() {
     { icon: Users, label: "Padron municipal historico", detail: "Ficha oficial del dataset municipal", color: "#de1d8d", href: "https://datos.madrid.es/dataset/209163-0-padron-municipal-historico" },
     { icon: Wind, label: "Calidad del aire", detail: "Ficha oficial del dataset municipal", color: "#f97316", href: "https://datos.madrid.es/dataset/201200-0-calidad-aire-horario" },
     { icon: Database, label: "Estaciones de aire", detail: "Ficha oficial del dataset municipal", color: "#7c3aed", href: "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire" },
-    { icon: Droplets, label: "Fuentes de agua para beber", detail: "Ficha oficial del dataset municipal", color: "#0ea5e9", href: "https://datos.madrid.es/dataset/300051-0-fuentes" },
+    { icon: Droplets, label: "Fuentes de agua para beber", detail: "Ficha oficial del dataset municipal", color: "var(--climate-cyan)", href: "https://datos.madrid.es/dataset/300051-0-fuentes" },
     { icon: Landmark, label: "Bibliotecas municipales", detail: "Ficha oficial del dataset municipal", color: "#8b5cf6", href: "https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas" },
     { icon: Landmark, label: "Centros culturales", detail: "Ficha oficial del dataset municipal", color: "#6d28d9", href: "https://datos.madrid.es/dataset/200304-0-centros-culturales" },
     { icon: Landmark, label: "Polideportivos municipales", detail: "Ficha oficial del dataset municipal", color: "#9333ea", href: "https://datos.madrid.es/dataset/200186-0-polideportivos" },
@@ -233,7 +234,7 @@ export default function Home() {
         <section className="hero-atmosphere hero-grid hero-frame px-4 py-5 sm:px-5 sm:py-6 lg:px-6 lg:py-7">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-14">
             <div id="routing" className="text-left">
-              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(45,106,79,0.12)] bg-[rgba(255,252,247,0.86)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#2d6a4f] shadow-[0_14px_28px_rgba(33,48,43,0.06)]">
+              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(74,124,89,0.12)] bg-[rgba(255,252,247,0.86)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--climate-green)] shadow-[0_14px_28px_rgba(33,48,43,0.06)]">
                 <OrganicTree className="h-5 w-4" />
                 Madrid caminado con criterio climático
               </div>
@@ -245,20 +246,20 @@ export default function Home() {
               </p>
               <div className="fade-in-up mt-6 flex flex-wrap gap-3 text-sm font-semibold text-[var(--ds-gray-600)]">
                 <span className="hero-chip">
-                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[#2d6a4f]" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[var(--climate-green)]" aria-hidden="true">
                     <path d="M8 1.5a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 0 0-4-4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     <path d="M5 5.5a3 3 0 0 1 6 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
                   </svg>
                   Sombra urbana real
                 </span>
                 <span className="hero-chip">
-                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[#2d6a4f]" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[var(--climate-green)]" aria-hidden="true">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   Comparación inmediata
                 </span>
                 <span className="hero-chip">
-                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[#2d6a4f]" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[var(--climate-green)]" aria-hidden="true">
                     <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
                   </svg>
@@ -317,11 +318,11 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="rounded-[28px] border border-[rgba(45,106,79,0.12)] bg-[linear-gradient(180deg,rgba(245,252,248,0.96),rgba(233,245,238,0.88))] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.06)]">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#2d6a4f]">En una frase</p>
+              <div className="rounded-[28px] border border-[rgba(74,124,89,0.12)] bg-[linear-gradient(180deg,rgba(245,252,248,0.96),rgba(233,245,238,0.88))] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.06)]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--climate-green)]">En una frase</p>
                 <p className="mt-3 text-[1.6rem] font-semibold leading-tight text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">No pide aprender un visor complejo. Pide elegir mejor un trayecto cuando el sol castiga.</p>
-                <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-xs font-semibold text-[#2d6a4f] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
+                <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-xs font-semibold text-[var(--climate-green)] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
                   <OrganicTree className="h-5 w-4" /> Decisión peatonal con criterio climático
                 </div>
               </div>

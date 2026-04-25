@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { AlertTriangle, Download, Play, Pause, MapPin, Clock3, ThermometerSun, ArrowRight } from "lucide-react";
+import { Play, Pause, ArrowRight } from "lucide-react";
+import { AlertTriangle, Download, MapPin, Clock3, ThermometerSun } from "@/components/ui/Icons";
 import { SearchBar, type ResolvedLocation, type SearchBarState } from "./SearchBar";
 import { getApiBaseUrl } from "@/lib/search-source";
 import { ClimateRouteBadge, ClimateShelterIcon, OrganicTree, RouteAdviceVisual, RouteHeatVisual, RouteResourceVisual, WaterFountainIcon } from "./branding/HomeVisuals";
@@ -265,10 +266,10 @@ ${gpxPoints}
     <div className="mb-10 sm:mb-12">
       <div className="mb-8">
         {demoLoaded && !useMyLocation && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-[24px] border border-emerald-200/80 bg-[linear-gradient(180deg,rgba(236,253,245,0.96),rgba(220,252,231,0.82))] px-4 py-3 text-left shadow-[0_10px_24px_rgba(22,163,74,0.10)]">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-[24px] border border-[var(--climate-green)]/20 bg-[linear-gradient(180deg,rgba(244,250,245,0.96),rgba(233,245,238,0.82))] px-4 py-3 text-left shadow-[0_10px_24px_rgba(74,124,89,0.10)]">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">Ejemplo cargado</p>
-              <p className="text-sm font-medium text-emerald-900">Hemos precargado una ruta Plaza Mayor → Museo del Prado a las 14:00 para mostrar el valor del producto desde el primer momento.</p>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--climate-green)]">Ejemplo cargado</p>
+              <p className="text-sm font-medium text-[var(--climate-green)]">Hemos precargado una ruta Plaza Mayor → Museo del Prado a las 14:00 para mostrar el valor del producto desde el primer momento.</p>
             </div>
           </div>
         )}
@@ -340,13 +341,13 @@ ${gpxPoints}
               <div className={`grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-6 ${loading ? "opacity-70" : "opacity-100"} ${animateResults ? "results-refresh" : ""}`}>
                 <div>
                   <div className="mb-5 flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#d4ead7] px-3 py-1 text-xs font-bold text-[#2d6a4f] shadow-[0_10px_18px_rgba(45,106,79,0.12)]">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[var(--climate-green)]/10 px-3 py-1 text-xs font-bold text-[var(--climate-green)] shadow-[0_10px_18px_rgba(74,124,89,0.12)]">
                       <ClimateRouteBadge className="h-4 w-7" /> Ruta recomendada
                     </span>
                     <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">Equilibrada</div>
                   </div>
 
-                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(45,106,79,0.12)] bg-[rgba(255,252,247,0.9)] px-3 py-2 text-xs font-semibold text-[#2d6a4f] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[rgba(74,124,89,0.12)] bg-[rgba(255,252,247,0.9)] px-3 py-2 text-xs font-semibold text-[var(--climate-green)] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
                     <OrganicTree testId="route-legend-tree" className="h-5 w-4" />
                     Ruta con alivio climático
                   </div>
@@ -361,7 +362,7 @@ ${gpxPoints}
                           aria-pressed={active}
                           aria-label={option.actionLabel}
                           onClick={() => handlePreferenceRefresh(option.value)}
-                          className={`rounded-[18px] border px-4 py-2 text-left text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${active ? "border-[#2d6a4f] bg-[#d4ead7] text-[#2d6a4f] shadow-[0_8px_18px_rgba(45,106,79,0.16)]" : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-gray-600)] hover:border-[#2d6a4f] hover:text-[#2d6a4f]"}`}
+                          className={`rounded-[18px] border px-4 py-2 text-left text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${active ? "border-[var(--climate-green)] bg-[var(--climate-green)]/10 text-[var(--climate-green)] shadow-[0_8px_18px_rgba(74,124,89,0.16)]" : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-gray-600)] hover:border-[var(--climate-green)] hover:text-[var(--climate-green)]"}`}
                         >
                           <span className="block">{option.label}</span>
                           <span className="block text-[11px] font-medium opacity-70">{option.detail}</span>
@@ -383,13 +384,13 @@ ${gpxPoints}
                       </div>
                     </Card>
 
-                    <Card level={1} className="rounded-[20px] border border-[#d4ead7] p-4">
+                    <Card level={1} className="rounded-[20px] border border-[var(--climate-green)]/20 p-4">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4ead7] text-[#2d6a4f]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--climate-green)]/10 text-[var(--climate-green)]">
                           <OrganicTree className="h-7 w-5" />
                         </span>
                         <div>
-                          <p className="text-lg font-bold text-[#2d6a4f]">{shadeMetersLabel} m</p>
+                          <p className="text-lg font-bold text-[var(--climate-green)]">{shadeMetersLabel} m</p>
                           <p className="text-xs text-[var(--ds-gray-500)]">Sombra acumulada</p>
                         </div>
                       </div>
@@ -403,7 +404,7 @@ ${gpxPoints}
                         data-testid="shade-progress"
                       >
                         <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,#52b788,#2d6a4f)] transition-[width] duration-700 ease-out"
+                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--climate-green),var(--climate-green))] transition-[width] duration-700 ease-out"
                           style={{ width: `${shadeCoverage ?? 0}%` }}
                         />
                       </div>
@@ -433,28 +434,28 @@ ${gpxPoints}
                     <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-100)] bg-[rgba(238,237,233,0.55)] px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-[var(--ds-gray-400)] sm:px-5">
                       <span>Comparativa</span>
                       <span className="text-center">Directa</span>
-                      <span className="text-center text-[#2d6a4f]">Equilibrada</span>
+                      <span className="text-center text-[var(--climate-green)]">Equilibrada</span>
                     </div>
                     <div className="divide-y divide-[var(--ds-gray-100)] text-sm">
                       <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
                         <span className="font-semibold text-[var(--ds-gray-600)]">Longitud</span>
                         <span className="text-center font-medium text-[var(--ds-black)]">{shortestLengthKm} km</span>
-                        <span className="text-center font-bold text-[#2d6a4f]">{comfortLengthKm} km</span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">{comfortLengthKm} km</span>
                       </div>
                       <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
                         <span className="font-semibold text-[var(--ds-gray-600)]">Sombra total</span>
                         <span className="text-center font-medium text-[var(--ds-black)]">{shortestShadeMeters?.toFixed(0)} m</span>
-                        <span className="text-center font-bold text-[#2d6a4f]">{comfortShadeMeters?.toFixed(0)} m</span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">{comfortShadeMeters?.toFixed(0)} m</span>
                       </div>
                       <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
                         <span className="font-semibold text-[var(--ds-gray-600)]">Fuentes</span>
                         <span className="text-center font-medium text-[var(--ds-black)]">{routeResult.metrics.shortest.fuentes}</span>
-                        <span className="text-center font-bold text-[#2d6a4f]">{routeResult.metrics.comfort.fuentes}</span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">{routeResult.metrics.comfort.fuentes}</span>
                       </div>
                       <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
                         <span className="font-semibold text-[var(--ds-gray-600)]">Refugios</span>
                         <span className="text-center font-medium text-[var(--ds-black)]">{routeResult.metrics.shortest.refugios}</span>
-                        <span className="text-center font-bold text-[#2d6a4f]">{routeResult.metrics.comfort.refugios}</span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">{routeResult.metrics.comfort.refugios}</span>
                       </div>
                     </div>
                   </div>
@@ -495,18 +496,18 @@ ${gpxPoints}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card level={1} className="overflow-hidden rounded-[28px] border border-[#d4ead7] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(244,250,245,0.95))] p-5 shadow-[0_14px_32px_rgba(45,106,79,0.08)]">
+            <Card level={1} className="overflow-hidden rounded-[28px] border border-[var(--climate-green)]/14 bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(240,247,242,0.95))] p-5 shadow-[0_14px_32px_rgba(74,124,89,0.08)]">
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2d6a4f]">Lugares frescos a tu alrededor</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--climate-green)]">Lugares frescos a tu alrededor</p>
                   <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Refugios cercanos</h3>
-                  <p className="mt-3 font-serif text-5xl font-semibold leading-none text-[#2d6a4f]">{routeResult.metrics.comfort.refugios}</p>
+                  <p className="mt-3 font-serif text-5xl font-semibold leading-none text-[var(--climate-green)]">{routeResult.metrics.comfort.refugios}</p>
                   <p className="mt-3 text-sm text-[var(--ds-gray-500)]">La ruta recomendada conecta {routeResult.metrics.comfort.refugios} refugios y {routeResult.metrics.comfort.fuentes} puntos de agua para descansar o recargar.</p>
                   <button
                     type="button"
                     onClick={scrollToRouteMap}
                     aria-label="Ver refugios en el mapa de la ruta"
-                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f] transition-opacity hover:opacity-80"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--climate-green)] transition-opacity hover:opacity-80"
                   >
                     Ver refugios <ArrowRight className="h-4 w-4" />
                   </button>
@@ -533,10 +534,10 @@ ${gpxPoints}
               </div>
             </button>
 
-            <Card level={1} className="overflow-hidden rounded-[28px] border border-[rgba(45,106,79,0.14)] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(240,247,242,0.95))] p-5 shadow-[0_14px_32px_rgba(45,106,79,0.08)]">
+            <Card level={1} className="overflow-hidden rounded-[28px] border border-[rgba(74,124,89,0.14)] bg-[linear-gradient(180deg,rgba(255,253,250,0.98),rgba(240,247,242,0.95))] p-5 shadow-[0_14px_32px_rgba(74,124,89,0.08)]">
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2d6a4f]">{routeHourLabel}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--climate-green)]">{routeHourLabel}</p>
                   <h3 className="mt-2 text-xl font-semibold text-[var(--ds-black)]">Consejo del día</h3>
                   <p className="mt-3 text-sm text-[var(--ds-gray-500)]">{adviceText}</p>
                   <a
@@ -545,7 +546,7 @@ ${gpxPoints}
                     rel="noopener noreferrer"
                     aria-label="Recomendaciones oficiales frente al calor de la Comunidad de Madrid"
                     title="Recomendaciones oficiales frente al calor de la Comunidad de Madrid"
-                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2d6a4f] transition-opacity hover:opacity-80"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--climate-green)] transition-opacity hover:opacity-80"
                   >
                     Ver más consejos <ArrowRight className="h-4 w-4" />
                   </a>

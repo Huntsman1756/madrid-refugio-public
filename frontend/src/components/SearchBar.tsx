@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { MapPin, Navigation } from "lucide-react";
+import { Navigation } from "lucide-react";
+import { MapPin } from "@/components/ui/Icons";
 
 import { AddressAutocompleteField } from "./AddressAutocompleteField";
 import { getSearchOptions as getSearchSuggestions } from "@/lib/search-source";
@@ -353,13 +354,13 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
             <div className="min-w-0 rounded-[24px] bg-[rgba(255,253,250,0.92)] px-3 py-3 shadow-[0_10px_24px_rgba(31,26,23,0.06)]">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
-                  <MapPin className="h-3.5 w-3.5 text-emerald-700" />
+                  <MapPin className="h-3.5 w-3.5 text-[var(--climate-green)]" />
                   Origen
                 </label>
                 <button
                   type="button"
                   onClick={handleToggleMyLocation}
-                  className="shrink-0 rounded-full bg-emerald-50/90 px-2.5 py-1 text-[11px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
+                  className="shrink-0 rounded-full bg-[var(--climate-green)]/10 px-2.5 py-1 text-[11px] font-medium text-[var(--climate-green)] transition-colors hover:bg-[var(--climate-green)]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
                 >
                   {useMyLocation ? "Escribir" : "Mi ubicación"}
                 </button>
@@ -427,7 +428,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
             <button
               type="submit"
               disabled={loading || !canSearch}
-              className="flex min-h-[64px] items-center justify-center rounded-[24px] bg-[linear-gradient(180deg,#1f7a45,#14532d)] px-6 text-base font-semibold text-white shadow-[0_18px_32px_rgba(20,83,45,0.26)] transition-all hover:-translate-y-[1px] hover:bg-[#15803d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
+              className="flex min-h-[64px] items-center justify-center rounded-[24px] bg-[var(--climate-green)] px-6 text-base font-semibold text-white shadow-[0_18px_32px_rgba(74,124,89,0.26)] transition-all hover:-translate-y-[1px] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
             >
               {loading ? "Calculando..." : "Buscar ruta con sombra"}
             </button>
@@ -444,7 +445,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                       key={option}
                       type="button"
                       onClick={() => setHour(option)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[#1a3d2b] bg-[#1a3d2b] text-white shadow-[0_12px_20px_rgba(26,61,43,0.20)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-[0_12px_20px_rgba(74,124,89,0.20)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
                     >
                       {option}:00
                     </button>
@@ -463,7 +464,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                       key={option.value}
                       type="button"
                       onClick={() => setPreference(option.value)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-emerald-600 bg-emerald-600 text-white shadow-[0_12px_20px_rgba(22,163,74,0.22)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-[0_12px_20px_rgba(74,124,89,0.22)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
                     >
                       {option.label}
                     </button>

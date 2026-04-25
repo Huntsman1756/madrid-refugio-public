@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/Card";
-import { Database, FileText, BarChart3, TreePine, MapIcon, Activity } from "lucide-react";
+import { FileText, BarChart3, MapIcon, Activity } from "lucide-react";
+import { Database, TreePine } from "@/components/ui/Icons";
 
 export default function ProjectInfoSection() {
   return (

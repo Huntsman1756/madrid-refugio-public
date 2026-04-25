@@ -25,11 +25,11 @@ export function OrganicTree({ title, testId, className, ...props }: SvgProps) {
       <path d="M14 18.5v10.5" stroke="#8b5e3c" strokeWidth="4" strokeLinecap="round" />
       <path
         d="M14.7 4.4c3.6 0 6.5 1.4 8.3 3.9 3.1.3 5.3 2.8 5.3 5.9 0 3.3-2.5 5.8-5.7 6.1-.7 3.3-3.7 5.6-7.5 5.6-4.4 0-7.5-1.6-9.8-4.6C2.6 20.6.6 18.2.6 14.8c0-3.5 2.6-6.2 6.1-6.4C8.6 5.9 11.3 4.4 14.7 4.4Z"
-        fill="#2d6a4f"
+        fill="var(--climate-green)"
       />
       <path
         d="M11.1 6.7c2.7 0 4.8 1 6.2 2.8 2.3.2 3.8 2 3.8 4.2 0 2.5-1.8 4.1-4.1 4.3-.6 2.3-2.8 3.8-5.4 3.8-3 0-5.2-1.1-6.8-3.2-1.8-.5-3.1-2.2-3.1-4.5 0-2.4 1.8-4.3 4.2-4.4 1.2-1.9 3-3 5.2-3Z"
-        fill="#52b788"
+        fill="var(--climate-green)"
       />
     </svg>
   );
@@ -56,8 +56,8 @@ export function AlcalaLogo({ title = "Madrid Refugio", testId = "alcala-logo", c
         <path d="M25 40V19c0-1.1 0.9-2 2-2h9c1.1 0 2 0.9 2 2v21" fill="#f0ebe3" stroke="#1d2733" strokeWidth="2" />
         
         {/* Roof lines - distinctive Madrid style */}
-        <path d="M10 24h15" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M23 19h16" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M10 24h15" stroke="var(--climate-green)" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M23 19h16" stroke="var(--climate-green)" strokeWidth="2.5" strokeLinecap="round" />
         
         {/* Windows - left building */}
         <rect x="16" y="28" width="5" height="5" rx="0.8" fill="#f8f5ef" stroke="#1d2733" strokeWidth="1.2" />
@@ -72,19 +72,19 @@ export function AlcalaLogo({ title = "Madrid Refugio", testId = "alcala-logo", c
         <rect x="37" y="31" width="5" height="5" rx="0.8" fill="#f8f5ef" stroke="#1d2733" strokeWidth="1.2" />
         
         {/* Door */}
-        <path d="M18 40V33c0-1.7 1.3-3 3-3s3 1.3 3 3v7" fill="#f6f2ea" stroke="#2d6a4f" strokeWidth="1.5" />
+        <path d="M18 40V33c0-1.7 1.3-3 3-3s3 1.3 3 3v7" fill="#f6f2ea" stroke="var(--climate-green)" strokeWidth="1.5" />
         
         {/* Tree - prominent, representing shade/refuge */}
         <path d="M40 40V30" stroke="#8b5e3c" strokeWidth="2.2" strokeLinecap="round" />
-        <path d="M40 30c-4 0-7-1.5-7-5 0-3 1.5-5 3.5-5.5 0.5-2.5 2.5-4 4.5-4s4 1.5 4.5 4c2 0.5 3.5 2.5 3.5 5.5 0 3.5-3 5-8 5Z" fill="#2d6a4f" />
-        <path d="M40 33c-3 0-5-1-5-3.5 0-2.5 1.2-4 2.8-4.2 0.4-1.8 1.8-3 3.2-3s2.8 1.2 3.2 3c1.6 0.2 2.8 1.7 2.8 4.2 0 2.5-2 3.5-5 3.5Z" fill="#52b788" />
+        <path d="M40 30c-4 0-7-1.5-7-5 0-3 1.5-5 3.5-5.5 0.5-2.5 2.5-4 4.5-4s4 1.5 4.5 4c2 0.5 3.5 2.5 3.5 5.5 0 3.5-3 5-8 5Z" fill="var(--climate-green)" />
+        <path d="M40 33c-3 0-5-1-5-3.5 0-2.5 1.2-4 2.8-4.2 0.4-1.8 1.8-3 3.2-3s2.8 1.2 3.2 3c1.6 0.2 2.8 1.7 2.8 4.2 0 2.5-2 3.5-5 3.5Z" fill="var(--climate-green)" />
         
         {/* Shade indicator - subtle arc under tree */}
-        <path d="M33 40c2-0.5 4-1 7-1s5 0.5 7 1" stroke="#2d6a4f" strokeWidth="1.2" strokeLinecap="round" opacity="0.4" />
+        <path d="M33 40c2-0.5 4-1 7-1s5 0.5 7 1" stroke="var(--climate-green)" strokeWidth="1.2" strokeLinecap="round" opacity="0.4" />
         
         {/* Small sun symbol - top right */}
-        <circle cx="38" cy="10" r="3" fill="#f6ad55" opacity="0.7" />
-        <path d="M38 5.5V4M38 16v-1.5M33.5 10H32M44.5 10H43" stroke="#f6ad55" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
+        <circle cx="38" cy="10" r="3" fill="var(--climate-terracotta)" opacity="0.7" />
+        <path d="M38 5.5V4M38 16v-1.5M33.5 10H32M44.5 10H43" stroke="var(--climate-terracotta)" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
       </g>
     </svg>
   );
@@ -108,8 +108,8 @@ export function HeroClimateArt({ className, testId = "hero-climate-art", ...prop
           <stop offset="1" stopColor="#d5dfd8" />
         </linearGradient>
         <linearGradient id="hero-shade" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0" stopColor="#2d6a4f" stopOpacity="0.08" />
-          <stop offset="1" stopColor="#2d6a4f" stopOpacity="0.03" />
+          <stop offset="0" stopColor="var(--climate-green)" stopOpacity="0.08" />
+          <stop offset="1" stopColor="var(--climate-green)" stopOpacity="0.03" />
         </linearGradient>
       </defs>
 
@@ -117,12 +117,12 @@ export function HeroClimateArt({ className, testId = "hero-climate-art", ...prop
       <path d="M0 183c82-18 160-26 240-18 84 8 167-6 255-34 71-22 132-25 185-14v115H0Z" fill="url(#hero-sky-wash)" />
 
       {/* Sun - upper right */}
-      <circle cx="590" cy="38" r="28" fill="#f6ad55" opacity="0.25" />
-      <circle cx="590" cy="38" r="20" fill="#f6ad55" opacity="0.35" />
-      <circle cx="590" cy="38" r="14" fill="#f6ad55" opacity="0.55" />
+      <circle cx="590" cy="38" r="28" fill="var(--climate-terracotta)" opacity="0.25" />
+      <circle cx="590" cy="38" r="20" fill="var(--climate-terracotta)" opacity="0.35" />
+      <circle cx="590" cy="38" r="14" fill="var(--climate-terracotta)" opacity="0.55" />
       <circle cx="590" cy="38" r="9" fill="#fde2bf" opacity="0.8" />
       {/* Sun rays */}
-      <g opacity="0.18" stroke="#f6ad55" strokeWidth="1.5" strokeLinecap="round">
+      <g opacity="0.18" stroke="var(--climate-terracotta)" strokeWidth="1.5" strokeLinecap="round">
         <path d="M590 8v-5" />
         <path d="M590 67v5" />
         <path d="M562 38h-5" />
@@ -279,7 +279,7 @@ export function HeroClimateArt({ className, testId = "hero-climate-art", ...prop
       </g>
 
       {/* ===== Route path indicator - subtle green line along street ===== */}
-      <path d="M30 254c40-2 80-1 120 0s80 1 120 2 80 1 120 0 80-1 120 0" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" opacity="0.3" stroke-dasharray="6 4" />
+      <path d="M30 254c40-2 80-1 120 0s80 1 120 2 80 1 120 0 80-1 120 0" stroke="var(--climate-green)" strokeWidth="2.5" strokeLinecap="round" opacity="0.3" stroke-dasharray="6 4" />
     </svg>
   );
 }
@@ -315,9 +315,9 @@ export function ClimateRouteBadge({ title = "Ruta con alivio climático", testId
   return (
     <svg viewBox="0 0 34 20" fill="none" role={title ? "img" : undefined} aria-label={title} data-testid={testId} className={className} {...props}>
       {title ? <title>{title}</title> : null}
-      <path d="M4 16c5.2-5.8 9.8-8.7 14-8.7 4.2 0 7.7 1.7 12 5.8" stroke="#2d6a4f" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M23.4 6.1 30 6.3 28.8 12.3" stroke="#2d6a4f" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9.4 7.4c1.6 0 2.9.7 3.8 2 1.5.1 2.4 1.3 2.4 2.6 0 1.5-1.1 2.6-2.5 2.7-.3 1.4-1.6 2.3-3.4 2.3-1.8 0-3.1-.6-4-1.9-1-.3-1.8-1.3-1.8-2.6 0-1.5 1.1-2.7 2.6-2.7.7-1.3 1.7-2.4 2.9-2.4Z" fill="#52b788" />
+      <path d="M4 16c5.2-5.8 9.8-8.7 14-8.7 4.2 0 7.7 1.7 12 5.8" stroke="var(--climate-green)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M23.4 6.1 30 6.3 28.8 12.3" stroke="var(--climate-green)" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9.4 7.4c1.6 0 2.9.7 3.8 2 1.5.1 2.4 1.3 2.4 2.6 0 1.5-1.1 2.6-2.5 2.7-.3 1.4-1.6 2.3-3.4 2.3-1.8 0-3.1-.6-4-1.9-1-.3-1.8-1.3-1.8-2.6 0-1.5 1.1-2.7 2.6-2.7.7-1.3 1.7-2.4 2.9-2.4Z" fill="var(--climate-green)" />
       <path d="M9.8 11.8v3.4" stroke="#8b5e3c" strokeWidth="1.6" strokeLinecap="round" />
       <ellipse cx="9.8" cy="16.4" rx="2.1" ry="0.7" fill="#00000020" />
     </svg>
@@ -329,7 +329,7 @@ export function HeatmapBadgeIcon({ title = "Mapa de calor", testId, className, .
     <svg viewBox="0 0 20 20" fill="none" role={title ? "img" : undefined} aria-label={title} data-testid={testId} className={className} {...props}>
       {title ? <title>{title}</title> : null}
       <circle cx="6" cy="8" r="3.2" fill="#fdebd0" />
-      <circle cx="12.4" cy="7.2" r="4.2" fill="#f6ad55" fillOpacity="0.95" />
+      <circle cx="12.4" cy="7.2" r="4.2" fill="var(--climate-terracotta)" fillOpacity="0.95" />
       <circle cx="9.8" cy="12.4" r="4.5" fill="#e67e22" fillOpacity="0.88" />
       <circle cx="13.8" cy="12.6" r="2.7" fill="#c0392b" />
     </svg>
@@ -359,8 +359,8 @@ export function MadridShelterBuildingArt({ title, testId, className, size = 160,
         <path d="M80 100V44c0-2 1.5-3.5 3.5-3.5h36c2 0 3.5 1.5 3.5 3.5v56" fill="#e8e4d9" stroke="#b6a891" strokeWidth="3" />
 
         {/* Roof */}
-        <path d="M29 52h36" stroke="#1a3d2b" strokeWidth="4" />
-        <path d="M77 44h39" stroke="#1a3d2b" strokeWidth="4" />
+        <path d="M29 52h36" stroke="var(--climate-green)" strokeWidth="4" />
+        <path d="M77 44h39" stroke="var(--climate-green)" strokeWidth="4" />
 
         {/* Windows */}
         <rect x="42" y="64" width="14" height="12" rx="2" fill="#f8f5ef" stroke="#b6a891" strokeWidth="2" />
@@ -369,17 +369,17 @@ export function MadridShelterBuildingArt({ title, testId, className, size = 160,
         <rect x="112" y="58" width="10" height="12" rx="2" fill="#f8f5ef" stroke="#b6a891" strokeWidth="2" />
 
         {/* Door */}
-        <path d="M48 100V78c0-3 2-5 5-5s5 2 5 5v22" fill="#f6f2ea" stroke="#1a3d2b" strokeWidth="3" />
+        <path d="M48 100V78c0-3 2-5 5-5s5 2 5 5v22" fill="#f6f2ea" stroke="var(--climate-green)" strokeWidth="3" />
 
         {/* Tree next to building */}
         <path d="M136 100V82" stroke="#8b5e3c" strokeWidth="4" strokeLinecap="round" />
-        <path d="M136 82c-8 0-14-3-14-10 0-5 3-8 7-9 1-4 4-7 8-7s7 3 8 7c4 1 7 4 7 9 0 7-6 10-14 10Z" fill="#2d6a4f" />
-        <path d="M136 86c-5 0-10-2-10-7 0-4 2-6 5-6 1-3 3-5 5-5s4 2 5 5c3 0 5 2 5 6 0 5-5 7-10 7Z" fill="#52b788" />
+        <path d="M136 82c-8 0-14-3-14-10 0-5 3-8 7-9 1-4 4-7 8-7s7 3 8 7c4 1 7 4 7 9 0 7-6 10-14 10Z" fill="var(--climate-green)" />
+        <path d="M136 86c-5 0-10-2-10-7 0-4 2-6 5-6 1-3 3-5 5-5s4 2 5 5c3 0 5 2 5 6 0 5-5 7-10 7Z" fill="var(--climate-green)" />
 
         {/* Cool indicator - thermometer going down */}
         <circle cx="24" cy="36" r="6" fill="#fdebd0" stroke="#e67e22" strokeWidth="2" />
-        <path d="M24 42v6" stroke="#2d6a4f" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="24" cy="48" r="2.5" fill="#2d6a4f" />
+        <path d="M24 42v6" stroke="var(--climate-green)" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="24" cy="48" r="2.5" fill="var(--climate-green)" />
 
         {/* Small shadow patch */}
         <ellipse cx="55" cy="104" rx="20" ry="3" fill="#00000014" />
@@ -403,17 +403,17 @@ export function RouteResourceVisual({ title, testId = "route-resource-visual", c
     >
       {title ? <title>{title}</title> : null}
       <g data-testid="civic-wayfinding-system" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 88c19-22 37-34 55-34 16 0 27 10 42 10 10 0 18-4 27-14" stroke="#2d6a4f" strokeWidth="7" />
+        <path d="M18 88c19-22 37-34 55-34 16 0 27 10 42 10 10 0 18-4 27-14" stroke="var(--climate-green)" strokeWidth="7" />
         <path d="M18 88c19-22 37-34 55-34 16 0 27 10 42 10 10 0 18-4 27-14" stroke="#d7efe0" strokeWidth="3" />
-        <circle cx="33" cy="75" r="7" fill="#fffdf8" stroke="#2d6a4f" strokeWidth="3" />
-        <circle cx="78" cy="55" r="7" fill="#fffdf8" stroke="#2d6a4f" strokeWidth="3" />
-        <circle cx="126" cy="51" r="7" fill="#fffdf8" stroke="#2d6a4f" strokeWidth="3" />
+        <circle cx="33" cy="75" r="7" fill="#fffdf8" stroke="var(--climate-green)" strokeWidth="3" />
+        <circle cx="78" cy="55" r="7" fill="#fffdf8" stroke="var(--climate-green)" strokeWidth="3" />
+        <circle cx="126" cy="51" r="7" fill="#fffdf8" stroke="var(--climate-green)" strokeWidth="3" />
         <path d="M108 91V64l18-13 18 13v27" fill="#f6f2ea" stroke="#1d2733" strokeWidth="3" />
         <path d="M119 91V75h14v16M116 67h20" stroke="#1d2733" strokeWidth="2.4" />
-        <path d="M126 48v18" stroke="#2d6a4f" strokeWidth="2.4" />
-        <path d="M39 94c6-1 11-5 14-12 3 5 3 10 0 15" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="2.5" />
-        <path d="M64 25c0-6 5-11 11-11" stroke="#0ea5e9" strokeWidth="3" />
-        <path d="M75 14c4 5 4 9 0 12-4-1-7-4-7-7 0-2 2-4 7-5Z" fill="#0ea5e9" />
+        <path d="M126 48v18" stroke="var(--climate-green)" strokeWidth="2.4" />
+        <path d="M39 94c6-1 11-5 14-12 3 5 3 10 0 15" fill="#d7efe0" stroke="var(--climate-green)" strokeWidth="2.5" />
+        <path d="M64 25c0-6 5-11 11-11" stroke="var(--climate-cyan)" strokeWidth="3" />
+        <path d="M75 14c4 5 4 9 0 12-4-1-7-4-7-7 0-2 2-4 7-5Z" fill="var(--climate-cyan)" />
       </g>
     </svg>
   );
@@ -443,24 +443,24 @@ export function MadridHeatmapMiniArt({ title, testId, className, size = 160, ...
 
         {/* Heat zones - overlapping circles */}
         <circle cx="52" cy="68" r="22" fill="#fdebd0" />
-        <circle cx="80" cy="56" r="28" fill="#f6ad55" fillOpacity="0.88" />
+        <circle cx="80" cy="56" r="28" fill="var(--climate-terracotta)" fillOpacity="0.88" />
         <circle cx="100" cy="74" r="24" fill="#e67e22" fillOpacity="0.82" />
         <circle cx="116" cy="78" r="16" fill="#c0392b" fillOpacity="0.88" />
 
         {/* Cool zone indicator */}
-        <circle cx="40" cy="34" r="6" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="1.5" />
-        <path d="M38 32h4M40 30v4" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" />
+        <circle cx="40" cy="34" r="6" fill="#d7efe0" stroke="var(--climate-green)" strokeWidth="1.5" />
+        <path d="M38 32h4M40 30v4" stroke="var(--climate-green)" strokeWidth="1" strokeLinecap="round" />
 
         {/* Route suggestion - cooler path */}
-        <path d="M32 88c8-4 14-8 20-20 6-14 16-20 28-16 10 3 18 10 22 22 6 18 14 24 22 26" stroke="#2d6a4f" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 88c8-4 14-8 20-20 6-14 16-20 28-16 10 3 18 10 22 22 6 18 14 24 22 26" stroke="var(--climate-green)" strokeWidth="3" strokeLinecap="round" />
         <path d="M32 88c8-4 14-8 20-20 6-14 16-20 28-16 10 3 18 10 22 22 6 18 14 24 22 26" stroke="#d7efe0" strokeWidth="6" />
 
         {/* Sun */}
-        <circle cx="132" cy="22" r="8" fill="#f6ad55" />
+        <circle cx="132" cy="22" r="8" fill="var(--climate-terracotta)" />
         <circle cx="132" cy="22" r="4" fill="#fde2bf" />
 
         {/* Shadow trees on map */}
-        <path d="M48 100c4-1 8-4 10-8 2 3 2 7 0 10" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="1.5" />
+        <path d="M48 100c4-1 8-4 10-8 2 3 2 7 0 10" fill="#d7efe0" stroke="var(--climate-green)" strokeWidth="1.5" />
       </g>
     </svg>
   );
@@ -483,14 +483,14 @@ export function RouteHeatVisual({ title, testId = "route-heat-visual", className
       <g data-testid="civic-wayfinding-system" strokeLinecap="round" strokeLinejoin="round">
         <path d="M24 89h112" stroke="#d9cab3" strokeWidth="4" />
         <path d="M38 89 70 50h46" stroke="#c0392b" strokeWidth="10" opacity="0.92" />
-        <path d="M38 89 70 50" stroke="#f6ad55" strokeWidth="18" opacity="0.42" />
-        <path d="M70 50h46" stroke="#2d6a4f" strokeWidth="10" />
+        <path d="M38 89 70 50" stroke="var(--climate-terracotta)" strokeWidth="18" opacity="0.42" />
+        <path d="M70 50h46" stroke="var(--climate-green)" strokeWidth="10" />
         <path d="M60 82 92 49" stroke="#d7efe0" strokeWidth="15" opacity="0.95" />
-        <circle cx="121" cy="28" r="15" fill="#f6ad55" />
+        <circle cx="121" cy="28" r="15" fill="var(--climate-terracotta)" />
         <circle cx="121" cy="28" r="8" fill="#fde2bf" />
         <path d="M120 7v-5M104 14l-4-4M138 14l4-4" stroke="#c26a1b" strokeWidth="3" />
-        <path d="M56 96c8-2 13-6 17-14 4 6 4 12 0 17" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="2.5" />
-        <path d="M103 96c8-2 13-6 17-14 4 6 4 12 0 17" fill="#d7efe0" stroke="#2d6a4f" strokeWidth="2.5" />
+        <path d="M56 96c8-2 13-6 17-14 4 6 4 12 0 17" fill="#d7efe0" stroke="var(--climate-green)" strokeWidth="2.5" />
+        <path d="M103 96c8-2 13-6 17-14 4 6 4 12 0 17" fill="#d7efe0" stroke="var(--climate-green)" strokeWidth="2.5" />
       </g>
     </svg>
   );
@@ -516,8 +516,8 @@ export function TreeBenchArt({ title, testId, className, size = 160, ...props }:
 
         {/* Large tree */}
         <path d="M76 96V68" stroke="#8b5e3c" strokeWidth="6" strokeLinecap="round" />
-        <path d="M76 68c-18 0-32-8-32-24 0-14 8-22 18-24 2-8 8-14 16-14s14 6 16 14c10 2 18 10 18 24 0 16-14 24-32 24Z" fill="#2d6a4f" />
-        <path d="M76 74c-12 0-22-6-22-16 0-10 6-16 13-17 2-5 6-9 11-9s9 4 11 9c7 1 13 7 13 17 0 10-10 16-22 16Z" fill="#52b788" />
+        <path d="M76 68c-18 0-32-8-32-24 0-14 8-22 18-24 2-8 8-14 16-14s14 6 16 14c10 2 18 10 18 24 0 16-14 24-32 24Z" fill="var(--climate-green)" />
+        <path d="M76 74c-12 0-22-6-22-16 0-10 6-16 13-17 2-5 6-9 11-9s9 4 11 9c7 1 13 7 13 17 0 10-10 16-22 16Z" fill="var(--climate-green)" />
 
         {/* Bench under tree */}
         <path d="M56 96h32" stroke="#8b5e3c" strokeWidth="4" strokeLinecap="round" />
@@ -528,8 +528,8 @@ export function TreeBenchArt({ title, testId, className, size = 160, ...props }:
 
         {/* Small tree in background */}
         <path d="M130 96V80" stroke="#8b5e3c" strokeWidth="4" strokeLinecap="round" />
-        <path d="M130 80c-10 0-18-5-18-14 0-8 5-12 10-12 1-5 5-8 10-8s9 3 10 8c5 0 10 4 10 12 0 9-8 14-18 14Z" fill="#2d6a4f" />
-        <path d="M130 84c-7 0-13-3-13-10 0-6 3-9 7-9 1-4 4-6 8-6s7 2 8 6c4 0 7 3 7 9 0 7-6 10-13 10Z" fill="#52b788" />
+        <path d="M130 80c-10 0-18-5-18-14 0-8 5-12 10-12 1-5 5-8 10-8s9 3 10 8c5 0 10 4 10 12 0 9-8 14-18 14Z" fill="var(--climate-green)" />
+        <path d="M130 84c-7 0-13-3-13-10 0-6 3-9 7-9 1-4 4-6 8-6s7 2 8 6c4 0 7 3 7 9 0 7-6 10-13 10Z" fill="var(--climate-green)" />
 
         {/* Water fountain */}
         <path d="M28 96V78" stroke="#1a6fa8" strokeWidth="3" strokeLinecap="round" />
@@ -538,7 +538,7 @@ export function TreeBenchArt({ title, testId, className, size = 160, ...props }:
         <path d="M28 77v4" stroke="#1a6fa8" strokeWidth="2" strokeLinecap="round" />
 
         {/* Sun */}
-        <circle cx="140" cy="20" r="12" fill="#f6ad55" />
+        <circle cx="140" cy="20" r="12" fill="var(--climate-terracotta)" />
         <circle cx="140" cy="20" r="7" fill="#fde2bf" />
         <path d="M140 4v-4M126 10l-3-3M154 10l3-3M126 30l-3 3M154 30l3 3" stroke="#c26a1b" strokeWidth="2" strokeLinecap="round" />
 
@@ -547,8 +547,8 @@ export function TreeBenchArt({ title, testId, className, size = 160, ...props }:
         <path d="M80 108h50" stroke="#d7efe0" strokeWidth="4" strokeLinecap="round" />
 
         {/* Shade indicator */}
-        <path d="M100 40c0-5 4-9 9-9" stroke="#0ea5e9" strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M111 31c3 3 3 6 0 9-3-1-4-2-4-4 0-1 1-2 4-3Z" fill="#0ea5e9" />
+        <path d="M100 40c0-5 4-9 9-9" stroke="var(--climate-cyan)" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M111 31c3 3 3 6 0 9-3-1-4-2-4-4 0-1 1-2 4-3Z" fill="var(--climate-cyan)" />
       </g>
     </svg>
   );
@@ -570,12 +570,12 @@ export function RouteAdviceVisual({ title, testId = "route-advice-visual", class
       {title ? <title>{title}</title> : null}
       <g data-testid="civic-wayfinding-system" strokeLinecap="round" strokeLinejoin="round">
         <path d="M24 92h112" stroke="#d4c8b7" strokeWidth="4" />
-        <path d="M35 92c17-18 33-27 50-27 13 0 25 5 39 15" stroke="#2d6a4f" strokeWidth="7" />
+        <path d="M35 92c17-18 33-27 50-27 13 0 25 5 39 15" stroke="var(--climate-green)" strokeWidth="7" />
         <path d="M35 92c17-18 33-27 50-27 13 0 25 5 39 15" stroke="#d7efe0" strokeWidth="3" />
-        <circle cx="118" cy="30" r="12" fill="#f6ad55" opacity="0.95" />
+        <circle cx="118" cy="30" r="12" fill="var(--climate-terracotta)" opacity="0.95" />
         <path d="M118 10V3M103 16l-5-5M133 16l5-5" stroke="#c26a1b" strokeWidth="3" />
-        <path d="M58 49c11 0 20 4 26 12 9 1 16 8 16 18 0 9-7 16-16 17-4 9-14 14-27 14-14 0-25-5-32-15-8-2-14-9-14-18 0-11 8-19 19-19 6-6 15-9 28-9Z" fill="#2d6a4f" />
-        <path d="M57 57c8 0 15 3 20 9 7 1 12 6 12 13 0 7-5 12-12 13-3 6-10 10-20 10-10 0-18-3-23-11-6-1-10-6-10-13 0-8 6-13 14-13 4-5 10-8 19-8Z" fill="#52b788" />
+        <path d="M58 49c11 0 20 4 26 12 9 1 16 8 16 18 0 9-7 16-16 17-4 9-14 14-27 14-14 0-25-5-32-15-8-2-14-9-14-18 0-11 8-19 19-19 6-6 15-9 28-9Z" fill="var(--climate-green)" />
+        <path d="M57 57c8 0 15 3 20 9 7 1 12 6 12 13 0 7-5 12-12 13-3 6-10 10-20 10-10 0-18-3-23-11-6-1-10-6-10-13 0-8 6-13 14-13 4-5 10-8 19-8Z" fill="var(--climate-green)" />
         <path d="M56 100V78" stroke="#8b5e3c" strokeWidth="4" />
         <path d="M88 89h34" stroke="#d7efe0" strokeWidth="8" />
       </g>
