@@ -269,4 +269,29 @@ describe("SearchBar integration", () => {
     expect(screen.getByRole("button", { name: /directa/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /buscar ruta con sombra/i })).toBeInTheDocument();
   });
+
+  it("can auto-load a demo route that showcases the product on first render", async () => {
+    render(<RoutingSection autoDemo />);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    expect(await screen.findByText(/ejemplo cargado/i)).toBeInTheDocument();
+
+    const [url, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/route");
+    expect(JSON.parse(String(request.body))).toMatchObject({
+      origin: {
+        label: "Plaza Mayor, Madrid",
+        lat: 40.4155,
+        lon: -3.7074,
+      },
+      destination: {
+        label: "Museo del Prado, Madrid",
+        lat: 40.4138,
+        lon: -3.6921,
+      },
+      hour: 14,
+      preference: 1,
+    });
+  });
 });

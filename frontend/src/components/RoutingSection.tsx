@@ -45,9 +45,28 @@ function savePreference(val: number) {
 
 interface RoutingSectionProps {
   onRouteCalculated?: (result: any) => void;
+  autoDemo?: boolean;
 }
 
-export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
+const DEMO_ROUTE: SearchBarState = {
+  origin: {
+    label: "Plaza Mayor, Madrid",
+    kind: "place",
+    lat: 40.4155,
+    lon: -3.7074,
+  },
+  destination: {
+    label: "Museo del Prado, Madrid",
+    kind: "place",
+    lat: 40.4138,
+    lon: -3.6921,
+  },
+  hour: 14,
+  preference: 1,
+  useMyLocation: false,
+};
+
+export function RoutingSection({ onRouteCalculated, autoDemo = false }: RoutingSectionProps) {
   const [origin, setOrigin] = useState<ResolvedLocation | null>(null);
   const [destination, setDestination] = useState<ResolvedLocation | null>(null);
   const [useMyLocation, setUseMyLocation] = useState(false);
@@ -61,7 +80,9 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
   const [routeResult, setRouteResult] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [demoLoaded, setDemoLoaded] = useState(false);
   const lastPlaybackHourRef = useRef<number | null>(null);
+  const autoDemoStartedRef = useRef(false);
 
   const formatSunSaved = (minutes: number | null | undefined) => (minutes == null ? "—" : `${minutes} min`);
   const formatExtraEffort = (minutes: number | null | undefined) => {
@@ -78,7 +99,6 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
     const now = new Date().getHours();
     setHour(Math.max(8, Math.min(20, now)));
   }, []);
-
 
   // Time slider automation
   useEffect(() => {
@@ -127,6 +147,16 @@ export function RoutingSection({ onRouteCalculated }: RoutingSectionProps) {
 
     doCalculate(state.origin, state.destination, state.hour, state.preference);
   }, []);
+
+  useEffect(() => {
+    if (!autoDemo || autoDemoStartedRef.current || hasSearched || loading) {
+      return;
+    }
+
+    autoDemoStartedRef.current = true;
+    setDemoLoaded(true);
+    handleSearch(DEMO_ROUTE);
+  }, [autoDemo, hasSearched, loading, handleSearch]);
 
   const doCalculate = async (originVal: ResolvedLocation, destVal: ResolvedLocation, hourVal: number, prefVal: number) => {
     setLoading(true);
@@ -185,6 +215,14 @@ ${gpxPoints}
       {/* Header — simplified */}
       {/* Search Bar — primary interaction */}
       <Card level={2} className="p-5 sm:p-6 border border-[var(--ds-gray-100)] shadow-xl mb-8">
+        {demoLoaded && !useMyLocation && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">Ejemplo cargado</p>
+              <p className="text-sm font-medium text-emerald-900">Hemos precargado una ruta Plaza Mayor → Museo del Prado a las 14:00 para mostrar el valor del producto desde el primer momento.</p>
+            </div>
+          </div>
+        )}
         <SearchBar
           onSearch={handleSearch}
           initialState={{
