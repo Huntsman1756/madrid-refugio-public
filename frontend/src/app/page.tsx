@@ -13,7 +13,7 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { getTop10PanelState } from "./home-data-state";
 
 // Dynamically import MapComponent to avoid SSR issues with Leaflet
-const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false, loading: () => <div className="w-full h-full bg-[var(--ds-gray-50)] rounded-xl animate-pulse flex items-center justify-center text-[var(--ds-gray-500)]">Loading Map...</div> });
+const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false, loading: () => <div className="w-full h-full bg-[var(--ds-gray-50)] rounded-lg animate-pulse flex items-center justify-center text-[var(--ds-gray-500)]">Loading Map...</div> });
 
 function CountUp({ end, decimals = 0, suffix = "" }: { end: number, decimals?: number, suffix?: string }) {
   const [val, setVal] = useState(0);
@@ -234,7 +234,7 @@ export default function Home() {
         <section className="hero-atmosphere hero-grid hero-frame px-4 py-5 sm:px-5 sm:py-6 lg:px-6 lg:py-7">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-14">
             <div id="routing" className="text-left">
-              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--climate-green)] shadow-[0_14px_28px_rgba(33,48,43,0.04)]">
+              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--climate-green)] shadow-[0_14px_28px_rgba(33,48,43,0.04)]">
                 <OrganicTree className="h-5 w-4" />
                 Madrid caminado con criterio climático
               </div>
@@ -305,7 +305,7 @@ export default function Home() {
             {journeySteps.map((step) => {
               const Icon = step.icon;
               return (
-                <Card key={step.step} level={1} className="rounded-xl border border-[rgba(91,84,74,0.08)] p-5">
+                <Card key={step.step} level={1} className="rounded-lg border border-[rgba(91,84,74,0.08)] p-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-400)]">{step.step}</span>
                     <span className={`flex h-10 w-10 items-center justify-center rounded-lg ${step.tone}`}>
@@ -335,12 +335,12 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="rounded-xl border border-[var(--climate-green)]/20 bg-[var(--ds-white)] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.04)]">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--climate-green)]">En una frase</p>
-                <p className="mt-3 text-[1.6rem] font-semibold leading-tight text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
+              <div className="rounded-lg border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] p-5 shadow-sm">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ds-black)]">En una frase</p>
+                <p className="mt-3 text-[1.6rem] font-serif font-semibold leading-tight text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">No pide aprender un visor complejo. Pide elegir mejor un trayecto cuando el sol castiga.</p>
-                <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-xs font-semibold text-[var(--climate-green)] shadow-[0_10px_22px_rgba(31,26,23,0.05)]">
-                  <OrganicTree className="h-5 w-4" /> Decisión peatonal con criterio climático
+                <div className="mt-5 inline-flex items-center gap-2 rounded-[4px] bg-white px-3 py-2 text-xs font-semibold text-[var(--ds-black)] shadow-sm border border-[var(--ds-gray-200)]">
+                  <OrganicTree className="h-5 w-4 text-[var(--ds-black)]" /> Decisión peatonal con criterio climático
                 </div>
               </div>
             </div>
@@ -348,7 +348,7 @@ export default function Home() {
               {valuePillars.map((pillar) => {
                 const Icon = pillar.icon;
                 return (
-                  <Card key={pillar.title} level={1} className="rounded-xl border border-[rgba(91,84,74,0.08)] p-5">
+                  <Card key={pillar.title} level={1} className="rounded-lg border border-[rgba(91,84,74,0.08)] p-5">
                     <span data-testid={pillar.testId} className={`mb-4 flex h-11 w-11 items-center justify-center rounded-lg ${pillar.tone}`}>
                       <Icon className="h-4 w-4" />
                     </span>
@@ -391,7 +391,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col gap-2 lg:items-end">
-              <div className="flex bg-[var(--ds-gray-50)] p-1 rounded-xl border border-[var(--ds-gray-100)] shadow-sm">
+              <div className="flex bg-[var(--ds-gray-50)] p-1 rounded-lg border border-[var(--ds-gray-100)] shadow-sm">
                 <button 
                   onClick={() => setViewMode('vulnerability')}
                   className={`px-3 py-2 text-xs font-medium rounded-lg transition-all ${viewMode === 'vulnerability' ? 'bg-white text-[var(--ds-black)] shadow-sm' : 'text-[var(--ds-gray-500)] hover:text-[var(--ds-black)]'}`}
@@ -450,7 +450,7 @@ export default function Home() {
                     </button>
                     <div className="flex justify-between items-start mb-5">
                       <h3 className="card-title text-[var(--ds-black)] leading-tight">{selectedBarrio}</h3>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)] whitespace-nowrap ml-2">{urgencyLabel}</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)] whitespace-nowrap ml-2">{urgencyLabel}</span>
                     </div>
 
                     <div className="space-y-5 flex-1">
@@ -460,9 +460,9 @@ export default function Home() {
                           <span className="text-xs font-medium text-[var(--ds-gray-600)]">Índice de Prioridad</span>
                           <span className="font-mono font-semibold text-[var(--ds-black)] text-sm">{score.toFixed(3).replace('.', ',')} / 1,00</span>
                         </div>
-                        <div className="w-full bg-[var(--ds-gray-100)] h-2.5 rounded-full overflow-hidden">
+                        <div className="w-full bg-[var(--ds-gray-100)] h-2.5 rounded overflow-hidden">
                           <div
-                            className="h-full rounded-full transition-all duration-700"
+                            className="h-full rounded transition-all duration-700"
                             style={{
                               width: `${Math.min(100, score * 100)}%`,
                               background: score > 0.8 ? '#a50026' : score > 0.5 ? '#f46d43' : '#1a9850'
@@ -486,9 +486,9 @@ export default function Home() {
                             <span className="font-mono font-semibold text-sm text-[var(--ds-black)]">{no2?.toFixed(1).replace('.', ',')} µg/m³</span>
                           </div>
                           {/* Visual bar: 0–40 µg/m³ scale */}
-                          <div className="relative w-full h-2 bg-[var(--ds-gray-100)] rounded-full overflow-visible mb-2">
+                          <div className="relative w-full h-2 bg-[var(--ds-gray-100)] rounded overflow-visible mb-2">
                             <div
-                              className="h-full rounded-full transition-all duration-700"
+                              className="h-full rounded transition-all duration-700"
                               style={{
                                 width: `${Math.min(100, ((no2 || 0) / 40) * 100)}%`,
                                 background: no2OverUE ? '#dc2626' : no2NearUE ? '#f97316' : '#eab308'
@@ -524,7 +524,7 @@ export default function Home() {
                       </div>
 
                       {/* Radar Chart for Vulnerability Profile */}
-                      <div className="mt-4 p-3 rounded-xl bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)]">
+                      <div className="mt-4 p-3 rounded-lg bg-[var(--ds-gray-50)] border border-[var(--ds-gray-100)]">
                         <span className="block text-xs font-semibold text-[var(--ds-black)] mb-2 text-center">Perfil de Vulnerabilidad Climática</span>
                         <div className="h-[220px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
@@ -607,9 +607,9 @@ export default function Home() {
                               <span className="font-mono text-xs text-[var(--ds-gray-600)] shrink-0">{s.toFixed(3).replace('.', ',')}</span>
                             </div>
                             {/* Mini progress bar */}
-                            <div className="ml-7 w-full h-1 bg-[var(--ds-gray-100)] rounded-full overflow-hidden">
+                            <div className="ml-7 w-full h-1 bg-[var(--ds-gray-100)] rounded overflow-hidden">
                               <div
-                                className="h-full rounded-full"
+                                className="h-full rounded"
                                 style={{ width: `${Math.min(100, s * 100)}%`, background: barColor }}
                               />
                             </div>
@@ -662,14 +662,14 @@ export default function Home() {
               <p className="text-[var(--ds-gray-600)] mt-2">Los enlaces de esta sección abren la ficha oficial de cada fuente para consultar metadatos, licencia y opciones de descarga.</p>
               <p className="text-[var(--ds-gray-600)] mt-2">No existe un dataset municipal operativo de refugios climáticos oficiales; por eso la capa de sustitución usa bibliotecas, centros culturales y polideportivos con trazabilidad explícita.</p>
             </div>
-            <div className="rounded-xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.88)] p-5 shadow-[0_12px_28px_rgba(31,26,23,0.05)]">
+            <div className="rounded-lg border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.88)] p-5 shadow-[0_12px_28px_rgba(31,26,23,0.05)]">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Criterio de publicación</p>
               <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">Si una URL oficial pública estable no está verificada, la fuente se mantiene como referencia informativa sin enlace activo.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {sourceCards.map((src) => {
-            const cardClassName = `fade-in-up rounded-xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.8)] p-5 transition-all group block shadow-[0_12px_28px_rgba(31,26,23,0.05)] ${src.href ? "hover:-translate-y-[2px] hover:border-[var(--ds-gray-400)] hover:shadow-[0_20px_40px_rgba(31,26,23,0.09)]" : "opacity-90"}`;
+            const cardClassName = `fade-in-up rounded-lg border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.8)] p-5 transition-all group block shadow-[0_12px_28px_rgba(31,26,23,0.05)] ${src.href ? "hover:-translate-y-[2px] hover:border-[var(--ds-gray-400)] hover:shadow-[0_20px_40px_rgba(31,26,23,0.09)]" : "opacity-90"}`;
 
             const content = (
               <>
@@ -677,7 +677,7 @@ export default function Home() {
                   <div className="flex h-11 w-11 items-center justify-center rounded-lg" style={{ background: `${src.color}12` }}>
                     <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
                   </div>
-                  <span className="rounded-full bg-[rgba(17,24,39,0.05)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ds-gray-500)]">
+                  <span className="rounded bg-[rgba(17,24,39,0.05)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ds-gray-500)]">
                     {src.href ? "Ficha oficial" : "Referencia"}
                   </span>
                 </div>
@@ -701,7 +701,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="mt-24 pb-12">
-          <div className="rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-white)] p-6 shadow-[0_18px_42px_rgba(36,53,65,0.04)] sm:p-8">
+          <div className="rounded-lg border border-[var(--ds-gray-100)] bg-[var(--ds-white)] p-6 shadow-[0_18px_42px_rgba(36,53,65,0.04)] sm:p-8">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>
                 <div className="flex items-center gap-3">
@@ -717,9 +717,9 @@ export default function Home() {
                   Proyecto demostrador que convierte datos abiertos urbanos en una decisión peatonal más segura durante episodios de calor en Madrid.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-[var(--ds-gray-500)]">
-                  <span className="rounded-full border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Datos abiertos municipales</span>
-                  <span className="rounded-full border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Metodología trazable</span>
-                  <span className="rounded-full border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Madrid 2026</span>
+                  <span className="rounded border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Datos abiertos municipales</span>
+                  <span className="rounded border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Metodología trazable</span>
+                  <span className="rounded border border-[rgba(91,84,74,0.08)] bg-white/80 px-3 py-1.5">Madrid 2026</span>
                 </div>
               </div>
 

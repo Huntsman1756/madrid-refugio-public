@@ -32,8 +32,9 @@ import {
 const MapComponent = dynamic(() => import("./MapComponent"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-[var(--ds-gray-50)] border border-[var(--ds-gray-200)] rounded-xl flex items-center justify-center text-[var(--ds-gray-500)] text-sm animate-pulse">
-      Cargando mapa...
+    <div className="w-full h-full bg-[var(--ds-white)] border border-[var(--ds-gray-200)] flex flex-col items-center justify-center text-[var(--ds-gray-500)] text-sm">
+      <div className="w-6 h-6 border-2 border-[var(--ds-black)] border-t-transparent rounded animate-spin mb-3"></div>
+      <p className="font-medium tracking-wide uppercase text-[11px]">Cargando cartografía...</p>
     </div>
   ),
 });
@@ -360,7 +361,7 @@ ${gpxPoints}
     <div className="mb-10 sm:mb-12">
       <div className="mb-8">
         {demoLoaded && !useMyLocation && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-3 text-left shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-3 text-left shadow-sm">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--climate-green)]">
                 Ejemplo cargado
@@ -385,13 +386,13 @@ ${gpxPoints}
           loading={loading}
           footerNotice={
             isHeatHour && hasSearched ? (
-              <div className="flex items-start gap-3 rounded-[22px] bg-[#fff7ed] px-4 py-3 shadow-[0_10px_24px_rgba(249,115,22,0.06)]">
-                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-600" />
+              <div className="flex items-start gap-3 rounded-lg bg-[#fff7ed] px-4 py-3 shadow-sm border border-[#fdebd0]">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#e67e22]" />
                 <div>
-                  <p className="text-xs font-bold text-orange-800">
+                  <p className="text-xs font-bold text-[#b45a12]">
                     Calor Extremo a las {hour}:00
                   </p>
-                  <p className="text-xs text-orange-700">
+                  <p className="text-xs text-[#c26a1b]">
                     La Ruta Refugio es prioritaria para minimizar el riesgo de
                     golpe de calor.
                   </p>
@@ -407,17 +408,17 @@ ${gpxPoints}
         <div className="mb-6 flex items-center gap-3">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${isPlaying ? "bg-red-500 text-white shadow-[0_12px_20px_rgba(239,68,68,0.24)]" : "bg-[rgba(255,253,250,0.92)] text-[var(--ds-black)] shadow-[0_10px_20px_rgba(31,26,23,0.08)] hover:bg-white"}`}
+            className={`flex items-center gap-1.5 rounded-[4px] px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${isPlaying ? "bg-[var(--ds-black)] text-white shadow-sm border border-transparent" : "bg-[var(--ds-gray-50)] text-[var(--ds-black)] border border-[var(--ds-gray-200)] shadow-sm hover:bg-white"}`}
           >
             {isPlaying ? (
               <Pause className="w-3 h-3" />
             ) : (
               <Play className="w-3 h-3" />
             )}
-            {isPlaying ? "DETENER SIMULACIÓN" : "SIMULAR DÍA"}
+            {isPlaying ? "Detener simulación" : "Simular día"}
           </button>
           {isPlaying && (
-            <span className="text-xs text-[var(--ds-gray-500)]">
+            <span className="text-xs font-mono text-[var(--ds-gray-500)]">
               Hora actual: {hour}:00
             </span>
           )}
@@ -426,7 +427,7 @@ ${gpxPoints}
 
       {/* Error */}
       {error && (
-        <div className="mb-6 rounded-[22px] border border-red-200 bg-[#fef2f2] p-4 text-sm font-medium text-red-700 shadow-[0_10px_24px_rgba(239,68,68,0.06)]">
+        <div className="mb-6 rounded-lg border border-red-200 bg-[#fef2f2] p-4 text-sm font-medium text-red-700 shadow-sm">
           ⚠ {error}
         </div>
       )}
@@ -438,7 +439,7 @@ ${gpxPoints}
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
             <div
               id="route-map"
-              className="overflow-hidden rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-white)] shadow-md"
+              className="overflow-hidden rounded-lg border border-[var(--ds-gray-100)] bg-[var(--ds-white)] shadow-md"
             >
               <div className="h-[500px] md:h-[600px] overflow-hidden border-b border-[var(--ds-gray-100)]">
                 <MapComponent
@@ -457,15 +458,15 @@ ${gpxPoints}
               >
                 <div>
                   <div className="mb-5 flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[var(--climate-green)]/10 px-3 py-1 text-xs font-bold text-[var(--climate-green)] shadow-sm">
-                      <ClimateRouteBadge className="h-4 w-7" /> Ruta recomendada
+                    <span className="inline-flex items-center gap-2 rounded-[4px] bg-[var(--ds-black)] px-3 py-1 text-xs font-bold text-white shadow-sm">
+                      <ClimateRouteBadge className="h-4 w-7 text-white" /> Ruta recomendada
                     </span>
                     <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">
                       Equilibrada
                     </div>
                   </div>
 
-                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-3 py-2 text-xs font-semibold text-[var(--climate-green)] shadow-sm">
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-[4px] border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-3 py-2 text-xs font-semibold text-[var(--ds-black)] shadow-sm">
                     <OrganicTree
                       testId="route-legend-tree"
                       className="h-5 w-4"
@@ -487,10 +488,10 @@ ${gpxPoints}
                           aria-pressed={active}
                           aria-label={option.actionLabel}
                           onClick={() => handlePreferenceRefresh(option.value)}
-                          className={`rounded-lg border px-4 py-2 text-left text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${active ? "border-[var(--climate-green)] bg-[var(--climate-green)]/10 text-[var(--climate-green)] shadow-sm" : "border-[var(--ds-gray-100)] bg-white text-[var(--ds-gray-600)] hover:border-[var(--climate-green)] hover:text-[var(--climate-green)]"}`}
+                          className={`rounded-[4px] border px-4 py-2 text-left text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${active ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-gray-600)] hover:border-[var(--ds-gray-400)] hover:text-[var(--ds-black)]"}`}
                         >
                           <span className="block">{option.label}</span>
-                          <span className="block text-[11px] font-medium opacity-70">
+                          <span className={`block text-[11px] font-medium ${active ? "opacity-80" : "text-[var(--ds-gray-400)]"}`}>
                             {option.detail}
                           </span>
                         </button>
@@ -501,10 +502,10 @@ ${gpxPoints}
                   <div className="grid gap-4 sm:gap-4 sm:grid-cols-3">
                     <Card
                       level={1}
-                      className="rounded-lg border border-[var(--ds-gray-100)] p-4"
+                      className="rounded-lg border border-[var(--ds-gray-200)] p-4"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(17,24,39,0.06)] text-[var(--ds-gray-600)]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-[4px] bg-[var(--ds-gray-100)] text-[var(--ds-black)]">
                           <Clock3 className="h-5 w-5" />
                         </span>
                         <div>
@@ -520,10 +521,10 @@ ${gpxPoints}
 
                     <Card
                       level={1}
-                      className="rounded-lg border border-[var(--climate-green)]/20 p-4"
+                      className="rounded-lg border border-[var(--ds-gray-200)] p-4"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--climate-green)]/10 text-[var(--climate-green)]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-[4px] bg-[var(--climate-green)]/10 text-[var(--climate-green)]">
                           <OrganicTree className="h-7 w-5" />
                         </span>
                         <div>
@@ -536,7 +537,7 @@ ${gpxPoints}
                         </div>
                       </div>
                       <div
-                        className="mt-3 h-2.5 overflow-hidden rounded-full bg-[rgba(17,24,39,0.08)]"
+                        className="mt-3 h-2.5 overflow-hidden rounded-[4px] bg-[var(--ds-gray-100)]"
                         role="progressbar"
                         aria-label="Sombra acumulada relativa al total de la ruta"
                         aria-valuemin={0}
@@ -545,7 +546,7 @@ ${gpxPoints}
                         data-testid="shade-progress"
                       >
                         <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--climate-green),var(--climate-green))] transition-[width] duration-700 ease-out"
+                          className="h-full rounded-[4px] bg-[var(--climate-green)] transition-[width] duration-700 ease-out"
                           style={{ width: `${shadeCoverage ?? 0}%` }}
                         />
                       </div>
@@ -553,10 +554,10 @@ ${gpxPoints}
 
                     <Card
                       level={1}
-                      className="rounded-lg border border-[#fdebd0] p-4"
+                      className="rounded-lg border border-[var(--ds-gray-200)] p-4"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff7ed] text-[#e67e22]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-[4px] bg-[#fff7ed] text-[#e67e22]">
                           <ThermometerSun className="h-5 w-5" />
                         </span>
                         <div>
@@ -564,7 +565,7 @@ ${gpxPoints}
                             -{estimatedCooling} °C
                           </p>
                           <p className="text-xs text-[var(--ds-gray-500)]">
-                            Reducción térmica estimada
+                            Reducción térmica
                           </p>
                         </div>
                       </div>
@@ -572,7 +573,7 @@ ${gpxPoints}
                   </div>
 
                   {isLongRoute ? (
-                    <div className="mt-4 flex items-start gap-3 rounded-lg border border-red-200 bg-[#fef2f2] px-4 py-3 text-sm text-[#8f2d23] shadow-[0_10px_24px_rgba(192,57,43,0.06)]">
+                    <div className="mt-4 flex items-start gap-3 rounded-[4px] border border-red-200 bg-[#fef2f2] px-4 py-3 text-sm text-[#8f2d23] shadow-sm">
                       <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
                       <p className="font-medium">
                         Ruta larga · Considera dividirla en tramos
@@ -580,8 +581,8 @@ ${gpxPoints}
                     </div>
                   ) : null}
 
-                  <div className="mt-6 overflow-hidden rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] border border-[var(--ds-gray-200)]">
-                    <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-100)] bg-[var(--ds-gray-100)] px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-[var(--ds-gray-400)] sm:px-5">
+                  <div className="mt-6 overflow-hidden rounded-lg border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] shadow-sm">
+                    <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-200)] bg-[var(--ds-gray-100)] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-600)] sm:px-5">
                       <span>Comparativa</span>
                       <span className="text-center">Directa</span>
                       <span className="text-center text-[var(--climate-green)]">
@@ -637,7 +638,7 @@ ${gpxPoints}
                   </div>
                 </div>
 
-                <aside className="flex flex-col gap-4 rounded-xl border border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.96)] p-5 shadow-sm">
+                <aside className="flex flex-col gap-4 rounded-lg border border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.96)] p-5 shadow-sm">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">
                       Recursos en ruta
@@ -652,30 +653,30 @@ ${gpxPoints}
                   </div>
 
                   <div className="space-y-3">
-                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-100)] px-4 py-3">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-200)] px-4 py-3 bg-[var(--ds-white)]">
                       <WaterFountainIcon className="h-5 w-5" />
-                      <span className="text-sm text-[var(--ds-gray-500)]">
+                      <span className="text-sm text-[var(--ds-gray-600)] font-medium">
                         Fuentes de agua
                       </span>
                       <span className="text-base font-bold text-[var(--ds-black)]">
                         {routeResult.metrics.comfort.fuentes}
                       </span>
                     </div>
-                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-100)] px-4 py-3">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-200)] px-4 py-3 bg-[var(--ds-white)]">
                       <ClimateShelterIcon className="h-5 w-5" />
-                      <span className="text-sm text-[var(--ds-gray-500)]">
+                      <span className="text-sm text-[var(--ds-gray-600)] font-medium">
                         Refugios climáticos
                       </span>
                       <span className="text-base font-bold text-[var(--ds-black)]">
                         {routeResult.metrics.comfort.refugios}
                       </span>
                     </div>
-                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-100)] px-4 py-3">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-200)] px-4 py-3 bg-[var(--ds-white)]">
                       <OrganicTree className="h-6 w-5" />
-                      <span className="text-sm text-[var(--ds-gray-500)]">
+                      <span className="text-sm text-[var(--ds-gray-600)] font-medium">
                         Zonas arboladas
                       </span>
-                      <span className="text-xs font-semibold text-[var(--ds-gray-500)]">
+                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--ds-gray-400)]">
                         En ruta
                       </span>
                     </div>
@@ -684,12 +685,11 @@ ${gpxPoints}
                   <Button
                     variant="secondary"
                     onClick={handleDownloadGPX}
-                    className="h-11 justify-between rounded-lg border-[1.5px] border-[var(--ds-gray-100)] px-4 font-semibold"
+                    className="mt-2 h-10 w-full justify-center rounded-[4px] border-[var(--ds-gray-200)] font-semibold shadow-sm"
                   >
                     <span className="inline-flex items-center gap-2">
                       <Download className="h-4 w-4" /> Exportar GPX
                     </span>
-                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </aside>
               </div>
@@ -699,7 +699,7 @@ ${gpxPoints}
           <div className="grid gap-4 lg:grid-cols-3">
             <Card
               level={1}
-              className="overflow-hidden rounded-xl border border-[var(--climate-green)]/14 bg-[var(--ds-white)] p-5 shadow-md"
+              className="overflow-hidden rounded-lg border border-[var(--climate-green)]/30 bg-[var(--ds-white)] p-5 shadow-sm"
             >
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
@@ -739,7 +739,7 @@ ${gpxPoints}
               aria-pressed={showHeatmap}
               aria-label="Ver mapa de calor"
               onClick={() => setShowHeatmap((current) => !current)}
-              className={`overflow-hidden rounded-xl border p-5 text-left shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[#fff7ed]" : "border-[#fdebd0] bg-[var(--ds-white)] hover:border-[#e67e22]"}`}
+              className={`overflow-hidden rounded-lg border p-5 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-black)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[#fff7ed]" : "border-[#fdebd0] bg-[var(--ds-white)] hover:border-[#e67e22]"}`}
             >
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
@@ -767,7 +767,7 @@ ${gpxPoints}
 
             <Card
               level={1}
-              className="overflow-hidden rounded-xl border border-[rgba(74,124,89,0.14)] bg-[var(--ds-white)] p-5 shadow-md"
+              className="overflow-hidden rounded-lg border border-[var(--ds-gray-200)] bg-[var(--ds-white)] p-5 shadow-sm"
             >
               <div className="flex h-full items-end justify-between gap-4">
                 <div className="min-w-0">
@@ -808,14 +808,14 @@ ${gpxPoints}
                 setError(null);
                 setIsPlaying(false);
               }}
-              className="h-10 rounded-full font-bold"
+              className="h-10 rounded-[4px] font-bold"
             >
               Nueva búsqueda
             </Button>
             <Button
               variant="secondary"
               onClick={handleDownloadGPX}
-              className="h-10 rounded-full font-bold"
+              className="h-10 rounded-[4px] font-bold"
             >
               <Download className="w-4 h-4 mr-1.5" /> Exportar GPX
             </Button>
@@ -831,20 +831,15 @@ ${gpxPoints}
 
       {/* Placeholder map when no search yet */}
       {!hasSearched && (
-        <div className="relative h-[220px] overflow-hidden rounded-xl border border-[rgba(91,84,74,0.08)] shadow-lg md:h-[260px]">
-          <MapComponent
-            mergedData={null}
-            refugios={null}
-            fuentes={null}
-            onBarrioSelect={() => {}}
-            routeResult={null}
-            showAreaLegend={false}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent pointer-events-none flex items-end justify-center pb-5">
-            <div className="text-center">
-              <MapPin className="w-6 h-6 text-[var(--ds-gray-400)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--ds-gray-500)]">
-                Busca una ruta para ver el mapa interactivo
+        <div className="relative h-[220px] overflow-hidden rounded-lg border border-[var(--ds-gray-200)] shadow-sm md:h-[260px] bg-[var(--ds-gray-50)]">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center bg-white/90 backdrop-blur-sm px-6 py-4 rounded-lg shadow-sm border border-[var(--ds-gray-200)]">
+              <MapPin className="w-5 h-5 text-[var(--ds-black)] mx-auto mb-2 opacity-80" />
+              <p className="text-[13px] font-semibold text-[var(--ds-black)] uppercase tracking-wider">
+                Esperando origen y destino
+              </p>
+              <p className="text-[12px] text-[var(--ds-gray-500)] mt-1 max-w-[220px]">
+                Introduce tus puntos de ruta para calcular la opción más fresca.
               </p>
             </div>
           </div>

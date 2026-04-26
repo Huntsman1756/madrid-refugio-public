@@ -397,7 +397,7 @@ export function SearchBar({
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-white)] px-4 py-4  sm:px-5 sm:py-5">
+      <div className="rounded-lg border border-[var(--ds-gray-100)] bg-[var(--ds-white)] px-4 py-4  sm:px-5 sm:py-5">
         <div className="mb-4 flex flex-col gap-2 border-b border-[rgba(91,84,74,0.08)] pb-4 text-left sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">
@@ -408,7 +408,7 @@ export function SearchBar({
               que prefieras.
             </p>
           </div>
-          <p className="rounded-full bg-[rgba(255,255,255,0.72)] px-3 py-1 text-xs font-medium text-[var(--ds-gray-500)] shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]">
+          <p className="rounded bg-[rgba(255,255,255,0.72)] px-3 py-1 text-xs font-medium text-[var(--ds-gray-500)] shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]">
             Sin búsqueda libre fuera de Madrid
           </p>
         </div>
@@ -424,7 +424,7 @@ export function SearchBar({
                 <button
                   type="button"
                   onClick={handleToggleMyLocation}
-                  className="shrink-0 rounded-full bg-[var(--climate-green)]/10 px-2.5 py-1 text-[11px] font-medium text-[var(--climate-green)] transition-colors hover:bg-[var(--climate-green)]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2"
+                  className="shrink-0 rounded-[4px] bg-[var(--climate-green)]/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--climate-green-deep)] transition-colors hover:bg-[var(--climate-green)]/15 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black"
                 >
                   {useMyLocation ? "Escribir" : "Mi ubicación"}
                 </button>
@@ -436,7 +436,7 @@ export function SearchBar({
                   onClick={() => {
                     if (!isLocationReady) requestGeolocation();
                   }}
-                  className="w-full rounded-[20px] bg-[var(--ds-gray-50)] px-4 py-3 text-left transition-colors hover:bg-[var(--ds-gray-100)]"
+                  className="w-full rounded-md border border-[var(--ds-gray-200)] bg-[var(--ds-white)] px-4 py-3 text-left transition-colors hover:bg-[var(--ds-gray-50)] focus:border-black focus:ring-1 focus:ring-black focus:outline-none shadow-sm"
                 >
                   <div className="text-sm font-medium text-[var(--ds-black)]">
                     {locationTitle}
@@ -500,7 +500,7 @@ export function SearchBar({
             <button
               type="submit"
               disabled={loading || !canSearch}
-              className="flex min-h-[64px] items-center justify-center rounded-md bg-[var(--climate-terracotta)] px-6 text-base font-semibold text-white shadow-md transition-all hover:-translate-y-[1px] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
+              className="flex min-h-[64px] items-center justify-center rounded-md bg-[var(--ds-black)] px-6 text-base font-semibold text-white shadow-md transition-all hover:bg-[var(--ds-gray-800)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
             >
               {loading ? "Calculando..." : "Buscar ruta con sombra"}
             </button>
@@ -523,7 +523,7 @@ export function SearchBar({
                       key={option}
                       type="button"
                       onClick={() => setHour(option)}
-                      className={`rounded-md border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-sm" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
+                      className={`rounded-[4px] border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black ${selected ? "border-black bg-black text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-white)] text-[var(--ds-black)] hover:bg-[var(--ds-gray-50)]"}`}
                     >
                       {option}:00
                     </button>
@@ -548,7 +548,7 @@ export function SearchBar({
                       key={option.value}
                       type="button"
                       onClick={() => setPreference(option.value)}
-                      className={`rounded-md border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-sm" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
+                      className={`rounded-[4px] border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black ${selected ? "border-black bg-black text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-[var(--ds-white)] text-[var(--ds-black)] hover:bg-[var(--ds-gray-50)]"}`}
                     >
                       {option.label}
                     </button>

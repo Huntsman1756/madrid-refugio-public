@@ -354,3 +354,32 @@ html {
     transform: translateY(0);
   }
 }
+
+/* Cartography Premium Map Tooltip */
+.carto-tooltip {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid var(--ds-gray-100) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 12px 24px rgba(17, 24, 39, 0.08), 0 4px 8px rgba(17, 24, 39, 0.04) !important;
+  color: var(--ds-black) !important;
+  font-family: var(--font-sans), sans-serif !important;
+  font-size: 12px !important;
+  padding: 8px 12px !important;
+  backdrop-filter: blur(8px) !important;
+}
+.carto-tooltip strong {
+  font-weight: 600 !important;
+  display: block !important;
+  margin-bottom: 2px !important;
+  font-size: 13px !important;
+}
+.carto-tooltip em {
+  font-size: 10px !important;
+  color: var(--ds-gray-500) !important;
+  font-style: normal !important;
+  display: block !important;
+  margin-top: 4px !important;
+}
+.leaflet-tooltip-top.carto-tooltip::before {
+  border-top-color: rgba(255, 255, 255, 0.95) !important;
+}

@@ -11,7 +11,7 @@ export function Button({ variant = 'primary', children, className = '', ...props
   const variants = {
     primary: "bg-[var(--ds-black)] text-white hover:bg-[var(--ds-gray-900)] active:scale-[0.98] px-4 py-2 rounded-lg shadow-sm font-semibold transition-all duration-150",
     secondary: "bg-[var(--ds-white)] text-[var(--ds-black)] hover:bg-[var(--ds-gray-50)] px-4 py-2 rounded-lg border border-[var(--ds-gray-100)] shadow-[var(--shadow-border)] font-semibold",
-    pill: "bg-[var(--climate-green)]/10 text-[var(--climate-green)] hover:bg-[var(--climate-green)]/15 px-[10px] py-0 rounded-full text-xs font-medium tracking-normal",
+    pill: "bg-[var(--climate-green)]/10 text-[var(--climate-green)] hover:bg-[var(--climate-green)]/15 px-[10px] py-0 rounded text-xs font-medium tracking-normal",
   };
 
   const variantClass = variants[variant] || variants.primary;

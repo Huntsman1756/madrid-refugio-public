@@ -24,7 +24,7 @@ export default function ProjectInfoSection() {
         <div className="md:col-span-2">
           <div className="grid grid-cols-2 gap-4">
             <Card level={2} className="p-5 flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-[#fef2f2] flex items-center justify-center text-[#ff5b4f] shrink-0">
+              <div className="w-8 h-8 rounded bg-[#fef2f2] flex items-center justify-center text-[#ff5b4f] shrink-0">
                 <MapIcon className="w-4 h-4" />
               </div>
               <div>
@@ -34,7 +34,7 @@ export default function ProjectInfoSection() {
             </Card>
             
             <Card level={2} className="p-5 flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-[#ebf5ff] flex items-center justify-center text-[#0a72ef] shrink-0">
+              <div className="w-8 h-8 rounded bg-[#ebf5ff] flex items-center justify-center text-[#0a72ef] shrink-0">
                 <Activity className="w-4 h-4" />
               </div>
               <div>
@@ -44,7 +44,7 @@ export default function ProjectInfoSection() {
             </Card>
 
             <Card level={2} className="p-5 flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] shrink-0">
+              <div className="w-8 h-8 rounded bg-[#fdf2f8] flex items-center justify-center text-[#de1d8d] shrink-0">
                 <TreePine className="w-4 h-4" />
               </div>
               <div>
@@ -54,7 +54,7 @@ export default function ProjectInfoSection() {
             </Card>
 
             <Card level={2} className="p-5 flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-[var(--ds-gray-100)] flex items-center justify-center text-[var(--ds-gray-600)] shrink-0">
+              <div className="w-8 h-8 rounded bg-[var(--ds-gray-100)] flex items-center justify-center text-[var(--ds-gray-600)] shrink-0">
                 <BarChart3 className="w-4 h-4" />
               </div>
               <div>
@@ -66,7 +66,7 @@ export default function ProjectInfoSection() {
         </div>
       </div>
 
-      <div className="rounded-xl shadow-[var(--shadow-card-subtle)] border border-[var(--ds-gray-100)] overflow-hidden bg-white">
+      <div className="rounded-lg shadow-[var(--shadow-card-subtle)] border border-[var(--ds-gray-100)] overflow-hidden bg-white">
         <div className="p-5 border-b border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] flex items-center gap-2">
           <Database className="w-5 h-5 text-[var(--ds-gray-500)]" />
           <h3 className="font-semibold text-[var(--ds-black)]">Inventario de Datasets Abiertos Utilizados</h3>

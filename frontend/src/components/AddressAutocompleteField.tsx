@@ -157,7 +157,7 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
   return (
     <div
       ref={rootRef}
-      className="space-y-2"
+      className="relative space-y-2"
       onBlur={(event) => {
         if (event.currentTarget.contains(event.relatedTarget)) {
           return;
@@ -194,14 +194,14 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
           }
         }}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-[20px] border border-transparent bg-[rgba(243,239,232,0.95)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-transparent focus:ring-2 focus:ring-[var(--ds-focus-color)] focus:ring-offset-2"
+        className="w-full rounded-md border border-[var(--ds-gray-200)] bg-[var(--ds-white)] px-4 py-3 text-sm text-[var(--ds-black)] placeholder:text-[var(--ds-gray-400)] focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-shadow shadow-sm"
       />
 
       {isListOpen && (
         <ul
           id={listboxId}
           role="listbox"
-          className="space-y-2 rounded-[22px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.98)] p-2 shadow-[0_18px_40px_rgba(31,26,23,0.10)]"
+          className="space-y-1 rounded-md border border-[var(--ds-gray-200)] bg-[var(--ds-white)] p-1.5 shadow-lg absolute z-10 w-full mt-1"
         >
           {suggestions.map((option, index) => (
             <li
@@ -217,10 +217,10 @@ export const AddressAutocompleteField = forwardRef<HTMLInputElement, AddressAuto
                   event.preventDefault();
                 }}
                 onClick={() => handleSelect(option)}
-                className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left hover:bg-[var(--ds-gray-50)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${index === activeIndex ? "bg-[var(--ds-gray-50)]" : ""}`}
+                className={`flex w-full items-center justify-between gap-3 rounded-[4px] px-3 py-2 text-left hover:bg-[var(--ds-gray-100)] focus-visible:outline-none focus-visible:bg-[var(--ds-gray-100)] transition-colors ${index === activeIndex ? "bg-[var(--ds-gray-100)]" : ""}`}
               >
                 <span className="min-w-0 text-sm text-[var(--ds-black)]">{option.label}</span>
-                <span className="shrink-0 rounded-full bg-[var(--ds-gray-100)] px-2 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
+                <span className="shrink-0 rounded bg-[var(--ds-gray-100)] px-2 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
                   {KIND_LABELS[option.kind]}
                 </span>
               </button>

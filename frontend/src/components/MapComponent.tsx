@@ -309,12 +309,17 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
           `Mayores 65+: ${feature.properties.pop_65plus ?? 'N/A'}<br>` +
           `<em>No representa sombra instantánea</em>`;
       
-      layer.bindTooltip(tooltipContent);
+      layer.bindTooltip(tooltipContent, { 
+        className: 'carto-tooltip',
+        direction: 'top',
+        offset: [0, -10],
+        opacity: 1
+      });
     }
   };
 
   return (
-    <div className="relative z-0 h-full w-full overflow-hidden rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]">
+    <div className="relative z-0 h-full w-full overflow-hidden rounded-lg border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] shadow-sm">
       {/* NO key prop — never unmount the map, controllers handle view changes */}
       <MapContainer
         center={[40.4168, -3.7038]}
@@ -429,7 +434,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
             <div className="mb-1 flex items-center gap-2"><WaterFountainIcon className="h-4 w-4" /> {routeResult.metrics?.comfort?.fuentes ?? 0} fuentes cerca</div>
             <div className="mb-1 flex items-center gap-2"><ClimateShelterIcon className="h-4 w-4" /> {routeResult.metrics?.comfort?.refugios ?? 0} refugios cerca</div>
             <div className="flex items-center gap-2"><OrganicTree testId="route-legend-tree" className="h-5 w-4" /> sombra y arbolado en ruta</div>
-            {showHeatmap ? <div className="mt-2 rounded-full bg-[rgba(230,126,34,0.12)] px-2 py-1 text-[#c0392b]">Capa térmica superpuesta</div> : null}
+            {showHeatmap ? <div className="mt-2 rounded bg-[rgba(230,126,34,0.12)] px-2 py-1 text-[#c0392b]">Capa térmica superpuesta</div> : null}
           </div>
         </div>
       )}
