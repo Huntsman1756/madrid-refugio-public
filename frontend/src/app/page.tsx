@@ -273,6 +273,23 @@ export default function Home() {
             </div>
           </div>
 
+          {/* ── Epic stats strip ─────────────────────────────────── */}
+          <div className="fade-in-up mt-6 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-[var(--ds-gray-100)] pt-5">
+            {[
+              { end: 662173, label: "polígonos LiDAR" },
+              { end: 661192, label: "árboles catalogados" },
+              { end: 430000, label: "mayores de 65" },
+              { end: 13, label: "franjas horarias" },
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-baseline gap-2">
+                <span className="font-mono text-[1.35rem] font-bold leading-none tracking-tight text-[var(--ds-black)] tabular-nums">
+                  <CountUp end={stat.end} />
+                </span>
+                <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
           <div className="fade-in-up mt-5">
             <RoutingSection />
           </div>
