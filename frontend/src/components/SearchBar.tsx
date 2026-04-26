@@ -45,15 +45,21 @@ function getPreferenceLabel(val: number): string {
 }
 
 function normalizeHour(val: number): number {
-  return HOUR_OPTIONS.reduce((closest, option) =>
-    Math.abs(option - val) < Math.abs(closest - val) ? option : closest
-  , HOUR_OPTIONS[0]);
+  return HOUR_OPTIONS.reduce(
+    (closest, option) =>
+      Math.abs(option - val) < Math.abs(closest - val) ? option : closest,
+    HOUR_OPTIONS[0],
+  );
 }
 
 function normalizePreference(val: number): number {
-  return PREFERENCE_OPTIONS.reduce<number>((closest, option) =>
-    Math.abs(option.value - val) < Math.abs(closest - val) ? option.value : closest
-  , PREFERENCE_OPTIONS[1].value);
+  return PREFERENCE_OPTIONS.reduce<number>(
+    (closest, option) =>
+      Math.abs(option.value - val) < Math.abs(closest - val)
+        ? option.value
+        : closest,
+    PREFERENCE_OPTIONS[1].value,
+  );
 }
 
 function toSearchOption(location?: ResolvedLocation): SearchOption | null {
@@ -88,38 +94,81 @@ function getLocationDetail(location: ResolvedLocation | null): string {
 }
 
 function isSearchSourceError(error: unknown): error is { message: string } {
-  return typeof error === "object" &&
+  return (
+    typeof error === "object" &&
     error !== null &&
     "name" in error &&
     error.name === "SearchSourceError" &&
     "message" in error &&
-    typeof error.message === "string";
+    typeof error.message === "string"
+  );
 }
 
-export function SearchBar({ onSearch, initialState, loading, footerNotice }: SearchBarProps) {
-  const [destination, setDestination] = useState(initialState?.destination?.label || "");
-  const [selectedDestination, setSelectedDestination] = useState<SearchOption | null>(() => toSearchOption(initialState?.destination));
-  const [destinationOptions, setDestinationOptions] = useState<SearchOption[]>([]);
-  const [origin, setOrigin] = useState(initialState?.useMyLocation ? "" : initialState?.origin?.label || "");
-  const [selectedOrigin, setSelectedOrigin] = useState<SearchOption | null>(() => initialState?.useMyLocation ? null : toSearchOption(initialState?.origin));
+export function SearchBar({
+  onSearch,
+  initialState,
+  loading,
+  footerNotice,
+}: SearchBarProps) {
+  const [destination, setDestination] = useState(
+    initialState?.destination?.label || "",
+  );
+  const [selectedDestination, setSelectedDestination] =
+    useState<SearchOption | null>(() =>
+      toSearchOption(initialState?.destination),
+    );
+  const [destinationOptions, setDestinationOptions] = useState<SearchOption[]>(
+    [],
+  );
+  const [origin, setOrigin] = useState(
+    initialState?.useMyLocation ? "" : initialState?.origin?.label || "",
+  );
+  const [selectedOrigin, setSelectedOrigin] = useState<SearchOption | null>(
+    () =>
+      initialState?.useMyLocation ? null : toSearchOption(initialState?.origin),
+  );
   const [originOptions, setOriginOptions] = useState<SearchOption[]>([]);
   const [debouncedDestination, setDebouncedDestination] = useState(destination);
   const [debouncedOrigin, setDebouncedOrigin] = useState(origin);
-  const [hour, setHour] = useState(() => normalizeHour(initialState?.hour ?? new Date().getHours()));
-  const [preference, setPreference] = useState(() => normalizePreference(initialState?.preference ?? 0.5));
-  const [useMyLocation, setUseMyLocation] = useState(initialState?.useMyLocation ?? false);
-  const [geolocationStatus, setGeolocationStatus] = useState<"idle" | "requesting" | "granted" | "denied" | "error">("idle");
+  const [hour, setHour] = useState(() =>
+    normalizeHour(initialState?.hour ?? new Date().getHours()),
+  );
+  const [preference, setPreference] = useState(() =>
+    normalizePreference(initialState?.preference ?? 0.5),
+  );
+  const [useMyLocation, setUseMyLocation] = useState(
+    initialState?.useMyLocation ?? false,
+  );
+  const [geolocationStatus, setGeolocationStatus] = useState<
+    "idle" | "requesting" | "granted" | "denied" | "error"
+  >("idle");
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
-  const [hasRequestedGeolocation, setHasRequestedGeolocation] = useState(Boolean(initialState?.useMyLocation && initialState?.origin));
-  const [searchSourceError, setSearchSourceError] = useState<string | null>(null);
-  const [currentLocation, setCurrentLocation] = useState<ResolvedLocation | null>(() => initialState?.useMyLocation ? initialState.origin ?? null : null);
+  const [hasRequestedGeolocation, setHasRequestedGeolocation] = useState(
+    Boolean(initialState?.useMyLocation && initialState?.origin),
+  );
+  const [searchSourceError, setSearchSourceError] = useState<string | null>(
+    null,
+  );
+  const [currentLocation, setCurrentLocation] =
+    useState<ResolvedLocation | null>(() =>
+      initialState?.useMyLocation ? (initialState.origin ?? null) : null,
+    );
   const destinationRef = useRef<HTMLInputElement>(null);
   const originRef = useRef<HTMLInputElement>(null);
 
-  const isLocationReady = useMyLocation && geolocationStatus === "granted" && Boolean(currentLocation);
-  const canSearch = Boolean(selectedDestination) && (useMyLocation ? isLocationReady : Boolean(selectedOrigin));
+  const isLocationReady =
+    useMyLocation &&
+    geolocationStatus === "granted" &&
+    Boolean(currentLocation);
+  const canSearch =
+    Boolean(selectedDestination) &&
+    (useMyLocation ? isLocationReady : Boolean(selectedOrigin));
   useEffect(() => {
-    if (useMyLocation && hasRequestedGeolocation && geolocationStatus === "idle") {
+    if (
+      useMyLocation &&
+      hasRequestedGeolocation &&
+      geolocationStatus === "idle"
+    ) {
       requestGeolocation();
     }
   }, [geolocationStatus, hasRequestedGeolocation, useMyLocation]);
@@ -141,8 +190,10 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
       }
     }
 
-    if (initialState?.hour !== undefined) setHour(normalizeHour(initialState.hour));
-    if (initialState?.preference !== undefined) setPreference(normalizePreference(initialState.preference));
+    if (initialState?.hour !== undefined)
+      setHour(normalizeHour(initialState.hour));
+    if (initialState?.preference !== undefined)
+      setPreference(normalizePreference(initialState.preference));
     if (initialState?.useMyLocation !== undefined) {
       setUseMyLocation(initialState.useMyLocation);
     }
@@ -270,13 +321,17 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
         setGeolocationStatus("denied");
         setUseMyLocation(false);
         if (error.code === error.PERMISSION_DENIED) {
-          setGeolocationError("Ubicación denegada. Escribe tu origen manualmente.");
+          setGeolocationError(
+            "Ubicación denegada. Escribe tu origen manualmente.",
+          );
         } else {
-          setGeolocationError("No se pudo obtener tu ubicación. Escribe tu origen manualmente.");
+          setGeolocationError(
+            "No se pudo obtener tu ubicación. Escribe tu origen manualmente.",
+          );
         }
         window.setTimeout(() => originRef.current?.focus(), 0);
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
     );
   };
 
@@ -298,7 +353,9 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
     }
 
     onSearch({
-      origin: useMyLocation ? currentLocation! : toResolvedLocation(selectedOrigin!),
+      origin: useMyLocation
+        ? currentLocation!
+        : toResolvedLocation(selectedOrigin!),
       destination: toResolvedLocation(selectedDestination),
       hour,
       preference,
@@ -333,25 +390,32 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
   const locationDetail = useMyLocation
     ? geolocationStatus === "granted"
       ? getLocationDetail(currentLocation)
-    : geolocationStatus === "requesting"
+      : geolocationStatus === "requesting"
         ? "Estamos buscando tu posición para calcular la salida."
         : ""
     : "Calle, lugar o coordenadas en Madrid";
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="rounded-[34px] border border-[var(--ds-gray-100)] bg-[var(--ds-white)] px-4 py-4 shadow-[0_20px_52px_rgba(31,26,23,0.06)] sm:px-5 sm:py-5">
+      <div className="rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-white)] px-4 py-4  sm:px-5 sm:py-5">
         <div className="mb-4 flex flex-col gap-2 border-b border-[rgba(91,84,74,0.08)] pb-4 text-left sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Planifica tu recorrido</p>
-            <p className="mt-1 text-sm text-[var(--ds-gray-600)]">Madrid solo: dos puntos reales, una hora concreta y el equilibrio que prefieras.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">
+              Planifica tu recorrido
+            </p>
+            <p className="mt-1 text-sm text-[var(--ds-gray-600)]">
+              Madrid solo: dos puntos reales, una hora concreta y el equilibrio
+              que prefieras.
+            </p>
           </div>
-          <p className="rounded-full bg-[rgba(255,255,255,0.72)] px-3 py-1 text-xs font-medium text-[var(--ds-gray-500)] shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]">Sin búsqueda libre fuera de Madrid</p>
+          <p className="rounded-full bg-[rgba(255,255,255,0.72)] px-3 py-1 text-xs font-medium text-[var(--ds-gray-500)] shadow-[0_1px_0_rgba(255,255,255,0.7)_inset]">
+            Sin búsqueda libre fuera de Madrid
+          </p>
         </div>
 
-          <div className="rounded-[28px] border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] p-2.5 sm:p-3">
+        <div className="rounded-lg border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)] p-2.5 sm:p-3">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px] lg:items-start">
-            <div className="min-w-0 rounded-[24px] bg-[var(--ds-white)] px-3 py-3 shadow-[0_6px_16px_rgba(31,26,23,0.04)]">
+            <div className="min-w-0 rounded-md bg-[var(--ds-white)] px-3 py-3 shadow-sm">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
                   <MapPin className="h-3.5 w-3.5 text-[var(--climate-green)]" />
@@ -374,8 +438,14 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                   }}
                   className="w-full rounded-[20px] bg-[var(--ds-gray-50)] px-4 py-3 text-left transition-colors hover:bg-[var(--ds-gray-100)]"
                 >
-                  <div className="text-sm font-medium text-[var(--ds-black)]">{locationTitle}</div>
-                  {locationDetail && <div className="mt-1 text-xs text-[var(--ds-gray-500)]">{locationDetail}</div>}
+                  <div className="text-sm font-medium text-[var(--ds-black)]">
+                    {locationTitle}
+                  </div>
+                  {locationDetail && (
+                    <div className="mt-1 text-xs text-[var(--ds-gray-500)]">
+                      {locationDetail}
+                    </div>
+                  )}
                 </button>
               ) : (
                 <AddressAutocompleteField
@@ -394,11 +464,13 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
               )}
 
               {geolocationError && !useMyLocation && (
-                <p className="mt-1.5 text-xs text-red-500">{geolocationError}</p>
+                <p className="mt-1.5 text-xs text-red-500">
+                  {geolocationError}
+                </p>
               )}
             </div>
 
-              <div className="min-w-0 rounded-[24px] bg-[var(--ds-white)] px-3 py-3 shadow-[0_6px_16px_rgba(31,26,23,0.04)]">
+            <div className="min-w-0 rounded-md bg-[var(--ds-white)] px-3 py-3 shadow-sm">
               <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
                 <Navigation className="h-3.5 w-3.5 text-[var(--ds-black)]" />
                 Destino
@@ -428,15 +500,21 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
             <button
               type="submit"
               disabled={loading || !canSearch}
-              className="flex min-h-[64px] items-center justify-center rounded-[24px] bg-[var(--climate-terracotta)] px-6 text-base font-semibold text-white shadow-[0_18px_32px_rgba(212,140,78,0.26)] transition-all hover:-translate-y-[1px] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
+              className="flex min-h-[64px] items-center justify-center rounded-md bg-[var(--climate-terracotta)] px-6 text-base font-semibold text-white shadow-md transition-all hover:-translate-y-[1px] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-[118px]"
             >
               {loading ? "Calculando..." : "Buscar ruta con sombra"}
             </button>
           </div>
 
           <div className="mt-3 grid gap-3 border-t border-[rgba(91,84,74,0.08)] pt-3 lg:grid-cols-2 lg:gap-6">
-            <div role="group" aria-label="Hora del recorrido" className="min-w-0">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Hora salida</label>
+            <div
+              role="group"
+              aria-label="Hora del recorrido"
+              className="min-w-0"
+            >
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
+                Hora salida
+              </label>
               <div className="grid grid-cols-3 gap-2">
                 {HOUR_OPTIONS.map((option) => {
                   const selected = option === hour;
@@ -445,7 +523,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                       key={option}
                       type="button"
                       onClick={() => setHour(option)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-[0_12px_20px_rgba(74,124,89,0.20)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
+                      className={`rounded-md border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-sm" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
                     >
                       {option}:00
                     </button>
@@ -454,8 +532,14 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
               </div>
             </div>
 
-            <div role="group" aria-label="Preferencia de ruta" className="min-w-0">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">Tipo de ruta</label>
+            <div
+              role="group"
+              aria-label="Preferencia de ruta"
+              className="min-w-0"
+            >
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--ds-gray-500)]">
+                Tipo de ruta
+              </label>
               <div className="grid grid-cols-3 gap-2">
                 {PREFERENCE_OPTIONS.map((option) => {
                   const selected = option.value === preference;
@@ -464,7 +548,7 @@ export function SearchBar({ onSearch, initialState, loading, footerNotice }: Sea
                       key={option.value}
                       type="button"
                       onClick={() => setPreference(option.value)}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-[0_12px_20px_rgba(74,124,89,0.22)]" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
+                      className={`rounded-md border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-focus-color)] focus-visible:ring-offset-2 ${selected ? "border-[var(--climate-green)] bg-[var(--climate-green)] text-white shadow-sm" : "border-transparent bg-[rgba(255,253,250,0.85)] text-[var(--ds-black)] hover:bg-[rgba(255,255,255,0.95)]"}`}
                     >
                       {option.label}
                     </button>
