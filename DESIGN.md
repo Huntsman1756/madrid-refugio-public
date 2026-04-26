@@ -309,7 +309,75 @@ What distinguishes Vercel from other monochrome design systems is its shadow-as-
 5. The inner `#fafafa` ring in card shadows is what gives Vercel cards their subtle inner glow
 6. Geist Mono uppercase for technical labels, Geist Sans for everything else
 
-## 10. Future Roadmap / Hitos de Proyecto
+## 10. Gestión de Imágenes — Guía de edición
+
+### Cómo funciona
+
+Las imágenes del proyecto se dividen en dos tipos:
+
+**A) PNGs intercambiables** — están en `frontend/public/`. Para cambiar una imagen basta con **reemplazar el archivo** con el mismo nombre. El componente React que la envuelve (bordes, sombras, overlays de texto) se mantiene intacto.
+
+**B) SVGs inline** — están directamente en el código TSX como funciones React. No dependen de archivos externos; si quieres cambiarlas hay que editar el código.
+
+---
+
+### Mapa completo de imágenes
+
+#### Home (`frontend/src/app/page.tsx`)
+
+| Slot visual | Archivo PNG | Componente React | Tamaño recomendado |
+|---|---|---|---|
+| Hero — bloque derecho grande | `frontend/public/premium_skyline.png` | `<PremiumHeroVisual>` en `HomeVisuals.tsx:721` | ≥ 1200×640 px, landscape |
+
+> **Nota:** El archivo actual pesa solo 20 KB — probablemente se ve pixelado. Sustituir por una imagen de mayor resolución con el mismo nombre.
+
+#### Home — SVGs inline (no son archivos)
+
+| Visual | Componente | Ubicación en código |
+|---|---|---|
+| Hero background (skyline con grid blueprint) | `HeroClimateArt` | `HomeVisuals.tsx:46` |
+| Árbol orgánico decorativo | `OrganicTree` | `HomeVisuals.tsx:645` |
+
+---
+
+#### Metodología (`frontend/src/app/metodologia/page.tsx`)
+
+Todos los diagramas son **SVG inline** — no hay archivos PNG en producción:
+
+| Sección | Componente SVG | Línea | Qué muestra |
+|---|---|---|---|
+| 02 — Pipeline | `PipelineDiagram()` | `metodologia/page.tsx:102` | 6 pasos del flujo de datos con conectores y etiquetas |
+| 03 — Función de coste | `CostFunctionViz()` | `metodologia/page.tsx:206` | Barras de penalización térmica por tipo |
+| 04 — Modelo de sombras | `ShadowModelDiagram()` | `metodologia/page.tsx:~310` | Edificio, proyección de sombra, franjas horarias |
+
+Para reemplazar un diagrama por una imagen real: cambiar `<PipelineDiagram />` por `<img src="/tu-imagen.png" ... />` y añadir el PNG a `frontend/public/`.
+
+---
+
+### Otros PNGs en `/public` (usados en versiones anteriores o no activos)
+
+| Archivo | Estado |
+|---|---|
+| `pipeline_diagram.png` | Reemplazado por SVG inline — no se usa |
+| `cost_function_diagram.png` | Reemplazado por SVG inline — no se usa |
+| `dashboard_premium.png` | Sin asignar — disponible para usar |
+| `hero_map.png` | Sin asignar — disponible para usar |
+| `routing_concept.png` | Sin asignar — disponible para usar |
+| `card_lugares_frescos.png` | Sin asignar — disponible para usar |
+| `card_radiacion.png` | Sin asignar — disponible para usar |
+| `card_consejo.png` | Sin asignar — disponible para usar |
+
+---
+
+### Flujo para añadir una imagen nueva
+
+1. Copia el archivo a `frontend/public/mi-imagen.png`
+2. En el componente destino usa `<img src="/mi-imagen.png" alt="..." className="..." />`
+3. O crea un wrapper en `HomeVisuals.tsx` siguiendo el patrón de `PremiumHeroVisual` (línea 721)
+
+---
+
+## 11. Future Roadmap / Hitos de Proyecto
 
 ### Evolución del Motor de Rutas Climáticas
 - **Integración de sombra dinámica:** posición solar con pvlib + modelo de alturas de edificios del vuelo LiDAR disponible en el Geoportal de Madrid + proyección de sombra por tramo y hora. 
