@@ -298,17 +298,17 @@ export default function Home() {
 
       {/* Secondary content — below the fold */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
-        <section className="section-shell mb-16 rounded-[32px] p-6 fade-in-up sm:p-8">
+        <section className="section-shell mb-16 rounded-2xl p-6 fade-in-up sm:p-8">
           <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Como funciona</p>
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-6">Una herramienta principal, tres pasos claros</h2>
           <div className="grid gap-4 md:grid-cols-3">
             {journeySteps.map((step) => {
               const Icon = step.icon;
               return (
-                <Card key={step.step} level={1} className="rounded-[24px] border border-[rgba(91,84,74,0.08)] p-5">
+                <Card key={step.step} level={1} className="rounded-xl border border-[rgba(91,84,74,0.08)] p-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-400)]">{step.step}</span>
-                    <span className={`flex h-10 w-10 items-center justify-center rounded-[14px] ${step.tone}`}>
+                    <span className={`flex h-10 w-10 items-center justify-center rounded-lg ${step.tone}`}>
                       <Icon className="h-4 w-4" />
                     </span>
                   </div>
@@ -321,7 +321,7 @@ export default function Home() {
         </section>
 
         <section className="mb-16 fade-in-up">
-          <div className="section-shell rounded-[32px] p-6 sm:p-8">
+          <div className="section-shell rounded-2xl p-6 sm:p-8">
             <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Por que es distinto</p>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)] lg:items-start">
               <div>
@@ -335,7 +335,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="rounded-[28px] border border-[var(--climate-green)]/20 bg-[var(--ds-white)] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.04)]">
+              <div className="rounded-xl border border-[var(--climate-green)]/20 bg-[var(--ds-white)] p-5 shadow-[0_18px_40px_rgba(36,53,65,0.04)]">
                 <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--climate-green)]">En una frase</p>
                 <p className="mt-3 text-[1.6rem] font-semibold leading-tight text-[var(--ds-black)]">Una capa climática encima del gesto más cotidiano: caminar.</p>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">No pide aprender un visor complejo. Pide elegir mejor un trayecto cuando el sol castiga.</p>
@@ -348,8 +348,8 @@ export default function Home() {
               {valuePillars.map((pillar) => {
                 const Icon = pillar.icon;
                 return (
-                  <Card key={pillar.title} level={1} className="rounded-[24px] border border-[rgba(91,84,74,0.08)] p-5">
-                    <span data-testid={pillar.testId} className={`mb-4 flex h-11 w-11 items-center justify-center rounded-[14px] ${pillar.tone}`}>
+                  <Card key={pillar.title} level={1} className="rounded-xl border border-[rgba(91,84,74,0.08)] p-5">
+                    <span data-testid={pillar.testId} className={`mb-4 flex h-11 w-11 items-center justify-center rounded-lg ${pillar.tone}`}>
                       <Icon className="h-4 w-4" />
                     </span>
                     <h3 className="text-sm font-bold text-[var(--ds-black)]">{pillar.title}</h3>
@@ -382,7 +382,7 @@ export default function Home() {
         </div>
 
         {/* Map and Detail Section */}
-        <section className="section-shell mb-24 rounded-[32px] p-5 fade-in-up sm:p-6">
+        <section className="section-shell mb-24 rounded-2xl p-5 fade-in-up sm:p-6">
           <div className="mb-6 flex flex-col gap-4 border-b border-[var(--ds-gray-100)] pb-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Mapa de intervencion</p>
@@ -628,7 +628,7 @@ export default function Home() {
         </div>
         </section>
 
-        <section className="section-shell mb-16 rounded-[32px] p-6 fade-in-up sm:p-8">
+        <section className="section-shell mb-16 rounded-2xl p-6 fade-in-up sm:p-8">
           <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Metodologia</p>
           <h2 className="sub-heading-large text-[var(--ds-black)] mb-4">Metodología</h2>
           <div className="max-w-3xl mb-6 text-[var(--ds-gray-600)] leading-relaxed">
@@ -654,7 +654,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="section-shell mb-24 rounded-[32px] p-6 fade-in-up sm:p-8">
+        <section className="section-shell mb-24 rounded-2xl p-6 fade-in-up sm:p-8">
           <div className="mb-8 grid gap-6 border-b border-[var(--ds-gray-100)] pb-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
             <div>
               <p className="editorial-kicker text-[var(--ds-gray-500)] mb-3">Trazabilidad publica</p>
@@ -662,19 +662,19 @@ export default function Home() {
               <p className="text-[var(--ds-gray-600)] mt-2">Los enlaces de esta sección abren la ficha oficial de cada fuente para consultar metadatos, licencia y opciones de descarga.</p>
               <p className="text-[var(--ds-gray-600)] mt-2">No existe un dataset municipal operativo de refugios climáticos oficiales; por eso la capa de sustitución usa bibliotecas, centros culturales y polideportivos con trazabilidad explícita.</p>
             </div>
-            <div className="rounded-[24px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.88)] p-5 shadow-[0_12px_28px_rgba(31,26,23,0.05)]">
+            <div className="rounded-xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.88)] p-5 shadow-[0_12px_28px_rgba(31,26,23,0.05)]">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-500)]">Criterio de publicación</p>
               <p className="mt-3 text-sm leading-relaxed text-[var(--ds-gray-600)]">Si una URL oficial pública estable no está verificada, la fuente se mantiene como referencia informativa sin enlace activo.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {sourceCards.map((src) => {
-            const cardClassName = `fade-in-up rounded-[24px] border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.8)] p-5 transition-all group block shadow-[0_12px_28px_rgba(31,26,23,0.05)] ${src.href ? "hover:-translate-y-[2px] hover:border-[var(--ds-gray-400)] hover:shadow-[0_20px_40px_rgba(31,26,23,0.09)]" : "opacity-90"}`;
+            const cardClassName = `fade-in-up rounded-xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.8)] p-5 transition-all group block shadow-[0_12px_28px_rgba(31,26,23,0.05)] ${src.href ? "hover:-translate-y-[2px] hover:border-[var(--ds-gray-400)] hover:shadow-[0_20px_40px_rgba(31,26,23,0.09)]" : "opacity-90"}`;
 
             const content = (
               <>
                 <div className="mb-4 flex items-start justify-between gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[14px]" style={{ background: `${src.color}12` }}>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg" style={{ background: `${src.color}12` }}>
                     <src.icon className="w-4.5 h-4.5" style={{ color: src.color }} />
                   </div>
                   <span className="rounded-full bg-[rgba(17,24,39,0.05)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ds-gray-500)]">
@@ -701,11 +701,11 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="mt-24 pb-12">
-          <div className="rounded-[28px] border border-[var(--ds-gray-100)] bg-[var(--ds-white)] p-6 shadow-[0_18px_42px_rgba(36,53,65,0.04)] sm:p-8">
+          <div className="rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-white)] p-6 shadow-[0_18px_42px_rgba(36,53,65,0.04)] sm:p-8">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[var(--ds-gray-50)] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[var(--ds-gray-100)]">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--ds-gray-50)] shadow-[0_10px_22px_rgba(33,48,43,0.08)] ring-1 ring-[var(--ds-gray-100)]">
                     <AlcalaLogo className="h-8 w-8" />
                   </span>
                   <div>

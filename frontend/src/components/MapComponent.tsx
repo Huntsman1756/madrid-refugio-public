@@ -314,7 +314,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
   };
 
   return (
-    <div className="relative z-0 h-full w-full overflow-hidden rounded-[26px] border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]">
+    <div className="relative z-0 h-full w-full overflow-hidden rounded-xl border border-[var(--ds-gray-100)] bg-[var(--ds-gray-50)]">
       {/* NO key prop — never unmount the map, controllers handle view changes */}
       <MapContainer
         center={[40.4168, -3.7038]}
@@ -387,7 +387,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
 
       {/* Map legend for vulnerability/shelter deficit */}
       {!routeResult && mergedData && showAreaLegend && (
-        <div className="absolute bottom-3 left-3 z-[1000] max-w-[190px] space-y-2 rounded-2xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.92)] px-3 py-3 text-xs shadow-[0_14px_28px_rgba(31,26,23,0.10)] backdrop-blur-sm">
+        <div className="absolute bottom-3 left-3 z-[1000] max-w-[190px] space-y-2 rounded-lg border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.92)] px-3 py-3 text-xs shadow-[0_14px_28px_rgba(31,26,23,0.10)] backdrop-blur-sm">
           <p className="font-bold text-[var(--ds-black)] mb-1">
             {viewMode === 'shelter_deficit' ? 'Acceso a refugios' : 'Vulnerabilidad climática'}
           </p>
@@ -416,7 +416,7 @@ const MapComponent = forwardRef<MapHandle, MapComponentProps>(function MapCompon
 
       {/* Map legend for routes */}
       {routeResult && (
-        <div className="absolute bottom-3 left-3 z-[1000] space-y-2 rounded-2xl border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.92)] px-3 py-3 text-xs shadow-[0_14px_28px_rgba(31,26,23,0.10)] backdrop-blur-sm">
+        <div className="absolute bottom-3 left-3 z-[1000] space-y-2 rounded-lg border border-[rgba(91,84,74,0.08)] bg-[rgba(255,253,250,0.92)] px-3 py-3 text-xs shadow-[0_14px_28px_rgba(31,26,23,0.10)] backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <ClimateRouteBadge className="h-5 w-9" />
             <span className="text-[var(--ds-black)] font-semibold">Ruta con alivio climático</span>

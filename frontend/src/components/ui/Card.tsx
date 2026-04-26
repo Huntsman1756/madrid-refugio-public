@@ -18,7 +18,7 @@ export function Card({ level = 2, children, className = '', ...props }: CardProp
 
   return (
     <div 
-      className={`bg-[var(--ds-white)] rounded-[20px] ${shadowClass} overflow-hidden ${className}`}
+      className={`bg-[var(--ds-white)] rounded-xl ${shadowClass} overflow-hidden ${className}`}
       {...props}
     >
       {children}
