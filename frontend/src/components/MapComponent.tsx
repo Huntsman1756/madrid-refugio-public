@@ -7,13 +7,7 @@ import 'leaflet.heat';
 import L from 'leaflet';
 import { ClimateRouteBadge, ClimateShelterIcon, OrganicTree, WaterFountainIcon } from './branding/HomeVisuals';
 
-// Fix Leaflet default icon paths (Next.js asset issue)
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+// All markers in this component use L.divIcon (inline SVG) — no CDN dependency.
 
 export interface MapHandle {
   flyToBarrio: (lat: number, lon: number) => void;
@@ -187,17 +181,27 @@ function FitDataController({ data, isActive }: { data: any, isActive: boolean })
 
 // ──────────────────────────────────────────────────────────────────────────
 
-const originIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
-});
+function createPinIcon(innerSvg: string, fillStyle: string, label: string) {
+  return L.divIcon({
+    html: `<svg aria-label="${label}" width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;filter:drop-shadow(0 3px 6px rgba(15,23,42,0.28))"><path d="M14 1.5C7.6 1.5 2.5 6.6 2.5 13c0 8.8 11.5 21 11.5 21S25.5 21.8 25.5 13C25.5 6.6 20.4 1.5 14 1.5z" style="fill:${fillStyle}" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>${innerSvg}</svg>`,
+    className: '',
+    iconSize: [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor: [0, -38],
+  });
+}
 
-const destIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
-});
+const originIcon = createPinIcon(
+  '<circle cx="14" cy="13" r="4.5" fill="white" opacity="0.9"/>',
+  'var(--ds-black)',
+  'Origen'
+);
+
+const destIcon = createPinIcon(
+  '<path d="M9.5 13.5l3 3 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  'var(--climate-green)',
+  'Destino'
+);
 
 function createResourceIcon(svg: string, background: string, border: string) {
   return L.divIcon({
