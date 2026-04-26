@@ -244,25 +244,17 @@ export default function Home() {
               <p className="fade-in-up mb-0 max-w-4xl text-base font-semibold leading-[1.65] text-[var(--ds-gray-500)] sm:text-lg">
                 Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
               </p>
-              <div className="fade-in-up mt-6 flex flex-wrap gap-3 text-sm font-semibold text-[var(--ds-gray-600)]">
+              <div className="fade-in-up mt-10 flex flex-wrap gap-4 text-[11px] font-bold uppercase tracking-wider text-[var(--ds-gray-500)]">
                 <span className="hero-chip">
-                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[var(--climate-green)]" aria-hidden="true">
-                    <path d="M8 1.5a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 0 0-4-4Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M5 5.5a3 3 0 0 1 6 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
-                  </svg>
+                  <div className="w-2 h-2 rounded-full bg-[var(--climate-cyan)] opacity-60"></div>
                   Sombra urbana real
                 </span>
                 <span className="hero-chip">
-                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[var(--climate-green)]" aria-hidden="true">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <div className="w-2 h-2 rounded-full bg-[var(--climate-terracotta)] opacity-60"></div>
                   Comparación inmediata
                 </span>
                 <span className="hero-chip">
-                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-[var(--climate-green)]" aria-hidden="true">
-                    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
-                  </svg>
+                  <div className="w-2 h-2 rounded-full bg-[var(--climate-cyan)] opacity-60"></div>
                   Recursos climáticos en ruta
                 </span>
               </div>

@@ -656,13 +656,13 @@ export function RouteAdviceVisual({ title, testId = "route-advice-visual", class
 
 export function PremiumHeroVisual({ className, ...props }: any) {
   return (
-    <div className={`relative overflow-hidden rounded-[20px] shadow-xl ${className}`} {...props}>
+    <div className={`relative overflow-hidden rounded-[24px] shadow-2xl ring-1 ring-black/5 bg-[var(--ds-gray-50)] ${className}`} {...props}>
       <img 
         src="/dashboard_premium.png" 
         alt="Madrid Refugio Premium Dashboard" 
-        className="w-full h-full object-cover"
+        className="w-full h-auto object-contain scale-[1.02] transition-transform duration-700 hover:scale-100"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none"></div>
     </div>
   );
 }
