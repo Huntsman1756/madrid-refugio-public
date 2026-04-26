@@ -11,7 +11,7 @@ export function Card({ level = 2, children, className = '', ...props }: CardProp
     0: "",
     1: "shadow-[var(--shadow-border)]", // Just the ring
     2: "shadow-[var(--shadow-card-subtle)]", // Ring + minimal lift
-    3: "shadow-[var(--shadow-card)]", // Featured cards with inner highlight
+    3: "shadow-[var(--shadow-card-premium)]", // Featured cards with inner highlight
   };
 
   const shadowClass = shadowLevels[level] || shadowLevels[2];

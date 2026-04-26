@@ -119,6 +119,10 @@ export function HeroClimateArt({ className, testId = "hero-climate-art", ...prop
   return (
     <svg viewBox="0 0 680 232" fill="none" preserveAspectRatio="xMidYMid meet" data-testid={testId} className={className} {...props}>
       <defs>
+        {/* Blueprint grid pattern */}
+        <pattern id="bp-grid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--climate-cyan)" strokeWidth="0.4" />
+        </pattern>
         {/* Sky: warm amber near sun → cool blue-white horizon */}
         <linearGradient id="hero-sky" x1="1" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#fef0e0" />
@@ -316,6 +320,66 @@ export function HeroClimateArt({ className, testId = "hero-climate-art", ...prop
         <circle cx="448" cy="22" r="8" />
         <rect x="422" y="18" width="26" height="12" rx="6" />
       </g>
+
+      {/* ── Blueprint overlay ────────────────────────────────────────── */}
+      {/* Grid wash */}
+      <rect width="680" height="232" fill="url(#bp-grid)" opacity="0.055" />
+
+      {/* Corner registration marks — top-left, top-right, bottom-left, bottom-right */}
+      <g stroke="var(--climate-terracotta)" strokeWidth="0.7" opacity="0.22" fill="none">
+        {/* top-left */}
+        <line x1="2" y1="8" x2="14" y2="8" />
+        <line x1="8" y1="2" x2="8" y2="14" />
+        <circle cx="8" cy="8" r="3.5" />
+        {/* top-right */}
+        <line x1="666" y1="8" x2="678" y2="8" />
+        <line x1="672" y1="2" x2="672" y2="14" />
+        <circle cx="672" cy="8" r="3.5" />
+        {/* bottom-left */}
+        <line x1="2" y1="224" x2="14" y2="224" />
+        <line x1="8" y1="218" x2="8" y2="230" />
+        <circle cx="8" cy="224" r="3.5" />
+        {/* bottom-right */}
+        <line x1="666" y1="224" x2="678" y2="224" />
+        <line x1="672" y1="218" x2="672" y2="230" />
+        <circle cx="672" cy="224" r="3.5" />
+      </g>
+
+      {/* Dimension annotation — tallest building (x=218 w=50 h=102, top=98 bottom=200) */}
+      <g stroke="var(--climate-cyan)" strokeWidth="0.6" opacity="0.28" fill="none">
+        {/* vertical dimension line */}
+        <line x1="212" y1="98" x2="212" y2="200" strokeDasharray="2 2" />
+        {/* tick top */}
+        <line x1="209" y1="98" x2="215" y2="98" />
+        {/* tick bottom */}
+        <line x1="209" y1="200" x2="215" y2="200" />
+      </g>
+      <text
+        x="204"
+        y="152"
+        fontSize="6"
+        fontFamily="var(--font-geist-mono, monospace)"
+        fill="var(--climate-cyan)"
+        opacity="0.38"
+        textAnchor="middle"
+        transform="rotate(-90, 204, 152)"
+        letterSpacing="0.5"
+      >
+        ~34 m
+      </text>
+
+      {/* Coordinate annotation — upper-left sky */}
+      <text
+        x="20"
+        y="14"
+        fontSize="5.5"
+        fontFamily="var(--font-geist-mono, monospace)"
+        fill="var(--climate-terracotta)"
+        opacity="0.32"
+        letterSpacing="0.6"
+      >
+        40.4°N / 3.7°W
+      </text>
     </svg>
   );
 }

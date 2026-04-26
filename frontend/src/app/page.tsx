@@ -257,7 +257,7 @@ export default function Home() {
               </div>
 
               {/* ── Panoramic Stats Strip ─────────────────────────────────── */}
-              <div className="fade-in-up mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 pt-10 border-t border-black/5">
+              <div className="fade-in-up mt-12 grid grid-cols-2 md:grid-cols-4 gap-10 pt-12 border-t border-black/5">
                 {[
                   { end: 662173, label: "polígonos LiDAR", icon: Building2 },
                   { end: 661192, label: "árboles catalogados", icon: TreePine },
@@ -269,7 +269,7 @@ export default function Home() {
                       <stat.icon className="h-3 w-3" />
                       <span className="text-[8px] font-bold uppercase tracking-widest">{stat.label}</span>
                     </div>
-                    <span className="font-serif italic text-3xl font-light text-[var(--ds-black)] tabular-nums leading-none">
+                    <span className="stat-number text-[3.25rem] text-[var(--ds-black)]">
                       <CountUp end={stat.end} />
                     </span>
                   </div>
