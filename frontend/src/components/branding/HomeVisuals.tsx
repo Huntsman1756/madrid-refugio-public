@@ -656,47 +656,53 @@ export function RouteAdviceVisual({ title, testId = "route-advice-visual", class
 
 export function PremiumHeroVisual({ className, ...props }: any) {
   return (
-    <div className={`relative overflow-hidden rounded-[24px] shadow-2xl ring-1 ring-black/5 bg-[var(--ds-gray-50)] ${className}`} {...props}>
+    <div className={`relative overflow-hidden rounded-[32px] shadow-2xl bg-white/40 border border-black/5 ${className}`} {...props}>
       <img 
-        src="/dashboard_premium.png" 
-        alt="Madrid Refugio Premium Dashboard" 
-        className="w-full h-auto object-contain scale-[1.02] transition-transform duration-700 hover:scale-100"
+        src="/premium_skyline.png" 
+        alt="Madrid Skyline Reference Style" 
+        className="w-full h-full object-cover opacity-90"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none"></div>
+      <div className="absolute top-4 left-6 text-[8px] font-bold uppercase tracking-[0.3em] text-gray-400">Atmósfera Urbana</div>
     </div>
   );
 }
 
 export function PremiumCoolPlacesVisual({ className, ...props }: any) {
   return (
-    <img 
-      src="/card_lugares_frescos.png" 
-      alt="Lugares Frescos" 
-      className={`rounded-xl shadow-md ${className}`} 
-      {...props} 
-    />
+    <div className="relative h-28 w-28">
+      <img 
+        src="/card_lugares_frescos.png" 
+        alt="Lugares Frescos" 
+        className={`rounded-2xl shadow-sm object-cover ${className}`} 
+        {...props} 
+      />
+    </div>
   );
 }
 
 export function PremiumHeatmapVisual({ className, ...props }: any) {
   return (
-    <img 
-      src="/card_radiacion.png" 
-      alt="Mapa de Calor" 
-      className={`rounded-xl shadow-md ${className}`} 
-      {...props} 
-    />
+    <div className="relative h-28 w-28 overflow-hidden rounded-2xl">
+      <img 
+        src="/card_radiacion.png" 
+        alt="Mapa de Calor" 
+        className={`w-full h-full object-cover ${className}`} 
+        {...props} 
+      />
+    </div>
   );
 }
 
 export function PremiumAdviceVisual({ className, ...props }: any) {
   return (
-    <img 
-      src="/card_consejo.png" 
-      alt="Consejo del día" 
-      className={`rounded-xl shadow-md ${className}`} 
-      {...props} 
-    />
+    <div className="relative h-28 w-44">
+      <img 
+        src="/card_consejo.png" 
+        alt="Consejo del día" 
+        className={`rounded-2xl shadow-sm object-cover ${className}`} 
+        {...props} 
+      />
+    </div>
   );
 }
 

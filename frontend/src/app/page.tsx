@@ -229,62 +229,57 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero — focused on search, not exposition */}
+      {/* Hero — Panoramic reference style */}
       <div className="max-w-[1760px] mx-auto px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-10">
-        <section className="hero-atmosphere hero-grid hero-frame px-4 py-5 sm:px-5 sm:py-6 lg:px-6 lg:py-7">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,650px)] lg:items-center xl:gap-14">
-            <div id="routing" className="text-left">
-              <div className="fade-in-up mb-5 inline-flex items-center gap-2 rounded border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--climate-green)] shadow-[0_14px_28px_rgba(33,48,43,0.04)]">
-                <OrganicTree className="h-5 w-4" />
+        <section className="hero-atmosphere hero-grid hero-frame px-4 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-12">
+          <div className="grid gap-12 lg:grid-cols-[1fr_auto] lg:items-center xl:gap-20">
+            <div id="routing" className="text-left space-y-8">
+              <div className="fade-in-up inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--ds-gray-500)]">
+                <OrganicTree className="h-4 w-4" />
                 Madrid caminado con criterio climático
               </div>
-              <h1 className="hero-title-serif fade-in-up mb-4 max-w-5xl text-[clamp(3rem,4.3vw,4.5rem)] text-[var(--ds-black)]">
-                Camina por Madrid con menos calor
+              <h1 className="hero-title-serif fade-in-up max-w-5xl text-[clamp(3.5rem,5.5vw,6rem)] text-[var(--ds-black)]">
+                Camina por Madrid <br/>con menos calor
               </h1>
-              <p className="fade-in-up mb-0 max-w-4xl text-base font-semibold leading-[1.65] text-[var(--ds-gray-500)] sm:text-lg">
-                Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y refugios climáticos.
+              <p className="fade-in-up max-w-2xl text-lg font-medium leading-relaxed text-[var(--ds-gray-500)]">
+                Calcula tu ruta a pie evitando el sol directo. Comparamos el trayecto directo con una alternativa más fresca usando sombra real de edificios, arbolado urbano y fuentes.
               </p>
-              <div className="fade-in-up mt-10 flex flex-wrap gap-4 text-[11px] font-bold uppercase tracking-wider text-[var(--ds-gray-500)]">
-                <span className="hero-chip">
-                  <div className="w-2 h-2 rounded-full bg-[var(--climate-cyan)] opacity-60"></div>
+              
+              <div className="fade-in-up flex flex-wrap gap-4">
+                <span className="px-6 py-3 bg-[var(--forest-deep)] text-white rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg transition-transform hover:-translate-y-0.5">
+                  <Navigation className="w-3 h-3" />
                   Sombra urbana real
                 </span>
-                <span className="hero-chip">
-                  <div className="w-2 h-2 rounded-full bg-[var(--climate-terracotta)] opacity-60"></div>
+                <span className="px-6 py-3 bg-white/50 border border-black/5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-white transition-all shadow-sm">
+                  <Navigation className="w-3 h-3 rotate-45" />
                   Comparación inmediata
                 </span>
-                <span className="hero-chip">
-                  <div className="w-2 h-2 rounded-full bg-[var(--climate-cyan)] opacity-60"></div>
-                  Recursos climáticos en ruta
-                </span>
+              </div>
+
+              {/* ── Panoramic Stats Strip ─────────────────────────────────── */}
+              <div className="fade-in-up mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 pt-10 border-t border-black/5">
+                {[
+                  { end: 662173, label: "polígonos LiDAR", icon: Building2 },
+                  { end: 661192, label: "árboles catalogados", icon: TreePine },
+                  { end: 430000, label: "mayores de 65", icon: Users },
+                  { end: 13, label: "franjas horarias", icon: Clock3 },
+                ].map((stat) => (
+                  <div key={stat.label} className="space-y-1">
+                    <div className="flex items-center gap-2 mb-1 opacity-40">
+                      <stat.icon className="h-3 w-3" />
+                      <span className="text-[8px] font-bold uppercase tracking-widest">{stat.label}</span>
+                    </div>
+                    <span className="font-serif italic text-3xl font-light text-[var(--ds-black)] tabular-nums leading-none">
+                      <CountUp end={stat.end} />
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="hero-art-shell hero-art-stage fade-in-up hidden lg:block" aria-hidden="true">
-              <PremiumHeroVisual className="h-full w-full" />
+            <div className="hero-art-shell fade-in-up hidden lg:block w-[600px]" aria-hidden="true">
+              <PremiumHeroVisual className="h-[320px] w-full" />
             </div>
-          </div>
-
-          {/* ── Epic stats strip ─────────────────────────────────── */}
-          <div className="fade-in-up mt-6 flex flex-wrap items-center gap-x-12 gap-y-4 border-t border-[var(--ds-gray-100)] pt-6">
-            {[
-              { end: 662173, label: "polígonos LiDAR", icon: Building2 },
-              { end: 661192, label: "árboles catalogados", icon: TreePine },
-              { end: 430000, label: "mayores de 65", icon: Users },
-              { end: 13, label: "franjas horarias", icon: Clock3 },
-            ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--ds-gray-50)] text-[var(--climate-green)] shadow-sm ring-1 ring-black/5">
-                  <stat.icon className="h-5 w-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-mono text-[1.4rem] font-bold leading-none tracking-tight text-[var(--ds-black)] tabular-nums">
-                    <CountUp end={stat.end} />
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--ds-gray-500)]">{stat.label}</span>
-                </div>
-              </div>
-            ))}
           </div>
 
           <div className="fade-in-up mt-5">
