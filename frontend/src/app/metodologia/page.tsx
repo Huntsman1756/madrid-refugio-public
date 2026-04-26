@@ -72,30 +72,41 @@ const metrics = [
   { value: "6", label: "Datasets abiertos", sub: "Catálogo Madrid + OSM" },
   { value: "64,1 %", label: "Barrios sin refugio", sub: "Radio caminable 300 m" },
   { value: "~200 k", label: "Edificios procesados", sub: "Volumetría 3D" },
-  { value: "48", label: "Franjas horarias", sub: "Simulación diaria" },
+  { value: "30 min", label: "Resolución temporal", sub: "Modelo de sombras · día completo" },
   { value: "<800 ms", label: "Tiempo de respuesta", sub: "Ruta óptima extremo a extremo" },
   { value: "5 m", label: "Buffer dosel vegetal", sub: "Sombra biológica" },
 ];
 
-const backendStack = [
-  { name: "Python", version: "3.11", role: "Core logic" },
-  { name: "FastAPI", version: "0.110", role: "API RESTful" },
-  { name: "GeoPandas", version: "0.14", role: "Operaciones vectoriales" },
-  { name: "Shapely", version: "2.0", role: "Geometría espacial" },
-  { name: "OSMnx", version: "1.9", role: "Descarga y topología OSM" },
-  { name: "NetworkX", version: "3.3", role: "Algoritmo de Dijkstra" },
-  { name: "pvlib", version: "0.10", role: "Posición solar (astro-geometría)" },
-  { name: "pybdshadow", version: "0.4", role: "Sombras de edificios 3D" },
-];
-
-const frontendStack = [
-  { name: "Next.js", version: "15", role: "App Router + SSR" },
-  { name: "React", version: "19", role: "UI framework" },
-  { name: "TypeScript", version: "5.4", role: "Tipado estricto" },
-  { name: "Tailwind CSS", version: "v4", role: "Sistema de diseño" },
-  { name: "Leaflet", version: "1.9", role: "Cartografía 2D" },
-  { name: "React-Leaflet", version: "4.2", role: "Integración React" },
-  { name: "Recharts", version: "2.12", role: "Data-viz de apoyo" },
+// Capability blocks — plain language for general public; libs listed discreetly for jury
+const capabilityBlocks = [
+  {
+    icon: "🗺️",
+    color: "var(--climate-cyan)",
+    title: "Análisis territorial",
+    desc: "Procesa los datos oficiales de Madrid: 200.000 edificios con su altura real, 200.000 árboles y 90.000 tramos de calle. Todo el análisis parte exclusivamente de fuentes abiertas del Ayuntamiento.",
+    libs: ["Python · GeoPandas · Shapely"],
+  },
+  {
+    icon: "☀️",
+    color: "var(--climate-terracotta)",
+    title: "Modelo de sombras solar",
+    desc: "Calcula cada 30 minutos qué partes de cada calle están bajo sombra de edificios, usando la posición real del sol sobre Madrid. La cobertura de árboles se añade como una capa independiente.",
+    libs: ["pvlib · pybdshadow"],
+  },
+  {
+    icon: "🔀",
+    color: "var(--climate-green)",
+    title: "Motor de rutas térmicas",
+    desc: "Construye un mapa de red con todos los cruces y calles de Madrid. Para cada consulta calcula en menos de 800 ms la ruta que minimiza la exposición al sol, priorizando sombra, agua y equipamientos frescos.",
+    libs: ["OSMnx · NetworkX · FastAPI"],
+  },
+  {
+    icon: "🖥️",
+    color: "var(--ds-gray-500)",
+    title: "Visor web interactivo",
+    desc: "Muestra la ruta y los recursos climáticos del recorrido sobre el mapa de Madrid. No requiere instalar nada: funciona directamente en el navegador, en móvil y en escritorio.",
+    libs: ["Next.js · React · Leaflet"],
+  },
 ];
 
 // ─── Inline SVG: Data Pipeline ─────────────────────────────────────────────────
@@ -753,44 +764,39 @@ export default function MetodologiaPage() {
           <section className="section-shell rounded-[32px] p-8 sm:p-10">
             <div className="mb-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ds-gray-400)] mb-2">
-                06 — Stack Tecnológico
+                06 — Cómo funciona el sistema
               </p>
               <h2 className="font-display text-4xl italic text-[var(--ds-black)] sm:text-5xl">
                 Tecnología de código abierto
               </h2>
               <p className="mt-4 max-w-2xl text-[1.02rem] leading-relaxed text-[var(--ds-gray-600)]">
-                Toda la pila tecnológica es de código abierto. El repositorio es público y
-                reproducible con un único comando de instalación.
+                Cuatro módulos independientes, todos de código abierto, trabajan juntos para
+                transformar datos municipales en una recomendación de ruta en menos de un segundo.
               </p>
             </div>
 
-            <div className="grid gap-10 md:grid-cols-2">
-              {[
-                { title: "Backend & Geoprocesamiento", icon: <Cpu className="h-5 w-5 text-[var(--climate-green)]" />, color: "var(--climate-green)", items: backendStack },
-                { title: "Frontend & Visualización", icon: <Map className="h-5 w-5 text-[var(--climate-cyan)]" />, color: "var(--climate-cyan)", items: frontendStack },
-              ].map(({ title, icon, color, items }) => (
-                <div key={title}>
-                  <div className="flex items-center gap-2.5 mb-5">
-                    {icon}
-                    <h3 className="text-[1.1rem] font-bold text-[var(--ds-black)]">{title}</h3>
+            <div className="grid gap-5 sm:grid-cols-2">
+              {capabilityBlocks.map(({ icon, color, title, desc, libs }) => (
+                <div
+                  key={title}
+                  className="rounded-[20px] border border-[var(--ds-gray-100)] bg-[var(--ds-white)] p-6 flex flex-col gap-4 hover:border-[var(--ds-gray-200)] transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl leading-none">{icon}</span>
+                    <h3 className="text-[1.05rem] font-bold text-[var(--ds-black)]">{title}</h3>
                   </div>
-                  <div className="space-y-2">
-                    {items.map(({ name, version, role }) => (
-                      <div key={name}
-                        className="flex items-center gap-3 rounded-[14px] border border-[var(--ds-gray-100)] bg-[var(--ds-white)] px-4 py-3 hover:border-[var(--ds-gray-200)] transition-colors">
-                        <span className="font-semibold text-[0.92rem] text-[var(--ds-black)] min-w-[120px]">
-                          {name}
-                        </span>
-                        <span
-                          className="rounded-[7px] px-2 py-0.5 text-[0.68rem] font-mono font-bold border whitespace-nowrap"
-                          style={{ color, borderColor: `${color}40`, backgroundColor: `${color}10` }}
-                        >
-                          v{version}
-                        </span>
-                        <span className="text-[0.82rem] text-[var(--ds-gray-500)] leading-tight">
-                          {role}
-                        </span>
-                      </div>
+                  <p className="text-[0.9rem] leading-relaxed text-[var(--ds-gray-600)] flex-1">
+                    {desc}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 pt-1 border-t border-[var(--ds-gray-100)]">
+                    {libs.map((lib) => (
+                      <span
+                        key={lib}
+                        className="rounded-[7px] px-2 py-0.5 text-[0.65rem] font-mono font-semibold border"
+                        style={{ color, borderColor: `${color}40`, backgroundColor: `${color}10` }}
+                      >
+                        {lib}
+                      </span>
                     ))}
                   </div>
                 </div>
