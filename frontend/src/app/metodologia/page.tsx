@@ -49,9 +49,18 @@ export default function MetodologiaPage() {
         <section className="mb-16">
           <h2 className="font-display font-semibold text-2xl text-[var(--ds-black)] mb-6 pb-2 border-b border-[var(--ds-gray-200)]">1. Resumen Ejecutivo</h2>
           <div className="prose prose-gray max-w-none font-sans text-[var(--ds-gray-700)] leading-relaxed">
-            <p className="mb-4 text-lg">
+            <p className="mb-8 text-lg">
               <strong className="text-[var(--ds-black)]">Madrid Refugio</strong> es una herramienta de simulación climática urbana que calcula rutas peatonales optimizadas para el confort térmico en el momento preciso de la consulta.
             </p>
+            
+            <div className="mb-12">
+              <img 
+                src="/pipeline_diagram.png" 
+                alt="Diagrama del flujo de procesamiento de datos: Desde LiDAR hasta la ruta optimizada" 
+                className="w-full rounded-2xl shadow-lg border border-[var(--ds-gray-200)]"
+              />
+            </div>
+
             <p className="mb-4">
               El proyecto responde a una brecha crítica de infraestructura: el <strong className="text-[var(--ds-black)]">64,1% de los barrios de Madrid</strong> no dispone de un refugio climático operativo en un radio caminable de 300 metros. Frente a este déficit, el sistema combina datos abiertos municipales con topología de red para ofrecer navegación que prioriza sombra, fuentes de agua potable y acceso a equipamientos climatizados.
             </p>
@@ -110,9 +119,17 @@ export default function MetodologiaPage() {
             </ul>
             
             <h4 className="font-semibold text-[var(--ds-black)] mt-8 mb-3">Penalización Térmica</h4>
-            <p className="mb-4">
+            <p className="mb-8">
               El multiplicador térmico se compone de tres variables invertidas (mayor valor = menor penalización):
             </p>
+
+            <div className="mb-12">
+              <img 
+                src="/cost_function_diagram.png" 
+                alt="Visualización de la función de penalización térmica: Sombra de edificios vs Exposición solar" 
+                className="w-full rounded-2xl shadow-lg border border-[var(--ds-gray-200)]"
+              />
+            </div>
             
             <div className="bg-[var(--ds-gray-50)] border border-[var(--ds-gray-200)] rounded-lg p-5 font-mono text-sm overflow-x-auto mb-6 text-[var(--ds-gray-800)] shadow-inner">
               <pre className="leading-relaxed whitespace-pre">

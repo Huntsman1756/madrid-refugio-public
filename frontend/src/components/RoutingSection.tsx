@@ -22,9 +22,9 @@ import {
   ClimateRouteBadge,
   ClimateShelterIcon,
   OrganicTree,
-  RouteAdviceVisual,
-  RouteHeatVisual,
-  RouteResourceVisual,
+  PremiumAdviceVisual,
+  PremiumCoolPlacesVisual,
+  PremiumHeatmapVisual,
   WaterFountainIcon,
 } from "./branding/HomeVisuals";
 
@@ -727,7 +727,7 @@ ${gpxPoints}
                     Ver refugios <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
-                <RouteResourceVisual
+                <PremiumCoolPlacesVisual
                   className="h-28 w-28 flex-shrink-0"
                   aria-hidden="true"
                 />
@@ -758,7 +758,7 @@ ${gpxPoints}
                     Ver mapa <ArrowRight className="h-4 w-4" />
                   </p>
                 </div>
-                <RouteHeatVisual
+                <PremiumHeatmapVisual
                   className="h-28 w-28 flex-shrink-0"
                   aria-hidden="true"
                 />
@@ -791,7 +791,7 @@ ${gpxPoints}
                     Ver más consejos <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
-                <RouteAdviceVisual
+                <PremiumAdviceVisual
                   className="h-28 w-28 flex-shrink-0"
                   aria-hidden="true"
                 />

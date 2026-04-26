@@ -652,6 +652,54 @@ export function RouteAdviceVisual({ title, testId = "route-advice-visual", class
   );
 }
 
+// ─── Premium Visuals (PNG based) ─────────────────────────────────────────────
+
+export function PremiumHeroVisual({ className, ...props }: any) {
+  return (
+    <div className={`relative overflow-hidden rounded-[20px] shadow-xl ${className}`} {...props}>
+      <img 
+        src="/dashboard_premium.png" 
+        alt="Madrid Refugio Premium Dashboard" 
+        className="w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+    </div>
+  );
+}
+
+export function PremiumCoolPlacesVisual({ className, ...props }: any) {
+  return (
+    <img 
+      src="/card_lugares_frescos.png" 
+      alt="Lugares Frescos" 
+      className={`rounded-xl shadow-md ${className}`} 
+      {...props} 
+    />
+  );
+}
+
+export function PremiumHeatmapVisual({ className, ...props }: any) {
+  return (
+    <img 
+      src="/card_radiacion.png" 
+      alt="Mapa de Calor" 
+      className={`rounded-xl shadow-md ${className}`} 
+      {...props} 
+    />
+  );
+}
+
+export function PremiumAdviceVisual({ className, ...props }: any) {
+  return (
+    <img 
+      src="/card_consejo.png" 
+      alt="Consejo del día" 
+      className={`rounded-xl shadow-md ${className}`} 
+      {...props} 
+    />
+  );
+}
+
 // ─── HonestComparisonIcon ────────────────────────────────────────────────────
 export function HonestComparisonIcon({ title = "Comparación", testId, className, ...props }: SvgProps) {
   return (

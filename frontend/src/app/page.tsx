@@ -5,9 +5,9 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Database, Droplets, Building2, Users, Wind, MapPin, Landmark } from "lucide-react";
+import { Database, Droplets, Building2, Users, Wind, MapPin, Landmark, Clock3 } from "lucide-react";
 import { ThermometerSun, TreePine, Navigation } from "@/components/ui/Icons";
-import { AlcalaLogo, HeroClimateArt, OrganicTree } from "@/components/branding/HomeVisuals";
+import { AlcalaLogo, PremiumHeroVisual, OrganicTree } from "@/components/branding/HomeVisuals";
 import { RoutingSection } from "@/components/RoutingSection";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { getTop10PanelState } from "./home-data-state";
@@ -269,23 +269,28 @@ export default function Home() {
             </div>
 
             <div className="hero-art-shell hero-art-stage fade-in-up hidden lg:block" aria-hidden="true">
-              <HeroClimateArt className="h-full w-full" />
+              <PremiumHeroVisual className="h-full w-full" />
             </div>
           </div>
 
           {/* ── Epic stats strip ─────────────────────────────────── */}
-          <div className="fade-in-up mt-6 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-[var(--ds-gray-100)] pt-5">
+          <div className="fade-in-up mt-6 flex flex-wrap items-center gap-x-12 gap-y-4 border-t border-[var(--ds-gray-100)] pt-6">
             {[
-              { end: 662173, label: "polígonos LiDAR" },
-              { end: 661192, label: "árboles catalogados" },
-              { end: 430000, label: "mayores de 65" },
-              { end: 13, label: "franjas horarias" },
+              { end: 662173, label: "polígonos LiDAR", icon: Building2 },
+              { end: 661192, label: "árboles catalogados", icon: TreePine },
+              { end: 430000, label: "mayores de 65", icon: Users },
+              { end: 13, label: "franjas horarias", icon: Clock3 },
             ].map((stat) => (
-              <div key={stat.label} className="flex items-baseline gap-2">
-                <span className="font-mono text-[1.35rem] font-bold leading-none tracking-tight text-[var(--ds-black)] tabular-nums">
-                  <CountUp end={stat.end} />
-                </span>
-                <span className="text-xs font-semibold text-[var(--ds-gray-500)]">{stat.label}</span>
+              <div key={stat.label} className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--ds-gray-50)] text-[var(--climate-green)] shadow-sm ring-1 ring-black/5">
+                  <stat.icon className="h-5 w-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-mono text-[1.4rem] font-bold leading-none tracking-tight text-[var(--ds-black)] tabular-nums">
+                    <CountUp end={stat.end} />
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--ds-gray-500)]">{stat.label}</span>
+                </div>
               </div>
             ))}
           </div>
