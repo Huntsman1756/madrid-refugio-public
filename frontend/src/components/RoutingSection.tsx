@@ -1,164 +1,848 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { Navigation, ArrowRight, Clock3, ThermometerSun } from "lucide-react";
+import { Play, Pause, ArrowRight } from "lucide-react";
 import {
+  AlertTriangle,
+  Download,
+  MapPin,
+  Clock3,
+  ThermometerSun,
+} from "@/components/ui/Icons";
+import {
+  SearchBar,
+  type ResolvedLocation,
+  type SearchBarState,
+} from "./SearchBar";
+import { getApiBaseUrl } from "@/lib/search-source";
+import {
+  ClimateRouteBadge,
+  ClimateShelterIcon,
+  OrganicTree,
   PremiumAdviceVisual,
   PremiumCoolPlacesVisual,
   PremiumHeatmapVisual,
+  WaterFountainIcon,
 } from "./branding/HomeVisuals";
-import { AddressAutocompleteField } from "./AddressAutocompleteField";
 
+// Dynamically import MapComponent to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), {
   ssr: false,
-  loading: () => <div className="h-full w-full bg-[var(--sand-50)] animate-pulse rounded-[32px]" />,
+  loading: () => (
+    <div className="w-full h-full bg-[var(--ds-white)] border border-[var(--ds-gray-200)] flex flex-col items-center justify-center text-[var(--ds-gray-500)] text-sm">
+      <div className="w-6 h-6 border-2 border-[var(--ds-black)] border-t-transparent rounded animate-spin mb-3"></div>
+      <p className="font-medium tracking-wide uppercase text-[11px]">Cargando cartografía...</p>
+    </div>
+  ),
 });
 
-const EMPTY_GEOJSON = { type: "FeatureCollection", features: [] };
+const STORAGE_KEY = "madrid-refugio-preference";
+const RESULT_PREFERENCE_OPTIONS = [
+  {
+    value: 0.0,
+    label: "Directa",
+    actionLabel: "Mostrar ruta directa",
+    detail: "La más rápida",
+  },
+  {
+    value: 0.5,
+    label: "Equilibrada",
+    actionLabel: "Mostrar ruta equilibrada",
+    detail: "Buen balance",
+  },
+  {
+    value: 1.0,
+    label: "Más sombra",
+    actionLabel: "Mostrar ruta con más sombra",
+    detail: "Mayor protección",
+  },
+] as const;
+const OFFICIAL_SHELTER_LIST_URL =
+  "https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Calormad/";
+const OFFICIAL_HEAT_GUIDANCE_URL =
+  "https://www.comunidad.madrid/servicios/salud/calor-salud";
 
-export function RoutingSection() {
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
-  const [routeResult, setRouteResult] = useState<any>(null);
+function normalizePreference(val: number): number {
+  const options = [0, 0.5, 1];
+  return options.reduce(
+    (closest, option) =>
+      Math.abs(option - val) < Math.abs(closest - val) ? option : closest,
+    0.5,
+  );
+}
+
+function loadSavedPreference(): number | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const val = localStorage.getItem(STORAGE_KEY);
+    if (val !== null) return normalizePreference(parseFloat(val));
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function savePreference(val: number) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, String(normalizePreference(val)));
+  } catch {
+    /* ignore */
+  }
+}
+
+interface RoutingSectionProps {
+  onRouteCalculated?: (result: any) => void;
+  autoDemo?: boolean;
+}
+
+const DEMO_ROUTE: SearchBarState = {
+  origin: {
+    label: "Plaza Mayor, Madrid",
+    kind: "place",
+    lat: 40.4155,
+    lon: -3.7074,
+  },
+  destination: {
+    label: "Museo del Prado, Madrid",
+    kind: "place",
+    lat: 40.4138,
+    lon: -3.6921,
+  },
+  hour: 14,
+  preference: 1,
+  useMyLocation: false,
+};
+
+export function RoutingSection({
+  onRouteCalculated,
+  autoDemo = false,
+}: RoutingSectionProps) {
+  const [origin, setOrigin] = useState<ResolvedLocation | null>(null);
+  const [destination, setDestination] = useState<ResolvedLocation | null>(null);
+  const [useMyLocation, setUseMyLocation] = useState(false);
+  const [hour, setHour] = useState(() => {
+    const now = new Date().getHours();
+    return Math.max(8, Math.min(20, now));
+  });
+  const [preference, setPreference] = useState(
+    () => loadSavedPreference() ?? 0.5,
+  );
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [routeResult, setRouteResult] = useState<any>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [demoLoaded, setDemoLoaded] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
-  const [originOptions] = useState<any[]>([]);
-  const [destinationOptions] = useState<any[]>([]);
+  const [animateResults, setAnimateResults] = useState(false);
+  const lastPlaybackHourRef = useRef<number | null>(null);
+  const autoDemoStartedRef = useRef(false);
 
-  const calculateRoute = async () => {
-    if (!origin || !destination) return;
+  const formatSunSaved = (minutes: number | null | undefined) =>
+    minutes == null ? "—" : `${minutes} min`;
+  const formatExtraEffort = (minutes: number | null | undefined) => {
+    if (minutes == null) return "—";
+    if (minutes === 0) return "0 min";
+    return `+${minutes} min`;
+  };
+  const comfortMinutes = routeResult
+    ? Math.max(1, Math.round(routeResult.metrics.comfort.length / 83.33))
+    : null;
+  const comfortLengthKm = routeResult
+    ? (routeResult.metrics.comfort.length / 1000).toFixed(1)
+    : null;
+  const shortestLengthKm = routeResult
+    ? (routeResult.metrics.shortest.length / 1000).toFixed(1)
+    : null;
+  const shortestShadeMeters = routeResult
+    ? routeResult.metrics.shortest.tree_shade +
+      routeResult.metrics.shortest.building_shade
+    : null;
+  const comfortShadeMeters = routeResult
+    ? routeResult.metrics.comfort.tree_shade +
+      routeResult.metrics.comfort.building_shade
+    : null;
+  const shadeCoverage =
+    routeResult && routeResult.metrics.comfort.length > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (comfortShadeMeters! / routeResult.metrics.comfort.length) * 100,
+          ),
+        )
+      : null;
+  const estimatedCooling = routeResult
+    ? Math.max(
+        1.2,
+        Math.min(
+          4.8,
+          (routeResult.metrics.human.sun_time_saved_min || 0) / 3.75,
+        ),
+      )
+        .toFixed(1)
+        .replace(".", ",")
+    : null;
+  const shadeMetersLabel =
+    comfortShadeMeters != null
+      ? comfortShadeMeters.toLocaleString("es-ES")
+      : "—";
+  const routeHourLabel = `Hoy a las ${String(hour).padStart(2, "0")}:00`;
+  const isLongRoute = routeResult
+    ? Number(comfortLengthKm) > 8 || (comfortMinutes ?? 0) > 90
+    : false;
+  const adviceText =
+    hour >= 17
+      ? "Haz la ultima parada en una plaza arbolada o refugio antes del tramo final: el asfalto retiene calor incluso al caer la tarde."
+      : hour >= 12
+        ? "Si sales en hora critica, reserva una pausa corta cada 10-15 minutos en sombra o junto a una fuente para bajar pulsaciones."
+        : "Aprovecha las primeras horas para llenar agua y cubrir los tramos mas abiertos antes de que suba la temperatura.";
+
+  const scrollToRouteMap = () => {
+    document
+      .getElementById("route-map")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  useEffect(() => {
+    if (!routeResult) return;
+
+    setAnimateResults(true);
+    const timer = window.setTimeout(() => setAnimateResults(false), 360);
+    return () => window.clearTimeout(timer);
+  }, [routeResult]);
+
+  useEffect(() => {
+    const savedPreference = loadSavedPreference();
+    if (savedPreference !== null) {
+      setPreference(savedPreference);
+    }
+    const now = new Date().getHours();
+    setHour(Math.max(8, Math.min(20, now)));
+  }, []);
+
+  // Time slider automation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setHour((prev) => (prev >= 20 ? 8 : prev + 1));
+      }, 2500);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  // Auto-calculate route when hour changes during playback
+  useEffect(() => {
+    if (!isPlaying) {
+      lastPlaybackHourRef.current = null;
+      return;
+    }
+
+    if (!hasSearched || !origin || !destination) {
+      return;
+    }
+
+    if (lastPlaybackHourRef.current === null) {
+      lastPlaybackHourRef.current = hour;
+      return;
+    }
+
+    if (lastPlaybackHourRef.current === hour) {
+      return;
+    }
+
+    lastPlaybackHourRef.current = hour;
+    doCalculate(origin, destination, hour, preference);
+  }, [hour, isPlaying, hasSearched, origin, destination, preference]);
+
+  const isHeatHour = hour >= 12 && hour <= 17;
+
+  const handleSearch = useCallback((state: SearchBarState) => {
+    setOrigin(state.origin);
+    setDestination(state.destination);
+    setUseMyLocation(state.useMyLocation);
+    setHour(state.hour);
+    setPreference(state.preference);
+    savePreference(state.preference);
+
+    doCalculate(state.origin, state.destination, state.hour, state.preference);
+  }, []);
+
+  useEffect(() => {
+    if (!autoDemo || autoDemoStartedRef.current || hasSearched || loading) {
+      return;
+    }
+
+    autoDemoStartedRef.current = true;
+    setDemoLoaded(true);
+    handleSearch(DEMO_ROUTE);
+  }, [autoDemo, hasSearched, loading, handleSearch]);
+
+  const doCalculate = async (
+    originVal: ResolvedLocation,
+    destVal: ResolvedLocation,
+    hourVal: number,
+    prefVal: number,
+  ) => {
     setLoading(true);
-    // Lógica simulada para el ejemplo, manteniendo la estructura de datos original
-    setTimeout(() => {
-      setRouteResult({
-        metrics: {
-          human: { sun_time_saved_min: 12, shade_percentage: 75 }
-        }
+    setError(null);
+    setHasSearched(true);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/route`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          origin: originVal,
+          destination: destVal,
+          hour: hourVal,
+          preference: prefVal,
+        }),
       });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || "Error calculando la ruta");
+      }
+
+      const data = await response.json();
+      setRouteResult(data);
+      onRouteCalculated?.(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
+  };
+
+  const handlePreferenceRefresh = useCallback(
+    (nextPreference: number) => {
+      if (!origin || !destination || nextPreference === preference) {
+        return;
+      }
+
+      setPreference(nextPreference);
+      savePreference(nextPreference);
+      doCalculate(origin, destination, hour, nextPreference);
+    },
+    [destination, hour, origin, preference],
+  );
+
+  const handleDownloadGPX = () => {
+    if (!routeResult?.comfort_coords) {
+      alert("Primero debes calcular una ruta para descargar el GPX.");
+      return;
+    }
+    const gpxPoints = routeResult.comfort_coords
+      .map((c: number[]) => `    <trkpt lat="${c[0]}" lon="${c[1]}"></trkpt>`)
+      .join("\n");
+    const gpxData = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Madrid Refugio">
+  <trk>
+    <name>Ruta Climática Eco-Refugio</name>
+    <trkseg>
+${gpxPoints}
+    </trkseg>
+  </trk>
+</gpx>`;
+    const blob = new Blob([gpxData], { type: "application/gpx+xml" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ruta_madrid_refugio.gpx";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="space-y-8">
-      {/* 1. PLANNER CARD — Interfaz Operativa Premium */}
-      <Card level={2} className="premium-card p-10 space-y-10">
-        <div className="space-y-2">
-          <h2 className="serif text-2xl italic font-semibold text-[var(--teal-700)]">Planifica tu recorrido</h2>
-          <p className="text-[9px] text-[var(--sand-500)] font-bold tracking-[0.3em] uppercase">Introduce origen y destino</p>
-        </div>
-
-        <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[8px] font-bold uppercase tracking-widest text-[var(--teal-700)] opacity-40 ml-1">Origen</label>
-              <div className="rounded-[24px] border border-black/5 bg-white/45 px-4 py-2">
-                <AddressAutocompleteField
-                  label="Origen"
-                  hideLabelVisually
-                  name="origin"
-                  options={originOptions}
-                  value={origin}
-                  onValueChange={setOrigin}
-                  onSelect={(option) => setOrigin(option.label)}
-                  placeholder="Punto de partida..."
-                />
-              </div>
-           </div>
-           <div className="space-y-2">
-              <label className="text-[8px] font-bold uppercase tracking-widest text-[var(--teal-700)] opacity-40 ml-1">Destino</label>
-              <div className="rounded-[24px] border border-black/5 bg-white/45 px-4 py-2">
-                <AddressAutocompleteField
-                  label="Destino"
-                  hideLabelVisually
-                  name="destination"
-                  options={destinationOptions}
-                  value={destination}
-                  onValueChange={setDestination}
-                  onSelect={(option) => setDestination(option.label)}
-                  placeholder="Llegada..."
-                />
-              </div>
-           </div>
-         </div>
-
-        <div className="flex gap-4 items-center">
-            <div className="flex-1 bg-white/30 rounded-2xl border border-black/5 p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Clock3 className="w-4 h-4 text-[var(--teal-700)] opacity-40" />
-                    <span className="text-xs font-bold text-[var(--teal-700)]">Ahora</span>
-                </div>
-                <ArrowRight className="w-3 h-3 text-[var(--teal-700)] opacity-20" />
+    <div className="mb-10 sm:mb-12">
+      <div className="mb-8">
+        {demoLoaded && !useMyLocation && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[var(--climate-green)]/20 bg-[var(--ds-white)] px-4 py-3 text-left shadow-sm">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--climate-green)]">
+                Ejemplo cargado
+              </p>
+              <p className="text-sm font-medium text-[var(--climate-green)]">
+                Hemos precargado una ruta Plaza Mayor → Museo del Prado a las
+                14:00 para mostrar el valor del producto desde el primer
+                momento.
+              </p>
             </div>
-            <Button 
-                onClick={calculateRoute}
-                disabled={loading || !origin || !destination}
-                className="h-14 px-10 bg-[var(--teal-700)] text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl shadow-teal-900/20 hover:scale-[1.02] transition-all"
-            >
-                {loading ? "Calculando..." : "Calcular Ruta"}
-            </Button>
-        </div>
-      </Card>
-
-      {/* 2. MAP CARD — El lienzo dominante */}
-      <div className="h-[500px] w-full relative group">
-          <div className="absolute inset-0 -z-10 rounded-[40px] border border-black/5 bg-white/20 backdrop-blur-sm shadow-[var(--shadow-premium)]" />
-          <MapComponent
-            mergedData={EMPTY_GEOJSON}
-            refugios={EMPTY_GEOJSON}
-            fuentes={EMPTY_GEOJSON}
-            onBarrioSelect={() => {}}
-            routeResult={routeResult}
-            showAreaLegend={false}
-            showHeatmap={showHeatmap}
-          />
-          {!routeResult && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-white/80 backdrop-blur-md px-8 py-6 rounded-3xl border border-black/5 shadow-2xl text-center space-y-2">
-                      <Navigation className="w-8 h-8 text-[var(--teal-700)] opacity-20 mx-auto" />
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--teal-700)] opacity-60">Esperando coordenadas</p>
-                  </div>
+          </div>
+        )}
+        <SearchBar
+          onSearch={handleSearch}
+          initialState={{
+            origin: origin ?? undefined,
+            destination: destination ?? undefined,
+            hour,
+            preference,
+            useMyLocation,
+          }}
+          loading={loading}
+          footerNotice={
+            isHeatHour && hasSearched ? (
+              <div className="flex items-start gap-3 rounded-lg bg-[#fff7ed] px-4 py-3 shadow-sm border border-[#fdebd0]">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#e67e22]" />
+                <div>
+                  <p className="text-xs font-bold text-[#b45a12]">
+                    Calor Extremo a las {hour}:00
+                  </p>
+                  <p className="text-xs text-[#c26a1b]">
+                    La Ruta Refugio es prioritaria para minimizar el riesgo de
+                    golpe de calor.
+                  </p>
+                </div>
               </div>
-          )}
+            ) : null
+          }
+        />
       </div>
 
-      {/* 3. INSIGHT STRIP — Micro-dashboards horizontales */}
-      {routeResult && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in-up">
-            {/* Card Refugios */}
-            <Card className="premium-card p-6 flex flex-col justify-between aspect-square">
+      {/* Simulate day control — only after search */}
+      {hasSearched && (
+        <div className="mb-6 flex items-center gap-3">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className={`flex items-center gap-1.5 rounded-[4px] px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${isPlaying ? "bg-[var(--ds-black)] text-white shadow-sm border border-transparent" : "bg-[var(--ds-gray-50)] text-[var(--ds-black)] border border-[var(--ds-gray-200)] shadow-sm hover:bg-white"}`}
+          >
+            {isPlaying ? (
+              <Pause className="w-3 h-3" />
+            ) : (
+              <Play className="w-3 h-3" />
+            )}
+            {isPlaying ? "Detener simulación" : "Simular día"}
+          </button>
+          {isPlaying && (
+            <span className="text-xs font-mono text-[var(--ds-gray-500)]">
+              Hora actual: {hour}:00
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-[#fef2f2] p-4 text-sm font-medium text-red-700 shadow-sm">
+          ⚠ {error}
+        </div>
+      )}
+
+      {/* Map + Results — only after search */}
+      {hasSearched && routeResult && (
+        <div className="space-y-6">
+          {/* Map */}
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+            <div
+              id="route-map"
+              className="overflow-hidden rounded-lg border border-[var(--ds-gray-100)] bg-[var(--ds-white)] shadow-md"
+            >
+              <div className="h-[500px] md:h-[600px] overflow-hidden border-b border-[var(--ds-gray-100)]">
+                <MapComponent
+                  mergedData={null}
+                  refugios={null}
+                  fuentes={null}
+                  onBarrioSelect={() => {}}
+                  routeResult={routeResult}
+                  showHeatmap={showHeatmap}
+                  showAreaLegend={false}
+                />
+              </div>
+
+              <div
+                className={`grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-6 ${loading ? "opacity-70" : "opacity-100"} ${animateResults ? "results-refresh" : ""}`}
+              >
                 <div>
-                    <p className="text-[8px] font-bold uppercase tracking-widest text-[var(--teal-700)] opacity-40 mb-2">Lugares Frescos</p>
-                    <h3 className="serif text-xl font-bold leading-tight">Refugios <br/>cercanos</h3>
-                    <div className="text-5xl font-light serif italic mt-2 text-[var(--teal-700)] tabular-nums">6</div>
+                  <div className="mb-5 flex flex-wrap items-center gap-3">
+                    <span className="inline-flex items-center gap-2 rounded-[4px] bg-[var(--ds-black)] px-3 py-1 text-xs font-bold text-white shadow-sm">
+                      <ClimateRouteBadge className="h-4 w-7 text-white" /> Ruta recomendada
+                    </span>
+                    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">
+                      Equilibrada
+                    </div>
+                  </div>
+
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-[4px] border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] px-3 py-2 text-xs font-semibold text-[var(--ds-black)] shadow-sm">
+                    <OrganicTree
+                      testId="route-legend-tree"
+                      className="h-5 w-4"
+                    />
+                    Ruta con alivio climático
+                  </div>
+
+                  <div
+                    className="mb-5 flex flex-wrap gap-2"
+                    role="group"
+                    aria-label="Recomendación de ruta calculada"
+                  >
+                    {RESULT_PREFERENCE_OPTIONS.map((option) => {
+                      const active = option.value === preference;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          aria-pressed={active}
+                          aria-label={option.actionLabel}
+                          onClick={() => handlePreferenceRefresh(option.value)}
+                          className={`rounded-[4px] border px-4 py-2 text-left text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${active ? "border-[var(--ds-black)] bg-[var(--ds-black)] text-white shadow-sm" : "border-[var(--ds-gray-200)] bg-white text-[var(--ds-gray-600)] hover:border-[var(--ds-gray-400)] hover:text-[var(--ds-black)]"}`}
+                        >
+                          <span className="block">{option.label}</span>
+                          <span className={`block text-[11px] font-medium ${active ? "opacity-80" : "text-[var(--ds-gray-400)]"}`}>
+                            {option.detail}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="grid gap-4 sm:gap-4 sm:grid-cols-3">
+                    <Card
+                      level={1}
+                      className="rounded-lg border border-[var(--ds-gray-200)] p-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-[4px] bg-[var(--ds-gray-100)] text-[var(--ds-black)]">
+                          <Clock3 className="h-5 w-5" />
+                        </span>
+                        <div>
+                          <p className="text-lg font-bold text-[var(--ds-black)]">
+                            {comfortMinutes} min
+                          </p>
+                          <p className="text-xs text-[var(--ds-gray-500)]">
+                            Tiempo estimado
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card
+                      level={1}
+                      className="rounded-lg border border-[var(--ds-gray-200)] p-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-[4px] bg-[var(--climate-green)]/10 text-[var(--climate-green)]">
+                          <OrganicTree className="h-7 w-5" />
+                        </span>
+                        <div>
+                          <p className="text-lg font-bold text-[var(--climate-green)]">
+                            {shadeMetersLabel} m
+                          </p>
+                          <p className="text-xs text-[var(--ds-gray-500)]">
+                            Sombra acumulada
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        className="mt-3 h-2.5 overflow-hidden rounded-[4px] bg-[var(--ds-gray-100)]"
+                        role="progressbar"
+                        aria-label="Sombra acumulada relativa al total de la ruta"
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={shadeCoverage ?? 0}
+                        data-testid="shade-progress"
+                      >
+                        <div
+                          className="h-full rounded-[4px] bg-[var(--climate-green)] transition-[width] duration-700 ease-out"
+                          style={{ width: `${shadeCoverage ?? 0}%` }}
+                        />
+                      </div>
+                    </Card>
+
+                    <Card
+                      level={1}
+                      className="rounded-lg border border-[var(--ds-gray-200)] p-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-[4px] bg-[#fff7ed] text-[#e67e22]">
+                          <ThermometerSun className="h-5 w-5" />
+                        </span>
+                        <div>
+                          <p className="text-lg font-bold text-[#e67e22]">
+                            -{estimatedCooling} °C
+                          </p>
+                          <p className="text-xs text-[var(--ds-gray-500)]">
+                            Reducción térmica
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {isLongRoute ? (
+                    <div className="mt-4 flex items-start gap-3 rounded-[4px] border border-red-200 bg-[#fef2f2] px-4 py-3 text-sm text-[#8f2d23] shadow-sm">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <p className="font-medium">
+                        Ruta larga · Considera dividirla en tramos
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-6 overflow-hidden rounded-lg border border-[var(--ds-gray-200)] bg-[var(--ds-gray-50)] shadow-sm">
+                    <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] border-b border-[var(--ds-gray-200)] bg-[var(--ds-gray-100)] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ds-gray-600)] sm:px-5">
+                      <span>Comparativa</span>
+                      <span className="text-center">Directa</span>
+                      <span className="text-center text-[var(--climate-green)]">
+                        Equilibrada
+                      </span>
+                    </div>
+                    <div className="divide-y divide-[var(--ds-gray-100)] text-sm">
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">
+                          Longitud
+                        </span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">
+                          {shortestLengthKm} km
+                        </span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">
+                          {comfortLengthKm} km
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">
+                          Sombra total
+                        </span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">
+                          {shortestShadeMeters?.toFixed(0)} m
+                        </span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">
+                          {comfortShadeMeters?.toFixed(0)} m
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">
+                          Fuentes
+                        </span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">
+                          {routeResult.metrics.shortest.fuentes}
+                        </span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">
+                          {routeResult.metrics.comfort.fuentes}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] items-center px-4 py-4 sm:px-5">
+                        <span className="font-semibold text-[var(--ds-gray-600)]">
+                          Refugios
+                        </span>
+                        <span className="text-center font-medium text-[var(--ds-black)]">
+                          {routeResult.metrics.shortest.refugios}
+                        </span>
+                        <span className="text-center font-bold text-[var(--climate-green)]">
+                          {routeResult.metrics.comfort.refugios}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <PremiumCoolPlacesVisual className="h-12 w-full mt-4" />
+
+                <aside className="flex flex-col gap-4 rounded-lg border border-[var(--ds-gray-100)] bg-[rgba(255,255,255,0.96)] p-5 shadow-sm">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-gray-500)]">
+                      Recursos en ruta
+                    </p>
+                    <h3 className="mt-2 font-display text-3xl font-semibold leading-none tracking-tight text-[var(--ds-black)]">
+                      Equilibrada
+                    </h3>
+                    <p className="mt-2 text-sm text-[var(--ds-gray-500)]">
+                      Buen balance entre tiempo, sombra y acceso a puntos de
+                      alivio.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-200)] px-4 py-3 bg-[var(--ds-white)]">
+                      <WaterFountainIcon className="h-5 w-5" />
+                      <span className="text-sm text-[var(--ds-gray-600)] font-medium">
+                        Fuentes de agua
+                      </span>
+                      <span className="text-base font-bold text-[var(--ds-black)]">
+                        {routeResult.metrics.comfort.fuentes}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-200)] px-4 py-3 bg-[var(--ds-white)]">
+                      <ClimateShelterIcon className="h-5 w-5" />
+                      <span className="text-sm text-[var(--ds-gray-600)] font-medium">
+                        Refugios climáticos
+                      </span>
+                      <span className="text-base font-bold text-[var(--ds-black)]">
+                        {routeResult.metrics.comfort.refugios}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-[var(--ds-gray-200)] px-4 py-3 bg-[var(--ds-white)]">
+                      <OrganicTree className="h-6 w-5" />
+                      <span className="text-sm text-[var(--ds-gray-600)] font-medium">
+                        Zonas arboladas
+                      </span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--ds-gray-400)]">
+                        En ruta
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="secondary"
+                    onClick={handleDownloadGPX}
+                    className="mt-2 h-10 w-full justify-center rounded-[4px] border-[var(--ds-gray-200)] font-semibold shadow-sm"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Download className="h-4 w-4" /> Exportar GPX
+                    </span>
+                  </Button>
+                </aside>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card
+              level={1}
+              className="overflow-hidden rounded-lg border border-[var(--climate-green)]/30 bg-[var(--ds-white)] p-5 shadow-sm"
+            >
+              <div className="flex h-full items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--climate-green)]">
+                    Lugares frescos a tu alrededor
+                  </p>
+                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-[var(--ds-black)]">
+                    Refugios cercanos
+                  </h3>
+                  <p className="mt-3 font-display text-5xl font-semibold leading-none text-[var(--climate-green)]">
+                    {routeResult.metrics.comfort.refugios}
+                  </p>
+                  <p className="mt-3 text-sm text-[var(--ds-gray-500)]">
+                    La ruta recomendada conecta{" "}
+                    {routeResult.metrics.comfort.refugios} refugios y{" "}
+                    {routeResult.metrics.comfort.fuentes} puntos de agua para
+                    descansar o recargar.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={scrollToRouteMap}
+                    aria-label="Ver refugios en el mapa de la ruta"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--climate-green)] transition-opacity hover:opacity-80"
+                  >
+                    Ver refugios <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+                <PremiumCoolPlacesVisual
+                  className="h-28 w-28 flex-shrink-0"
+                  aria-hidden="true"
+                />
+              </div>
             </Card>
 
-            {/* Card Mapa Calor */}
-            <button 
-                onClick={() => setShowHeatmap(!showHeatmap)}
-                type="button"
-                className={`premium-card p-6 flex flex-col justify-between aspect-square text-left transition-all ${showHeatmap ? 'ring-2 ring-[var(--gold-500)]' : ''}`}
+            <button
+              type="button"
+              aria-pressed={showHeatmap}
+              aria-label="Ver mapa de calor"
+              onClick={() => setShowHeatmap((current) => !current)}
+              className={`overflow-hidden rounded-lg border p-5 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-black)] focus-visible:ring-offset-2 ${showHeatmap ? "border-[#e67e22] bg-[#fff7ed]" : "border-[#fdebd0] bg-[var(--ds-white)] hover:border-[#e67e22]"}`}
             >
-                <div>
-                    <p className="text-[8px] font-bold uppercase tracking-widest text-[var(--teal-700)] opacity-40 mb-2">Previsión</p>
-                    <h3 className="serif text-xl font-bold leading-tight text-[var(--teal-700)]">Mapa de <br/>radiación</h3>
+              <div className="flex h-full items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#c26a1b]">
+                    Radiación prevista
+                  </p>
+                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-[var(--ds-black)]">
+                    Mapa de calor
+                  </h3>
+                  <p className="mt-3 text-sm text-[var(--ds-gray-500)]">
+                    {showHeatmap
+                      ? "Capa térmica superpuesta"
+                      : `El desvio te evita ${formatSunSaved(routeResult.metrics.human.sun_time_saved_min)} de exposición directa al sol en el tramo más duro.`}
+                  </p>
+                  <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#c26a1b]">
+                    Ver mapa <ArrowRight className="h-4 w-4" />
+                  </p>
                 </div>
-                <PremiumHeatmapVisual className="h-16 w-full rounded-xl opacity-80" />
+                <PremiumHeatmapVisual
+                  className="h-28 w-28 flex-shrink-0"
+                  aria-hidden="true"
+                />
+              </div>
             </button>
 
-            {/* Card Consejo */}
-            <Card className="premium-card p-6 flex flex-col justify-between aspect-square">
-                <div>
-                    <p className="text-[8px] font-bold uppercase tracking-widest text-[var(--teal-700)] opacity-40 mb-2">Sugerencia</p>
-                    <h3 className="serif text-xl font-bold leading-tight">Consejo <br/>del día</h3>
-                    <p className="text-[10px] text-[var(--sand-500)] mt-3 leading-relaxed italic">“Busca arbolado denso.”</p>
+            <Card
+              level={1}
+              className="overflow-hidden rounded-lg border border-[var(--ds-gray-200)] bg-[var(--ds-white)] p-5 shadow-sm"
+            >
+              <div className="flex h-full items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--climate-green)]">
+                    {routeHourLabel}
+                  </p>
+                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-[var(--ds-black)]">
+                    Consejo del día
+                  </h3>
+                  <p className="mt-3 text-sm text-[var(--ds-gray-500)]">
+                    {adviceText}
+                  </p>
+                  <a
+                    href={OFFICIAL_HEAT_GUIDANCE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Recomendaciones oficiales frente al calor de la Comunidad de Madrid"
+                    title="Recomendaciones oficiales frente al calor de la Comunidad de Madrid"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--climate-green)] transition-opacity hover:opacity-80"
+                  >
+                    Ver más consejos <ArrowRight className="h-4 w-4" />
+                  </a>
                 </div>
-                <PremiumAdviceVisual className="h-12 w-full opacity-60" />
+                <PremiumAdviceVisual
+                  className="h-28 w-28 flex-shrink-0"
+                  aria-hidden="true"
+                />
+              </div>
             </Card>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setRouteResult(null);
+                setHasSearched(false);
+                setError(null);
+                setIsPlaying(false);
+              }}
+              className="h-10 rounded-[4px] font-bold"
+            >
+              Nueva búsqueda
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleDownloadGPX}
+              className="h-10 rounded-[4px] font-bold"
+            >
+              <Download className="w-4 h-4 mr-1.5" /> Exportar GPX
+            </Button>
+          </div>
+
+          <p className="px-2 mt-4 text-[10px] font-medium leading-relaxed text-[var(--ds-gray-400)]">
+            * Cálculos basados en proyección geométrica de edificios (LiDAR) y
+            661.192 árboles del Inventario Municipal. Velocidad media estimada:
+            5km/h.
+          </p>
+        </div>
+      )}
+
+      {/* Placeholder map when no search yet */}
+      {!hasSearched && (
+        <div className="relative h-[220px] overflow-hidden rounded-lg border border-[var(--ds-gray-200)] shadow-sm md:h-[260px] bg-[var(--ds-gray-50)]">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center bg-white/90 backdrop-blur-sm px-6 py-4 rounded-lg shadow-sm border border-[var(--ds-gray-200)]">
+              <MapPin className="w-5 h-5 text-[var(--ds-black)] mx-auto mb-2 opacity-80" />
+              <p className="text-[13px] font-semibold text-[var(--ds-black)] uppercase tracking-wider">
+                Esperando origen y destino
+              </p>
+              <p className="text-[12px] text-[var(--ds-gray-500)] mt-1 max-w-[220px]">
+                Introduce tus puntos de ruta para calcular la opción más fresca.
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

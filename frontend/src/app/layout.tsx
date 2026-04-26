@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { Cormorant, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const instrumentSans = Instrument_Sans({
-  variable: "--font-sans",
+const dmSans = DM_Sans({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-const cormorant = Cormorant({
-  variable: "--font-serif",
+const fraunces = Fraunces({
+  variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
   style: ["normal", "italic"],
-  weight: ["300", "400", "500", "600", "700"],
+  axes: ["SOFT", "WONK"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
+  variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -63,7 +63,7 @@ export default function RootLayout({
   return (
     <html
       lang="es-ES"
-      className={`${instrumentSans.variable} ${cormorant.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
