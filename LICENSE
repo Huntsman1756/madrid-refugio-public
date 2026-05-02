@@ -1,15 +1,14 @@
 Copyright (c) 2026 Daniel Romero Gil
 
-All rights reserved.
+Este repositorio se pone a disposición exclusivamente para evaluación y
+participación en los Premios a la Reutilización de Datos Abiertos del
+Ayuntamiento de Madrid 2026.
 
-This repository is made available for viewing, cloning, and evaluation in connection
-with the 2026 Premios a la Reutilizacion de Datos Abiertos del Ayuntamiento de Madrid
-and for general review of the project.
+Se permite su visualización, clonación y uso interno para fines de evaluación
+del concurso. Queda prohibida cualquier otra forma de uso, reproducción,
+modificación, distribución o creación de obras derivadas sin autorización
+previa del autor, salvo lo requerido por la legislación aplicable.
 
-No license is granted to use, reproduce, modify, distribute, sublicense, or create
-derivative works from this codebase or its contents, in whole or in part, without
-prior written permission from the copyright holder, except as required by applicable law.
-
-Third-party components, datasets, and subdirectories included in this repository may
-be subject to their own licenses or terms. Those materials remain governed by their
-respective notices and licenses.
+Los componentes de terceros, datasets y subdirectorios incluidos pueden estar
+sujetos a sus propias licencias o términos. Esos materiales permanecen
+gobernados por sus respectivos avisos y licencias.
